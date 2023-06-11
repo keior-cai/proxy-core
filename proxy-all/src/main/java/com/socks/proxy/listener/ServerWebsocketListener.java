@@ -1,7 +1,5 @@
 package com.socks.proxy.listener;
 
-import com.socks.proxt.codes.ProxyCodes;
-import com.socks.proxt.codes.ProxyMessage;
 import com.socks.proxy.handshake.AdaptorMessageListener;
 import com.socks.proxy.handshake.message.CloseMessage;
 import com.socks.proxy.handshake.message.server.PublicKeyMessage;
@@ -9,8 +7,8 @@ import com.socks.proxy.netty.NettyLocalWebsocketRemoteConnect;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.RemoteProxyConnect;
-import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.LocalProxyCommand;
+import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -21,6 +19,7 @@ import io.netty.util.internal.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +30,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ServerWebsocketListener extends AdaptorMessageListener{
 
-    private final Map<ProxyCommand, ServerHandshakeMessageHandler> handlerMap;
+    private final Map<Class<? extends ProxyMessage>, List<ServerHandshakeMessageHandler>> handlerMap;
 
     private final ProxyCodes<? super ProxyMessage> codes;
 
@@ -57,13 +56,19 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
             return;
         }
         log.debug("receive text message = {}", message);
-        ProxyMessage proxyMessage = (ProxyMessage) codes.decode(message);
+        ProxyMessage proxyMessage = codes.decode(message);
         log.debug("receive text message = {}", proxyMessage);
-        ProxyCommand command = LocalProxyCommand.of(proxyMessage.getCommand());
-        ServerHandshakeMessageHandler remoteMessageHandler = handlerMap.get(command);
+        Class<? extends ProxyMessage> clazz = proxyMessage.getClass();
+        List<ServerHandshakeMessageHandler> handlers = handlerMap.get(proxyMessage.getClass());
+        if(handlers == null || handlers.isEmpty()){
+            log.warn("proxy class {}, handler is empty.", clazz);
+            return;
+        }
         RemoteProxyConnect remoteProxyConnect = context.channel().attr(AttrConstant.TARGET_SERVICE).get();
-        remoteMessageHandler.handle(new NettyLocalWebsocketRemoteConnect(context.channel(), codes), proxyMessage,
-                remoteProxyConnect);
+        for(ServerHandshakeMessageHandler handler : handlers) {
+            handler.handle(new NettyLocalWebsocketRemoteConnect(context.channel(), codes), proxyMessage,
+                    remoteProxyConnect);
+        }
     }
 
 

@@ -1,18 +1,16 @@
 package com.socks.proxy.handshake.handler.local;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxt.codes.ProxyMessage;
 import com.socks.proxy.cipher.AbstractCipher;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.handshake.DefaultCipher;
 import com.socks.proxy.handshake.config.ConnectUserInfo;
-import com.socks.proxy.handshake.message.local.UserMessage;
+import com.socks.proxy.handshake.message.local.SendUserMessage;
 import com.socks.proxy.handshake.message.server.PublicKeyMessage;
-import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
-import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
+import com.socks.proxy.protocol.codes.ProxyMessage;
+import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
@@ -51,16 +49,10 @@ public class SendRandomPasswordMessageHandler implements LocalHandshakeMessageHa
             //            throw new ProxyException("RSA加密失败");
         }
         String aes = AESUtil.encryptByDefaultKey(decrypt);
-        ProxyMessage proxyMessage = new UserMessage(userInfo.getMethod(), userInfo.getUsername(),
+        ProxyMessage proxyMessage = new SendUserMessage(userInfo.getMethod(), userInfo.getUsername(),
                 userInfo.getPassword(), aes);
         AbstractCipher cipher = CipherProvider.getByName(userInfo.getMethod(), random);
         local.setCipher(new DefaultCipher(cipher));
         remote.write(JSON.toJSONString(proxyMessage));
-    }
-
-
-    @Override
-    public ProxyCommand command(){
-        return ServerProxyCommand.SEND_PUBLIC_KEY;
     }
 }

@@ -30,7 +30,8 @@ public abstract class AbstractNettyConnect implements LocalProxyConnect{
             protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
                 byte[] content = ByteBufUtil.getBytes(msg);
                 if(log.isDebugEnabled()){
-                    log.debug("receive system proxy byteBuf \n {}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(content)));
+                    log.debug("receive system proxy byteBuf \n {}",
+                            ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(content)));
                 }
                 ICipher cipher = ctx.channel().attr(AttrConstant.CIPHER_KEY).get();
                 byte[] bytes = cipher.encode(content);
@@ -61,12 +62,6 @@ public abstract class AbstractNettyConnect implements LocalProxyConnect{
         byte[] bytes = cipher.decode(content);
         log.debug("send to system proxy byte size = {}", bytes.length);
         context.writeAndFlush(Unpooled.wrappedBuffer(bytes));
-    }
-
-
-    @Override
-    public void connect(){
-        throw new RuntimeException();
     }
 
 

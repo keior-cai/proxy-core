@@ -1,4 +1,4 @@
-package com.socks.proxt.codes;
+package com.socks.proxy.protocol.codes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

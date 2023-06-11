@@ -22,12 +22,6 @@ public interface ProxyConnect{
 
 
     /**
-     * 连接远程服务
-     */
-    void connect() throws Exception;
-
-
-    /**
      * 关闭远程服务连接
      */
     void close();

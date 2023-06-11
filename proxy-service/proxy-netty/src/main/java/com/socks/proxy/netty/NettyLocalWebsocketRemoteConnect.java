@@ -1,7 +1,7 @@
 package com.socks.proxy.netty;
 
-import com.socks.proxt.codes.ProxyCommandEncode;
-import com.socks.proxt.codes.ProxyMessage;
+import com.socks.proxy.protocol.codes.ProxyCommandEncode;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.DstServer;
 import com.socks.proxy.protocol.ICipher;

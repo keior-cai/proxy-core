@@ -1,15 +1,12 @@
 package com.socks.proxy.handshake.handler.server;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxt.codes.ProxyMessage;
-import com.socks.proxy.handshake.message.local.DstServiceMessage;
-import com.socks.proxy.handshake.message.server.ConnectDstSuccessMessage;
+import com.socks.proxy.handshake.message.local.SenTargetAddressMessage;
+import com.socks.proxy.handshake.message.server.AckTargetAddressMessage;
 import com.socks.proxy.protocol.DefaultDstServer;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.factory.ServerConnectTargetFactory;
-import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
-import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
+import com.socks.proxy.protocol.handshake.SimpleServerHandshakeMessageHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,16 +22,16 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 @AllArgsConstructor
-public class ConnectSuccessMessageHandler implements ServerHandshakeMessageHandler{
+public class ConnectSuccessMessageHandler extends SimpleServerHandshakeMessageHandler<SenTargetAddressMessage>{
 
     private final ServerConnectTargetFactory factory;
 
 
     @Override
-    public void handle(RemoteProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
-        DstServiceMessage target = (DstServiceMessage) message;
-        log.debug("connect to target service = {}:{}", target.getHost(), target.getPort());
-        local.setDstServer(new DefaultDstServer(target.getHost(), target.getPort()));
+    protected void handleServerMessage(RemoteProxyConnect local, SenTargetAddressMessage message,
+                                       RemoteProxyConnect remote){
+        log.debug("connect to target service = {}:{}", message.getHost(), message.getPort());
+        local.setDstServer(new DefaultDstServer(message.getHost(), message.getPort()));
         RemoteProxyConnect proxyService = factory.getProxyService(local);
         try {
             proxyService.connect();
@@ -42,12 +39,6 @@ public class ConnectSuccessMessageHandler implements ServerHandshakeMessageHandl
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        local.write(JSON.toJSONString(new ConnectDstSuccessMessage()));
-    }
-
-
-    @Override
-    public ProxyCommand command(){
-        return ServerProxyCommand.CONNECT_SUCCESS;
+        local.write(JSON.toJSONString(new AckTargetAddressMessage()));
     }
 }

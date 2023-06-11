@@ -1,9 +1,7 @@
 package com.socks.proxy.service;
 
 import com.neovisionaries.ws.client.WebSocket;
-import com.socks.proxt.codes.ProxyCodes;
-import com.socks.proxt.codes.ProxyMessage;
-import com.socks.proxy.codes.json.DefaultProxyCommandCodes;
+import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.handshake.config.ConnectUserInfo;
 import com.socks.proxy.handshake.handler.CloseMessageHandler;
 import com.socks.proxy.handshake.handler.local.AckConnectSuccessMessageHandler;
@@ -11,10 +9,12 @@ import com.socks.proxy.handshake.handler.local.SendDstServerMessageHandler;
 import com.socks.proxy.handshake.handler.local.SendRandomPasswordMessageHandler;
 import com.socks.proxy.handshake.message.CloseMessage;
 import com.socks.proxy.handshake.message.server.AckUserMessage;
-import com.socks.proxy.handshake.message.server.ConnectDstSuccessMessage;
+import com.socks.proxy.handshake.message.server.AckTargetAddressMessage;
 import com.socks.proxy.handshake.message.server.PublicKeyMessage;
 import com.socks.proxy.netty.LocalServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
+import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
@@ -58,7 +58,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
             codeMap.put(ServerProxyCommand.SEND_PUBLIC_KEY.getCode(), PublicKeyMessage.class);
             codeMap.put(ServerProxyCommand.ACK_USER_MESSAGE.getCode(), AckUserMessage.class);
-            codeMap.put(ServerProxyCommand.CONNECT_SUCCESS.getCode(), ConnectDstSuccessMessage.class);
+            codeMap.put(ServerProxyCommand.CONNECT_SUCCESS.getCode(), AckTargetAddressMessage.class);
             codeMap.put(ServerProxyCommand.CLOSE.getCode(), CloseMessage.class);
             setCodes(new DefaultProxyCommandCodes<>(codeMap));
         }

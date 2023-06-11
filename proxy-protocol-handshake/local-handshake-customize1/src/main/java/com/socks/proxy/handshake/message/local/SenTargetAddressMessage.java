@@ -1,7 +1,7 @@
 package com.socks.proxy.handshake.message.local;
 
-import com.socks.proxt.codes.ProxyMessage;
 import com.socks.proxy.protocol.DstServer;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import lombok.Getter;
 import lombok.ToString;
@@ -14,18 +14,19 @@ import lombok.ToString;
  **/
 @Getter
 @ToString
-public class DstServiceMessage extends ProxyMessage{
+public class SenTargetAddressMessage extends ProxyMessage{
 
-    private final int    port;
+    private final int port;
+
     private final String host;
 
 
-    public DstServiceMessage(DstServer remoteServer){
+    public SenTargetAddressMessage(DstServer remoteServer){
         this(remoteServer.host(), remoteServer.port());
     }
 
 
-    public DstServiceMessage(String host, int port){
+    public SenTargetAddressMessage(String host, int port){
         super(LocalProxyCommand.SEND_DST_ADDR.getCode());
         this.port = port;
         this.host = host;

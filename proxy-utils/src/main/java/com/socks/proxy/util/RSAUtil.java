@@ -1,5 +1,6 @@
 package com.socks.proxy.util;
 
+import lombok.Getter;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
@@ -18,11 +19,15 @@ import java.util.Map;
  **/
 public class RSAUtil{
 
-    public static final String CHAR_ENCODING = "UTF-8";
-    public static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";
+    private static final String CHAR_ENCODING = "UTF-8";
 
-    public final String privateKey;
-    public final String publicKey;
+    private static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";
+
+    @Getter
+    private final String privateKey;
+
+    @Getter
+    private final String publicKey;
 
 
     public RSAUtil(String privateKey, String publicKey){

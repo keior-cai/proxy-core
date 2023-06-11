@@ -20,12 +20,6 @@ public interface LocalProxyConnect extends ProxyConnect{
     void setRemoteChannel(RemoteProxyConnect channel);
 
 
-    /**
-     * 通道设置属性
-     */
-    void setCipher(ICipher iCipher);
-
-
     DstServer getDstServer();
 
 }

@@ -1,9 +1,7 @@
-package com.socks.proxy.codes.json;
+package com.socks.proxy.protocol.codes;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.socks.proxt.codes.ProxyCodes;
-import com.socks.proxt.codes.ProxyMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.FieldNameUtils;
 import lombok.AllArgsConstructor;
@@ -19,7 +17,7 @@ import java.util.Map;
  **/
 @Slf4j
 @AllArgsConstructor
-public class DefaultProxyCommandCodes<T> implements ProxyCodes<T>{
+public class DefaultProxyCommandCodes<T extends ProxyMessage> implements ProxyCodes<T>{
 
     private final Map<Integer, Class<? extends ProxyMessage>> commandMap;
 

@@ -1,6 +1,6 @@
 package com.socks.proxy.handshake.message.local;
 
-import com.socks.proxt.codes.ProxyMessage;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class UserMessage extends ProxyMessage{
+public class SendUserMessage extends ProxyMessage{
 
     /**
      * 连接用户名
@@ -38,12 +38,12 @@ public class UserMessage extends ProxyMessage{
     private String random;
 
 
-    public UserMessage(){
+    public SendUserMessage(){
         super(LocalProxyCommand.SEND_USER_INFO.getCode());
     }
 
 
-    public UserMessage(String method, String username, String password, String random){
+    public SendUserMessage(String method, String username, String password, String random){
         this();
         this.method = method;
         this.username = username;

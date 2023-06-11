@@ -11,8 +11,6 @@
         <module>proxy-local</module>
         <module>proxy-service</module>
         <module>proxy-protocol</module>
-        <module>proxy-codes</module>
-        <module>proxy-codes-json</module>
         <module>proxy-utils</module>
         <module>proxy-all</module>
         <module>proxy-protocol-handshake</module>
@@ -80,11 +78,6 @@
             <dependency>
                 <groupId>com.proxy</groupId>
                 <artifactId>local-handshake-customize1</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.proxy</groupId>
-                <artifactId>proxy-codes</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,13 +1,11 @@
 package com.socks.proxy.handshake.handler.local;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxt.codes.ProxyMessage;
-import com.socks.proxy.handshake.message.local.DstServiceMessage;
+import com.socks.proxy.handshake.message.local.SenTargetAddressMessage;
+import com.socks.proxy.handshake.message.server.AckUserMessage;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
-import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
-import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.SimpleLocalHandshakeMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/5/21
  **/
 @Slf4j
-public class SendDstServerMessageHandler implements LocalHandshakeMessageHandler{
+public class SendDstServerMessageHandler extends SimpleLocalHandshakeMessageHandler<AckUserMessage>{
 
     private String username;
 
@@ -29,13 +27,8 @@ public class SendDstServerMessageHandler implements LocalHandshakeMessageHandler
 
 
     @Override
-    public void handle(LocalProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
-        remote.write(JSON.toJSONString(new DstServiceMessage(local.getDstServer())));
-    }
+    protected void handleLocalMessage(LocalProxyConnect local, AckUserMessage message, RemoteProxyConnect remote){
+        remote.write(JSON.toJSONString(new SenTargetAddressMessage(local.getDstServer())));
 
-
-    @Override
-    public ProxyCommand command(){
-        return ServerProxyCommand.ACK_USER_MESSAGE;
     }
 }

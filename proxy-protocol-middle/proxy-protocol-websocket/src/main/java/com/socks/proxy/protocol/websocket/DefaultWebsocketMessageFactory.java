@@ -1,8 +1,8 @@
 package com.socks.proxy.protocol.websocket;
 
 import com.neovisionaries.ws.client.WebSocketListener;
-import com.socks.proxt.codes.ProxyCodes;
-import com.socks.proxt.codes.ProxyMessage;
+import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.command.ProxyCommand;

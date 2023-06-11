@@ -1,9 +1,9 @@
 package com.socks.proxy.protocol.handshake;
 
-import com.socks.proxt.codes.ProxyMessage;
 import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 
-public interface ServerHandshakeMessageHandler extends HandshakeHandler{
+public interface ServerHandshakeMessageHandler{
 
     /**
      * 处理ss-server服务发送消息

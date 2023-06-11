@@ -4,8 +4,8 @@ import com.socks.proxy.netty.connect.DefaultSocks5NettyConnect;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.DefaultDstServer;
 import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.LocalProxyConnect;
+import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -13,10 +13,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * socks5 代理处理器
  */
+@Slf4j
 @AllArgsConstructor
 @ChannelHandler.Sharable
 public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5InitialRequest>{
@@ -37,6 +39,12 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
     }
 
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
+        log.error("", cause);
+    }
+
+
     private static class Socks5CommandHandler extends AbstractProxy<Socks5CommandRequest>{
 
         public Socks5CommandHandler(LocalConnectServerFactory connectFactory){
@@ -46,6 +54,7 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, Socks5CommandRequest msg){
+            log.debug("receive socks5 handshake");
             ctx.channel().attr(AttrConstant.SOCKS5_ADDRESS_TYPE).set(msg.dstAddrType());
             super.channelRead0(ctx, msg);
         }

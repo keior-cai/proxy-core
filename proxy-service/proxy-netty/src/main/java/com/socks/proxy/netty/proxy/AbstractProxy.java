@@ -2,17 +2,18 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 代理处理器
@@ -26,7 +27,8 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     private final LocalConnectServerFactory factory;
 
-    private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(8192);
+    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(500, 500, 1000L, TimeUnit.MILLISECONDS,
+            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
 
 
     @Override

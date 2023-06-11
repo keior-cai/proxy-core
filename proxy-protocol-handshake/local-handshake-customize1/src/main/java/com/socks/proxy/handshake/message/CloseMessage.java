@@ -1,6 +1,6 @@
 package com.socks.proxy.handshake.message;
 
-import com.socks.proxt.codes.ProxyMessage;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 
 /**
