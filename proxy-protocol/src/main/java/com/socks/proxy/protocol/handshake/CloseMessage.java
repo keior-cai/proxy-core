@@ -1,4 +1,4 @@
-package com.socks.proxy.handshake.message;
+package com.socks.proxy.protocol.handshake;
 
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;

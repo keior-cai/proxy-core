@@ -25,8 +25,6 @@ public class WebsocketMessageListener extends WebSocketAdapter{
 
     private final LocalProxyConnect context;
 
-    private final WebsocketPoolFactory websocketPoolFactory;
-
     private final Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
 
     private ProxyCodes<? super ProxyMessage> codes;
@@ -39,7 +37,7 @@ public class WebsocketMessageListener extends WebSocketAdapter{
         log.debug("receive proxy message = {}", decode);
         ProxyCommand command = ServerProxyCommand.of(decode.getCommand());
         LocalHandshakeMessageHandler remoteMessageHandler = messageHandlerMap.get(command);
-        remoteMessageHandler.handle(context, decode, new WebsocketProxyConnect(websocketPoolFactory, websocket, codes));
+        remoteMessageHandler.handle(context, decode, new WebsocketProxyConnect(websocket, codes));
     }
 
 
@@ -51,11 +49,7 @@ public class WebsocketMessageListener extends WebSocketAdapter{
 
     @Override
     public void onError(WebSocket websocket, WebSocketException cause){
-        log.error("", cause);
-        if(websocket.isOpen()){
-            websocketPoolFactory.invalidateObject(websocket);
-        }
-        context.close();
+
     }
 
 
@@ -68,13 +62,11 @@ public class WebsocketMessageListener extends WebSocketAdapter{
     @Override
     public void handleCallbackError(WebSocket websocket, Throwable cause){
         log.error("handle error", cause);
-        websocketPoolFactory.returnClient(websocket);
         context.close();
     }
 
 
     @Override
     public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
-        websocketPoolFactory.invalidateObject(websocket);
     }
 }

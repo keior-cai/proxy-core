@@ -1,12 +1,11 @@
-package com.socks.proxy.handshake.handler.server;
+package com.socks.proxy.protocol.handshake.server;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxy.handshake.message.local.SenTargetAddressMessage;
-import com.socks.proxy.handshake.message.server.AckTargetAddressMessage;
 import com.socks.proxy.protocol.DefaultDstServer;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.factory.ServerConnectTargetFactory;
 import com.socks.proxy.protocol.handshake.SimpleServerHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.local.SenTargetAddressMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

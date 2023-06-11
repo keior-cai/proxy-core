@@ -1,10 +1,8 @@
-package com.socks.proxy.handshake.handler;
+package com.socks.proxy.protocol.handshake;
 
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.codes.ProxyMessage;
-import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**

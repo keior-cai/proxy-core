@@ -1,16 +1,15 @@
-package com.socks.proxy.handshake.handler.local;
+package com.socks.proxy.protocol.handshake.local;
 
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.cipher.AbstractCipher;
 import com.socks.proxy.cipher.CipherProvider;
-import com.socks.proxy.handshake.DefaultCipher;
-import com.socks.proxy.handshake.config.ConnectUserInfo;
-import com.socks.proxy.handshake.message.local.SendUserMessage;
-import com.socks.proxy.handshake.message.server.PublicKeyMessage;
+import com.socks.proxy.protocol.DefaultCipher;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
+import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
@@ -20,7 +19,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 /**
  * <p>接受ss-server发送RSA公钥处理器</p>
  * <p>
- * 接收到ss-server发送过来的公钥 生成随机密码，密码长度参考{@link com.socks.proxy.handshake.config.ConnectUserInfo#getPasswordLen()} 加密过程：
+ * 接收到ss-server发送过来的公钥 生成随机密码，密码长度参考{@link com.socks.proxy.protocol.handshake.config.ConnectUserInfo#getPasswordLen()}
+ * 加密过程：
  * <li>使用服务端公钥，对随机密码进行加密；</li>
  * <li>使用AES对称加密，使用默认的KEY对使用公钥加密后的密码再次加密</li>
  * </p>

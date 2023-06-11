@@ -2,8 +2,6 @@ package com.socks.proxy.service;
 
 import com.socks.proxy.handshake.MessageListener;
 import com.socks.proxy.handshake.WebsocketHandler;
-import com.socks.proxy.handshake.message.local.SenTargetAddressMessage;
-import com.socks.proxy.handshake.message.local.SendUserMessage;
 import com.socks.proxy.listener.ServerWebsocketListener;
 import com.socks.proxy.netty.DefaultNettyConnectServerFactory;
 import com.socks.proxy.netty.ServerServiceBuilder;
@@ -14,6 +12,8 @@ import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.factory.ServerConnectTargetFactory;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.local.SenTargetAddressMessage;
+import com.socks.proxy.protocol.handshake.local.SendUserMessage;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;

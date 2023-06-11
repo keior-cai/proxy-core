@@ -1,7 +1,6 @@
-package com.socks.proxy.handshake;
+package com.socks.proxy.protocol;
 
 import com.socks.proxy.cipher.AbstractCipher;
-import com.socks.proxy.protocol.ICipher;
 import lombok.AllArgsConstructor;
 
 /**
@@ -14,11 +13,6 @@ import lombok.AllArgsConstructor;
 public class DefaultCipher implements ICipher{
 
     private final AbstractCipher cipher;
-
-
-    public DefaultCipher(){
-        this(null);
-    }
 
 
     @Override

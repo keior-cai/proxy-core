@@ -1,13 +1,12 @@
-package com.socks.proxy.handshake.handler.server;
+package com.socks.proxy.protocol.handshake.server;
 
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.cipher.CipherProvider;
-import com.socks.proxy.handshake.DefaultCipher;
-import com.socks.proxy.handshake.message.CloseMessage;
-import com.socks.proxy.handshake.message.local.SendUserMessage;
-import com.socks.proxy.handshake.message.server.AckUserMessage;
+import com.socks.proxy.protocol.DefaultCipher;
 import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.SimpleServerHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.local.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
@@ -33,7 +32,7 @@ public class AckUserMessageHandler extends SimpleServerHandshakeMessageHandler<S
             local.write(JSON.toJSONString(new AckUserMessage()));
         } catch (Exception e) {
             log.error("", e);
-            local.write(JSON.toJSONString(new CloseMessage()));
+            local.write(JSON.toJSONString(CloseMessage.instance()));
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.socks.proxy.handshake.config;
+package com.socks.proxy.protocol.handshake.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

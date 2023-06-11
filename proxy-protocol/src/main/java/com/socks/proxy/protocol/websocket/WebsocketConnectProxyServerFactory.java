@@ -2,10 +2,10 @@ package com.socks.proxy.protocol.websocket;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketState;
-import com.socks.proxy.protocol.codes.ProxyCommandEncode;
-import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.codes.ProxyCommandEncode;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,15 +18,14 @@ import java.util.Objects;
 @Slf4j
 public class WebsocketConnectProxyServerFactory implements LocalConnectServerFactory{
 
-    private final WebsocketPoolFactory factory;
+    private final WebsocketFactory factory;
 
     private final WebsocketMessageFactory messageFactory;
 
     private final ProxyCommandEncode<? super ProxyMessage> encode;
 
 
-    public WebsocketConnectProxyServerFactory(WebsocketPoolFactory factory,
-                                              WebsocketMessageFactory websocketMessageFactory,
+    public WebsocketConnectProxyServerFactory(WebsocketFactory factory, WebsocketMessageFactory websocketMessageFactory,
                                               ProxyCommandEncode<? super ProxyMessage> encode){
         this.factory = factory;
         this.messageFactory = websocketMessageFactory;
@@ -38,7 +37,7 @@ public class WebsocketConnectProxyServerFactory implements LocalConnectServerFac
     public RemoteProxyConnect getProxyService(LocalProxyConnect channel){
         try {
             WebSocket client = factory.getClient();
-            WebsocketProxyConnect websocketProxyConnect = new WebsocketProxyConnect(factory, client, encode);
+            WebsocketProxyConnect websocketProxyConnect = new WebsocketProxyConnect(client, encode);
             WebSocket webSocket = websocketProxyConnect.getWebSocket();
             webSocket.addListener(messageFactory.getListener(channel));
             if(!Objects.equals(webSocket.getState(), WebSocketState.CREATED)){

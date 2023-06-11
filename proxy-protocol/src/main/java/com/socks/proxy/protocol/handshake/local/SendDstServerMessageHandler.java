@@ -1,11 +1,10 @@
-package com.socks.proxy.handshake.handler.local;
+package com.socks.proxy.protocol.handshake.local;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxy.handshake.message.local.SenTargetAddressMessage;
-import com.socks.proxy.handshake.message.server.AckUserMessage;
 import com.socks.proxy.protocol.LocalProxyConnect;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.handshake.SimpleLocalHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.server.AckUserMessage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -16,15 +15,6 @@ import lombok.extern.slf4j.Slf4j;
  **/
 @Slf4j
 public class SendDstServerMessageHandler extends SimpleLocalHandshakeMessageHandler<AckUserMessage>{
-
-    private String username;
-
-    private String password;
-
-    private String method = "ase-256-cfb";
-
-    private int passwordLen = 10;
-
 
     @Override
     protected void handleLocalMessage(LocalProxyConnect local, AckUserMessage message, RemoteProxyConnect remote){

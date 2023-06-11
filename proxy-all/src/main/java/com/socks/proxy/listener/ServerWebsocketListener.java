@@ -1,15 +1,15 @@
 package com.socks.proxy.listener;
 
 import com.socks.proxy.handshake.AdaptorMessageListener;
-import com.socks.proxy.handshake.message.CloseMessage;
-import com.socks.proxy.handshake.message.server.PublicKeyMessage;
 import com.socks.proxy.netty.NettyLocalWebsocketRemoteConnect;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.RemoteProxyConnect;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
+import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
+import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -116,7 +116,7 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
 
 
     private void writeClose(ChannelHandlerContext context){
-        context.writeAndFlush(codes.encodeObject(new CloseMessage()));
+        context.writeAndFlush(codes.encodeObject(CloseMessage.instance()));
     }
 
 

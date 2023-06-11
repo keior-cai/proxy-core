@@ -3,11 +3,11 @@ package com.socks.proxy.protocol.websocket;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
-import com.socks.proxy.protocol.codes.ProxyCommandEncode;
-import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.DstServer;
 import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.codes.ProxyCommandEncode;
+import com.socks.proxy.protocol.codes.ProxyMessage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,14 +24,11 @@ public class WebsocketProxyConnect implements RemoteProxyConnect{
     @Getter
     private final WebSocket webSocket;
 
-    private final WebsocketPoolFactory                     factory;
     @Setter
-    private       ProxyCommandEncode<? super ProxyMessage> encode;
+    private ProxyCommandEncode<? super ProxyMessage> encode;
 
 
-    public WebsocketProxyConnect(WebsocketPoolFactory factory, WebSocket webSocket,
-                                 ProxyCommandEncode<? super ProxyMessage> encode){
-        this.factory = factory;
+    public WebsocketProxyConnect(WebSocket webSocket, ProxyCommandEncode<? super ProxyMessage> encode){
         this.webSocket = webSocket;
         this.encode = encode;
     }
@@ -59,13 +56,7 @@ public class WebsocketProxyConnect implements RemoteProxyConnect{
 
     @Override
     public void close(){
-        if(factory != null){
-            if(Objects.equals(webSocket.getState(), WebSocketState.CLOSED)){
-                factory.invalidateObject(webSocket);
-            } else {
-                factory.returnClient(webSocket);
-            }
-        }
+
     }
 
 

@@ -2,14 +2,7 @@ package com.socks.proxy.protocol.websocket;
 
 import com.neovisionaries.ws.client.WebSocket;
 
-public interface WebsocketPoolFactory{
+public interface WebsocketFactory{
 
     WebSocket getClient() throws Exception;
-
-
-    void returnClient(WebSocket webSocket);
-
-
-    void invalidateObject(WebSocket webSocket);
-
 }

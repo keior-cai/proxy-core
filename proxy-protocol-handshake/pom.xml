@@ -12,7 +12,6 @@
 
     <artifactId>proxy-protocol-handshake</artifactId>
     <modules>
-        <module>local-handshake-customize1</module>
         <module>server-netty-websocket</module>
     </modules>
     <dependencies>
