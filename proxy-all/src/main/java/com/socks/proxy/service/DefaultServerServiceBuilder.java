@@ -1,8 +1,8 @@
 package com.socks.proxy.service;
 
 import com.socks.proxy.handshake.DefaultServerMiddleProxyFactory;
-import com.socks.proxy.handshake.WebsocketHandler;
 import com.socks.proxy.handshake.ServerWebsocketListener;
+import com.socks.proxy.handshake.WebsocketHandler;
 import com.socks.proxy.netty.DefaultNettyConnectServerFactory;
 import com.socks.proxy.netty.ServerServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
@@ -16,6 +16,7 @@ import com.socks.proxy.protocol.handshake.local.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.local.SendUserMessage;
 import com.socks.proxy.protocol.handshake.server.AckUserMessageHandler;
 import com.socks.proxy.protocol.handshake.server.ConnectSuccessMessageHandler;
+import com.socks.proxy.protocol.listener.ServerConnectListener;
 import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
@@ -49,14 +50,19 @@ public class DefaultServerServiceBuilder extends ServerServiceBuilder{
 
     private TargetConnectFactory connectFactory;
 
+    private List<ServerConnectListener> listeners;
+
 
     @Override
     public TcpService builder(){
         if(rsaUtil == null){
             this.rsaUtil = new RSAUtil();
         }
+        if(listeners == null){
+            listeners = new ArrayList<>();
+        }
         if(connectFactory == null){
-            connectFactory = new DefaultNettyConnectServerFactory();
+            connectFactory = new DefaultNettyConnectServerFactory(listeners);
         }
         if(codes == null){
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();

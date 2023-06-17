@@ -62,6 +62,7 @@ public abstract class AbstractNettyTcpService implements TcpService{
                 future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 // ignore
+                future.cancel(false);
             }
         }, "tcp-server-main");
         thread.setDaemon(false);
