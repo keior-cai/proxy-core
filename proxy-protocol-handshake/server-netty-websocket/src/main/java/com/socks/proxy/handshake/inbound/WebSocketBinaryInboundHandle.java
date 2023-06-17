@@ -1,6 +1,8 @@
 package com.socks.proxy.handshake.inbound;
 
 import com.socks.proxy.handshake.NettyServerMiddleProxyFactory;
+import com.socks.proxy.handshake.constant.WebsocketAttrConstant;
+import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
 import io.netty.buffer.ByteBufUtil;
@@ -24,8 +26,10 @@ public class WebSocketBinaryInboundHandle extends SimpleChannelInboundHandler<Bi
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg){
         ServerMiddleProxy proxy = factory.getProxy(ctx);
+        byte[] bytes = ByteBufUtil.getBytes(msg.content());
+        ICipher iCipher = ctx.channel().attr(WebsocketAttrConstant.CIPHER).get();
         try {
-            messageListener.onBinary(proxy, ByteBufUtil.getBytes(msg.content()));
+            messageListener.onBinary(proxy, iCipher.decode(bytes));
         } catch (Throwable cause) {
             messageListener.onCallbackError(proxy, cause);
         }

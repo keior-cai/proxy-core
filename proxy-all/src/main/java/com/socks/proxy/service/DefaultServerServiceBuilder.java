@@ -18,8 +18,9 @@ import com.socks.proxy.protocol.handshake.handler.ReconnectHandler;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendReconnectMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
-import com.socks.proxy.protocol.listener.ServerConnectListener;
+import com.socks.proxy.protocol.listener.LogHandlerTargetConnectListener;
 import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
+import com.socks.proxy.protocol.listener.TargetConnectListener;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,7 +53,7 @@ public class DefaultServerServiceBuilder extends ServerServiceBuilder{
 
     private TargetConnectFactory connectFactory;
 
-    private List<ServerConnectListener> listeners;
+    private List<TargetConnectListener> listeners;
 
 
     @Override
@@ -62,6 +63,7 @@ public class DefaultServerServiceBuilder extends ServerServiceBuilder{
         }
         if(listeners == null){
             listeners = new ArrayList<>();
+            listeners.add(new LogHandlerTargetConnectListener());
         }
         if(connectFactory == null){
             connectFactory = new DefaultNettyConnectServerFactory(listeners);

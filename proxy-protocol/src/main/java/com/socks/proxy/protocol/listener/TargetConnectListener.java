@@ -4,7 +4,7 @@ import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.TargetServer;
 
-public interface ServerConnectListener{
+public interface TargetConnectListener{
 
     void onConnected(TargetConnect proxy, TargetServer target);
 

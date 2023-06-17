@@ -44,7 +44,7 @@ public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
 
     @Override
     public void close(){
-
+        context.close();
     }
 
 
@@ -56,13 +56,13 @@ public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
 
     @Override
     public TargetConnect getTarget(){
-        return null;
+        return context.channel().attr(WebsocketAttrConstant.TARGET).get();
     }
 
 
     @Override
     public void setTarget(TargetConnect target){
-
+        context.channel().attr(WebsocketAttrConstant.TARGET).set(target);
     }
 
 

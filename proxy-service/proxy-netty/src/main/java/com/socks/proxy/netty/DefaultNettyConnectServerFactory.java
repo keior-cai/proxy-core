@@ -4,7 +4,7 @@ import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.factory.TargetConnectFactory;
-import com.socks.proxy.protocol.listener.ServerConnectListener;
+import com.socks.proxy.protocol.listener.TargetConnectListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -26,10 +26,10 @@ public class DefaultNettyConnectServerFactory implements TargetConnectFactory{
 
     private final EventLoopGroup group;
 
-    private final List<ServerConnectListener> listeners;
+    private final List<TargetConnectListener> listeners;
 
 
-    public DefaultNettyConnectServerFactory(List<ServerConnectListener> listeners){
+    public DefaultNettyConnectServerFactory(List<TargetConnectListener> listeners){
         this.listeners = listeners;
         int processors = Runtime.getRuntime().availableProcessors();
         group = new NioEventLoopGroup(processors * 2);

@@ -3,7 +3,7 @@ package com.socks.proxy.netty;
 import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.listener.ServerConnectListener;
+import com.socks.proxy.protocol.listener.TargetConnectListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -22,13 +22,13 @@ public class SocketTargetChannel implements TargetConnect{
 
     private final TargetServer targetServer;
 
-    private final List<ServerConnectListener> listeners;
+    private final List<TargetConnectListener> listeners;
 
     private ChannelFuture channelFuture;
 
 
     public SocketTargetChannel(Bootstrap bootstrap, ServerMiddleProxy channel, TargetServer targetServer,
-                               List<ServerConnectListener> listeners){
+                               List<TargetConnectListener> listeners){
         this.bootstrap = bootstrap;
         this.localConnect = channel;
         this.targetServer = targetServer;
@@ -54,7 +54,7 @@ public class SocketTargetChannel implements TargetConnect{
         this.channelFuture = bootstrap.connect(targetServer.host(), targetServer.port());
         this.channelFuture.channel().pipeline().addLast(new TargetForWard(localConnect, listeners));
         channelFuture.sync().get();
-        for(ServerConnectListener listener : listeners) {
+        for(TargetConnectListener listener : listeners) {
             listener.onConnected(this, targetServer);
         }
     }
@@ -65,29 +65,30 @@ public class SocketTargetChannel implements TargetConnect{
         channelFuture.channel().close();
     }
 
+
     private static class TargetForWard extends SimpleChannelInboundHandler<ByteBuf>{
 
         private final ServerMiddleProxy delegate;
 
-        private final List<ServerConnectListener> listeners;
+        private final List<TargetConnectListener> listeners;
 
 
-        public TargetForWard(ServerMiddleProxy proxy, List<ServerConnectListener> listeners){
+        public TargetForWard(ServerMiddleProxy proxy, List<TargetConnectListener> listeners){
             this.delegate = proxy;
             this.listeners = listeners;
         }
 
 
         @Override
-        protected void channelRead0(ChannelHandlerContext ctx, io.netty.buffer.ByteBuf msg){
+        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
             try {
                 byte[] bytes = ByteBufUtil.getBytes(msg);
-                for(ServerConnectListener listener : listeners) {
+                for(TargetConnectListener listener : listeners) {
                     listener.onBinary(delegate, bytes);
                 }
                 delegate.write(bytes);
             } catch (Throwable cause) {
-                for(ServerConnectListener listener : listeners) {
+                for(TargetConnectListener listener : listeners) {
                     listener.onCallbackError(delegate, cause);
                 }
             }
@@ -96,8 +97,8 @@ public class SocketTargetChannel implements TargetConnect{
 
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx){
-            for(ServerConnectListener listener : listeners) {
+        public void channelInactive(ChannelHandlerContext ctx){
+            for(TargetConnectListener listener : listeners) {
                 listener.onDisconnected(delegate);
             }
         }
@@ -105,7 +106,7 @@ public class SocketTargetChannel implements TargetConnect{
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-            for(ServerConnectListener listener : listeners) {
+            for(TargetConnectListener listener : listeners) {
                 listener.onError(delegate, cause);
             }
         }

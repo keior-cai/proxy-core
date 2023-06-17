@@ -1,5 +1,6 @@
 package com.socks.proxy.handshake;
 
+import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyCodes;
@@ -31,9 +32,7 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
     @Override
     public void onConnect(ServerMiddleProxy proxy, Map<String, String> headers, String s, String selectedSubprotocol){
         try {
-            String encode = codes.encodeObject(new PublicKeyMessage(publicKey));
-            log.debug("send public key message = {}", encode);
-            proxy.write(encode);
+            proxy.write(JSON.toJSONString(new PublicKeyMessage(publicKey)));
         } catch (Throwable cause) {
             onCallbackError(proxy, cause);
         }
@@ -65,7 +64,7 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
     @Override
     public void onBinary(ServerMiddleProxy proxy, byte[] content){
         log.debug("receive local byte size = {}", content.length);
-        proxy.write(content);
+        proxy.getTarget().write(content);
     }
 
 
