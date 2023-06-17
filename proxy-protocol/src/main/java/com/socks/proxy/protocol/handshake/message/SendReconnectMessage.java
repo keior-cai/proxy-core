@@ -1,4 +1,4 @@
-package com.socks.proxy.protocol.handshake.local;
+package com.socks.proxy.protocol.handshake.message;
 
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
@@ -15,9 +15,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ReconnectMessage extends ProxyMessage{
+public class SendReconnectMessage extends ProxyMessage{
 
-    public ReconnectMessage(){
+    public SendReconnectMessage(){
         super(LocalProxyCommand.SEND_RECONNECT.getCode());
     }
 }

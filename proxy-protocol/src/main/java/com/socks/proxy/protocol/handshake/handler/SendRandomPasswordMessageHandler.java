@@ -1,4 +1,4 @@
-package com.socks.proxy.protocol.handshake.local;
+package com.socks.proxy.protocol.handshake.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.cipher.AbstractCipher;
@@ -9,7 +9,8 @@ import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
-import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
+import com.socks.proxy.protocol.handshake.message.SendUserMessage;
+import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;

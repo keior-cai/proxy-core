@@ -12,10 +12,12 @@ import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.factory.TargetConnectFactory;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.local.SenTargetAddressMessage;
-import com.socks.proxy.protocol.handshake.local.SendUserMessage;
-import com.socks.proxy.protocol.handshake.server.AckUserMessageHandler;
-import com.socks.proxy.protocol.handshake.server.ConnectSuccessMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.AckUserMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.ConnectSuccessMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.ReconnectHandler;
+import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
+import com.socks.proxy.protocol.handshake.message.SendReconnectMessage;
+import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.protocol.listener.ServerConnectListener;
 import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
 import com.socks.proxy.util.RSAUtil;
@@ -68,12 +70,14 @@ public class DefaultServerServiceBuilder extends ServerServiceBuilder{
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
             codeMap.put(LocalProxyCommand.SEND_USER_INFO.getCode(), SendUserMessage.class);
             codeMap.put(LocalProxyCommand.SEND_DST_ADDR.getCode(), SenTargetAddressMessage.class);
+            codeMap.put(LocalProxyCommand.SEND_RECONNECT.getCode(), SendReconnectMessage.class);
             codes = new DefaultProxyCommandCodes<>(codeMap);
         }
 
         if(handlerList.isEmpty()){
             handlerList.add(new AckUserMessageHandler(rsaUtil));
             handlerList.add(new ConnectSuccessMessageHandler(connectFactory));
+            handlerList.add(new ReconnectHandler(rsaUtil.getPublicKey()));
 
         }
 

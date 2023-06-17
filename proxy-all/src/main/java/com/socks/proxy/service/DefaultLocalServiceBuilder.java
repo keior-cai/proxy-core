@@ -12,12 +12,12 @@ import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.CloseMessageHandler;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
-import com.socks.proxy.protocol.handshake.local.AckConnectSuccessMessageHandler;
-import com.socks.proxy.protocol.handshake.local.SendDstServerMessageHandler;
-import com.socks.proxy.protocol.handshake.local.SendRandomPasswordMessageHandler;
-import com.socks.proxy.protocol.handshake.server.AckTargetAddressMessage;
-import com.socks.proxy.protocol.handshake.server.AckUserMessage;
-import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
+import com.socks.proxy.protocol.handshake.handler.AckConnectSuccessMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.SendTargetServerMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.SendRandomPasswordMessageHandler;
+import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
+import com.socks.proxy.protocol.handshake.message.AckUserMessage;
+import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.listener.WebsocketMessageFactory;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketMessageFactory;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketPoolFactory;
@@ -116,7 +116,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
 
     private void initMessageHandlerMap(){
         messageHandlerMap.put(ServerProxyCommand.CONNECT_SUCCESS, new AckConnectSuccessMessageHandler());
-        messageHandlerMap.put(ServerProxyCommand.ACK_USER_MESSAGE, new SendDstServerMessageHandler());
+        messageHandlerMap.put(ServerProxyCommand.ACK_USER_MESSAGE, new SendTargetServerMessageHandler());
         messageHandlerMap.put(ServerProxyCommand.SEND_PUBLIC_KEY,
                 new SendRandomPasswordMessageHandler(new ConnectUserInfo(null, null)));
         messageHandlerMap.put(ServerProxyCommand.CLOSE, new CloseMessageHandler());

@@ -5,7 +5,7 @@ import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
+import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import io.netty.util.internal.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

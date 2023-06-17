@@ -1,9 +1,9 @@
-package com.socks.proxy.protocol.handshake.local;
+package com.socks.proxy.protocol.handshake.handler;
 
 import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.handshake.SimpleLocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.server.AckTargetAddressMessage;
+import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
 import lombok.extern.slf4j.Slf4j;
 
 /**

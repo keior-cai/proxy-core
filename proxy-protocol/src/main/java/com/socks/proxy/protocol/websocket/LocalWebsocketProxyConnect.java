@@ -7,7 +7,7 @@ import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCommandEncode;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.ConnectStatus;
-import com.socks.proxy.protocol.handshake.local.ReconnectMessage;
+import com.socks.proxy.protocol.handshake.message.SendReconnectMessage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,7 +51,7 @@ public class LocalWebsocketProxyConnect implements LocalMiddleProxy{
                 webSocket.connect();
                 break;
             case OPEN:
-                String encodeStr = encode.encodeObject(new ReconnectMessage());
+                String encodeStr = encode.encodeObject(new SendReconnectMessage());
                 webSocket.sendText(encodeStr);
                 break;
         }

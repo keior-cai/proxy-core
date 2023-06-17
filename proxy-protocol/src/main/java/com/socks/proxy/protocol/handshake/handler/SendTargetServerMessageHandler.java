@@ -1,10 +1,11 @@
-package com.socks.proxy.protocol.handshake.local;
+package com.socks.proxy.protocol.handshake.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.handshake.SimpleLocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.server.AckUserMessage;
+import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
+import com.socks.proxy.protocol.handshake.message.AckUserMessage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -14,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/5/21
  **/
 @Slf4j
-public class SendDstServerMessageHandler extends SimpleLocalHandshakeMessageHandler<AckUserMessage>{
+public class SendTargetServerMessageHandler extends SimpleLocalHandshakeMessageHandler<AckUserMessage>{
 
     @Override
     protected void handleLocalMessage(LocalConnect local, AckUserMessage message, LocalMiddleProxy remote){
