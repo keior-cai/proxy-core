@@ -3,7 +3,8 @@ package com.socks.proxy.protocol.handshake.server;
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.DefaultCipher;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.SimpleServerHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.local.SendUserMessage;
@@ -24,7 +25,7 @@ public class AckUserMessageHandler extends SimpleServerHandshakeMessageHandler<S
 
 
     @Override
-    protected void handleServerMessage(RemoteProxyConnect local, SendUserMessage message, RemoteProxyConnect remote){
+    protected void handleServerMessage(ServerMiddleProxy local, SendUserMessage message, TargetConnect middleProxy){
         try {
             String methodPassword = rsaUtil.decrypt(AESUtil.decryptByDefaultKey(message.getRandom()));
             log.debug("{}write ack user message = {} password = {}", local.channelId(), message, methodPassword);

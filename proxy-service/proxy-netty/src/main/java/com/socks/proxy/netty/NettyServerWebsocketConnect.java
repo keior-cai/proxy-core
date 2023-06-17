@@ -1,11 +1,11 @@
 package com.socks.proxy.netty;
 
+import com.socks.proxy.netty.constant.AttrConstant;
+import com.socks.proxy.protocol.ICipher;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyCommandEncode;
 import com.socks.proxy.protocol.codes.ProxyMessage;
-import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.ICipher;
-import com.socks.proxy.protocol.RemoteProxyConnect;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -18,16 +18,16 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/6/10
  **/
 @Slf4j
-public class NettyLocalWebsocketRemoteConnect implements RemoteProxyConnect{
+public class NettyServerWebsocketConnect implements ServerMiddleProxy{
 
     private final Channel channel;
 
     private final ProxyCommandEncode<? super ProxyMessage> encode;
 
-    private DstServer dstServer;
+    private TargetConnect target;
 
 
-    public NettyLocalWebsocketRemoteConnect(Channel channel, ProxyCommandEncode<? super ProxyMessage> encode){
+    public NettyServerWebsocketConnect(Channel channel, ProxyCommandEncode<? super ProxyMessage> encode){
         this.channel = channel;
         this.encode = encode;
     }
@@ -56,12 +56,6 @@ public class NettyLocalWebsocketRemoteConnect implements RemoteProxyConnect{
 
 
     @Override
-    public void connect() throws Exception{
-        throw new IllegalAccessError();
-    }
-
-
-    @Override
     public void close(){
         channel.close();
     }
@@ -81,20 +75,14 @@ public class NettyLocalWebsocketRemoteConnect implements RemoteProxyConnect{
 
 
     @Override
-    public DstServer getDstServer(){
-        return dstServer;
+    public TargetConnect getTarget(){
+        return target;
     }
 
 
     @Override
-    public void setDstServer(DstServer dstServer){
-        this.dstServer = dstServer;
-    }
-
-
-    @Override
-    public void setTarget(RemoteProxyConnect proxyConnect){
-        channel.attr(AttrConstant.TARGET_SERVICE).set(proxyConnect);
+    public void setTarget(TargetConnect target){
+        this.target = target;
     }
 
 }

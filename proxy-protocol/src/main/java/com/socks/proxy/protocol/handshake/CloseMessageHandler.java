@@ -1,7 +1,9 @@
 package com.socks.proxy.protocol.handshake;
 
-import com.socks.proxy.protocol.LocalProxyConnect;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.LocalConnect;
+import com.socks.proxy.protocol.LocalMiddleProxy;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 public class CloseMessageHandler implements ServerHandshakeMessageHandler, LocalHandshakeMessageHandler{
 
     @Override
-    public void handle(LocalProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
+    public void handle(LocalConnect local, ProxyMessage message, LocalMiddleProxy remote){
         local.close();
     }
 
 
     @Override
-    public void handle(RemoteProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
+    public void handle(ServerMiddleProxy local, ProxyMessage message, TargetConnect remote){
         local.close();
     }
 }

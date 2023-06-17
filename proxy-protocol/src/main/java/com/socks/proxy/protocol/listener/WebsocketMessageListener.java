@@ -1,15 +1,16 @@
-package com.socks.proxy.protocol.websocket;
+package com.socks.proxy.protocol.listener;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFrame;
-import com.socks.proxy.protocol.LocalProxyConnect;
+import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
+import com.socks.proxy.protocol.websocket.LocalWebsocketProxyConnect;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +24,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class WebsocketMessageListener extends WebSocketAdapter{
 
-    private final LocalProxyConnect context;
+    private final LocalConnect context;
 
     private final Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
 
@@ -37,7 +38,7 @@ public class WebsocketMessageListener extends WebSocketAdapter{
         log.debug("receive proxy message = {}", decode);
         ProxyCommand command = ServerProxyCommand.of(decode.getCommand());
         LocalHandshakeMessageHandler remoteMessageHandler = messageHandlerMap.get(command);
-        remoteMessageHandler.handle(context, decode, new WebsocketProxyConnect(websocket, codes));
+        remoteMessageHandler.handle(context, decode, new LocalWebsocketProxyConnect(websocket, codes));
     }
 
 

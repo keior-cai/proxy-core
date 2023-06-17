@@ -2,10 +2,11 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.netty.connect.DefaultSocks5NettyConnect;
 import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.DefaultDstServer;
-import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.LocalProxyConnect;
+import com.socks.proxy.protocol.DefaultTargetServer;
+import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
+import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -14,6 +15,8 @@ import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * socks5 代理处理器
@@ -25,6 +28,8 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
 
     private final LocalConnectServerFactory connectFactory;
 
+    private final List<LocalConnectListener> listeners;
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Socks5InitialRequest msg){
@@ -33,8 +38,8 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
             ctx.close();
             return;
         }
-        pipeline.addFirst(new Socks5CommandRequestDecoder()).addLast(new Socks5CommandHandler(connectFactory))
-                .remove(this);
+        pipeline.addFirst(new Socks5CommandRequestDecoder())
+                .addLast(new Socks5CommandHandler(connectFactory, listeners)).remove(this);
         ctx.writeAndFlush(new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH));
     }
 
@@ -47,8 +52,8 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
 
     private static class Socks5CommandHandler extends AbstractProxy<Socks5CommandRequest>{
 
-        public Socks5CommandHandler(LocalConnectServerFactory connectFactory){
-            super(connectFactory);
+        public Socks5CommandHandler(LocalConnectServerFactory connectFactory, List<LocalConnectListener> listeners){
+            super(connectFactory, listeners);
         }
 
 
@@ -61,14 +66,14 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
 
 
         @Override
-        protected DstServer resolveRemoteServer(Socks5CommandRequest msg){
-            return new DefaultDstServer(msg.dstAddr(), msg.dstPort());
+        protected TargetServer resolveRemoteServer(Socks5CommandRequest msg){
+            return new DefaultTargetServer(msg.dstAddr(), msg.dstPort());
         }
 
 
         @Override
-        protected LocalProxyConnect createProxyConnect(ChannelHandlerContext ctx, DstServer dstServer){
-            return new DefaultSocks5NettyConnect(ctx);
+        protected LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
+            return new DefaultSocks5NettyConnect(ctx, dstServer);
         }
     }
 }

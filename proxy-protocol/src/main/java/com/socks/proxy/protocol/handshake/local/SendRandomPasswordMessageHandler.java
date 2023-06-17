@@ -4,8 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.cipher.AbstractCipher;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.DefaultCipher;
-import com.socks.proxy.protocol.LocalProxyConnect;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.LocalConnect;
+import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
@@ -36,7 +36,7 @@ public class SendRandomPasswordMessageHandler implements LocalHandshakeMessageHa
 
 
     @Override
-    public void handle(LocalProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
+    public void handle(LocalConnect local, ProxyMessage message, LocalMiddleProxy remote){
         PublicKeyMessage publicKeyMessage = (PublicKeyMessage) message;
         String publicKey = publicKeyMessage.getPublicKey();
 

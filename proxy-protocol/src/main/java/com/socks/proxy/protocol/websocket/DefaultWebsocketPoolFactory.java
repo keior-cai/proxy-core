@@ -1,7 +1,6 @@
 package com.socks.proxy.protocol.websocket;
 
 import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketState;
 import com.socks.proxy.protocol.codes.ProxyCommandEncode;
 import com.socks.proxy.protocol.codes.ProxyMessage;
@@ -17,23 +16,23 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * <pre>
+ *     websocket connect server service pool
+ * </pre>
+ *
  * @author: chuangjie
  * @date: 2023/5/22
  **/
 @Slf4j
 public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSocket> implements WebsocketPoolFactory{
 
-    private final GenericObjectPool<WebSocket> pool;
-    private final List<URI>                    address;
-    private       Thread                       thread;
-    private final AtomicLong                   COUNTER = new AtomicLong();
-
+    private final GenericObjectPool<WebSocket>             pool;
+    private       Thread                                   thread;
     private final ProxyCommandEncode<? super ProxyMessage> encode;
 
-    private final WebSocketFactory factory = new WebSocketFactory();
+    private final WebsocketFactory factory;
 
     private final ProxyMessage close;
 
@@ -41,7 +40,7 @@ public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSock
     public DefaultWebsocketPoolFactory(List<URI> address, GenericObjectPoolConfig<WebSocket> config,
                                        ProxyCommandEncode<? super ProxyMessage> encode, ProxyMessage close){
         this.pool = new GenericObjectPool<>(this, config);
-        this.address = address;
+        this.factory = new DefaultWebsocketFactory(address);
         this.encode = encode;
         this.close = close;
     }
@@ -115,11 +114,7 @@ public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSock
 
     @Override
     public WebSocket create() throws Exception{
-        int len = address.size();
-        int index = (int) (COUNTER.incrementAndGet() % len);
-        URI target = address.get(index);
-        log.debug("create proxy server = {}", target);
-        return factory.createSocket(target);
+        return factory.getClient();
     }
 
 

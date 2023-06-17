@@ -1,7 +1,7 @@
 package com.socks.proxy.netty.connect;
 
 import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.DstServer;
+import com.socks.proxy.protocol.TargetServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
@@ -15,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DefaultSocks5NettyConnect extends AbstractNettyConnect{
 
-    public DefaultSocks5NettyConnect(ChannelHandlerContext context){
-        super(context);
+    public DefaultSocks5NettyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
+        super(ctx, dstServer);
     }
 
 
@@ -32,12 +32,6 @@ public class DefaultSocks5NettyConnect extends AbstractNettyConnect{
     public void writeConnectFail(){
         Socks5AddressType socks5AddressType = context.channel().attr(AttrConstant.SOCKS5_ADDRESS_TYPE).get();
         context.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.FAILURE, socks5AddressType));
-    }
-
-
-    @Override
-    public DstServer getDstServer(){
-        return context.channel().attr(AttrConstant.REMOTE_SERVER).get();
     }
 
 }

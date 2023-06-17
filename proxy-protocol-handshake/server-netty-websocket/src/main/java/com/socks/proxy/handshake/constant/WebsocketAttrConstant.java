@@ -1,6 +1,7 @@
 package com.socks.proxy.handshake.constant;
 
-import com.socks.proxy.protocol.DstServer;
+import com.socks.proxy.protocol.ICipher;
+import com.socks.proxy.protocol.TargetServer;
 import io.netty.util.AttributeKey;
 
 public interface WebsocketAttrConstant{
@@ -8,6 +9,9 @@ public interface WebsocketAttrConstant{
     /**
      * 目标地址
      */
-    AttributeKey<DstServer> DST_SERVER = AttributeKey.valueOf("dstServer");
+    AttributeKey<TargetServer> DST_SERVER = AttributeKey.valueOf("dstServer");
+
+
+    AttributeKey<ICipher> CIPHER = AttributeKey.valueOf("cipher");
 
 }

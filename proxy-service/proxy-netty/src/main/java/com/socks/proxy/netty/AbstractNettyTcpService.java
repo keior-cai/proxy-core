@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/6/4
  **/
 @Slf4j
-public class AbstractNettyTcpService implements TcpService{
+public abstract class AbstractNettyTcpService implements TcpService{
 
     private final int port;
 

@@ -1,14 +1,17 @@
-package com.socks.proxy.netty;
+package com.socks.proxy.netty.local;
 
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
-import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.netty.ServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
+import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
+import com.socks.proxy.protocol.listener.LocalConnectListener;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,9 +45,21 @@ public class LocalServiceBuilder implements ServiceBuilder{
     private LocalConnectServerFactory connectFactory;
 
     /**
+     * 本地连接监听器
+     */
+    private List<LocalConnectListener> listeners = new ArrayList<>();
+
+    /**
      * 连接池
      */
     private Pool pool;
+
+
+    public LocalServiceBuilder addListener(LocalConnectListener listener){
+        listeners.add(listener);
+        return this;
+    }
+
 
     @Getter
     @Setter
@@ -65,9 +80,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                return new LocalHttpProxyService(port, connectFactory);
+                return new LocalHttpProxyService(port, connectFactory, listeners);
             case SOCKS5:
-                return new LocalSocks5ProxyService(port, connectFactory);
+                return new LocalSocks5ProxyService(port, connectFactory, listeners);
         }
         throw new RuntimeException();
     }

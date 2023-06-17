@@ -1,7 +1,7 @@
 package com.socks.proxy.protocol.handshake;
 
-import com.socks.proxy.protocol.LocalProxyConnect;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.LocalConnect;
+import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 
 /**
@@ -13,10 +13,10 @@ public abstract class SimpleLocalHandshakeMessageHandler<I extends ProxyMessage>
         implements LocalHandshakeMessageHandler{
 
     @Override
-    public void handle(LocalProxyConnect local, ProxyMessage message, RemoteProxyConnect remote){
+    public void handle(LocalConnect local, ProxyMessage message, LocalMiddleProxy remote){
         handleLocalMessage(local, (I) message, remote);
     }
 
 
-    protected abstract void handleLocalMessage(LocalProxyConnect local, I message, RemoteProxyConnect remote);
+    protected abstract void handleLocalMessage(LocalConnect local, I message, LocalMiddleProxy remote);
 }

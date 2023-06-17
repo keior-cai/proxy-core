@@ -1,10 +1,9 @@
 package com.socks.proxy.netty;
 
-import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.ICipher;
-import com.socks.proxy.protocol.RemoteProxyConnect;
-import com.socks.proxy.protocol.factory.ServerConnectTargetFactory;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.TargetConnect;
+import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.factory.TargetConnectFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -24,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/6/6
  **/
 @Slf4j
-public class DefaultNettyConnectServerFactory implements ServerConnectTargetFactory{
+public class DefaultNettyConnectServerFactory implements TargetConnectFactory{
 
     private final Bootstrap bootstrap = new Bootstrap();
 
@@ -39,10 +38,8 @@ public class DefaultNettyConnectServerFactory implements ServerConnectTargetFact
 
 
     @Override
-    public RemoteProxyConnect getProxyService(RemoteProxyConnect channel){
-        SocketDstChannel socketDstChannel = new SocketDstChannel(bootstrap, channel);
-        socketDstChannel.setDstServer(channel.getDstServer());
-        return socketDstChannel;
+    public TargetConnect getProxyService(ServerMiddleProxy channel, TargetServer target){
+        return new SocketDstChannel(bootstrap, channel, target);
     }
 
 
@@ -51,82 +48,53 @@ public class DefaultNettyConnectServerFactory implements ServerConnectTargetFact
     }
 
 
-    private static class SocketDstChannel implements RemoteProxyConnect{
+    private static class SocketDstChannel implements TargetConnect{
 
         private final Bootstrap bootstrap;
 
-        private final RemoteProxyConnect localProxyConnect;
+        private final ServerMiddleProxy localConnect;
 
-        private DstServer dstServer;
+        private final TargetServer targetServer;
 
-        private ChannelFuture channel;
+        private ChannelFuture channelFuture;
 
 
-        public SocketDstChannel(Bootstrap bootstrap, RemoteProxyConnect localProxyConnect){
+        public SocketDstChannel(Bootstrap bootstrap, ServerMiddleProxy channel, TargetServer targetServer){
             this.bootstrap = bootstrap;
-            this.localProxyConnect = localProxyConnect;
+            this.localConnect = channel;
+            this.targetServer = targetServer;
+
         }
 
 
         @Override
         public String channelId(){
-            return channel.channel().id().asShortText();
+            return channelFuture.channel().id().asShortText();
         }
 
 
         @Override
         public void write(byte[] content){
-            channel.channel().writeAndFlush(Unpooled.wrappedBuffer(content));
+            channelFuture.channel().writeAndFlush(Unpooled.wrappedBuffer(content));
         }
 
 
         @Override
         public void connect() throws Exception{
-            this.channel = bootstrap.connect(dstServer.host(), dstServer.port());
-            this.channel.channel().pipeline().addLast(new SimpleChannelInboundHandler<ByteBuf>(){
+            this.channelFuture = bootstrap.connect(targetServer.host(), targetServer.port());
+            this.channelFuture.channel().pipeline().addLast(new SimpleChannelInboundHandler<ByteBuf>(){
                 @Override
                 protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
-                    localProxyConnect.write(ByteBufUtil.getBytes(msg));
+                    localConnect.write(ByteBufUtil.getBytes(msg));
                 }
             });
-            channel.sync().get();
+            channelFuture.sync().get();
         }
 
 
         @Override
         public void close(){
-            channel.channel().close();
-        }
-
-
-        @Override
-        public void setCipher(ICipher iCipher){
-            channel.channel().attr(AttrConstant.CIPHER_KEY).set(iCipher);
-        }
-
-
-        @Override
-        public void write(String message){
-            throw new IllegalStateException();
-
-        }
-
-
-        @Override
-        public DstServer getDstServer(){
-            return dstServer;
-        }
-
-
-        @Override
-        public void setDstServer(DstServer dstServer){
-            this.dstServer = dstServer;
-        }
-
-
-        @Override
-        public void setTarget(RemoteProxyConnect proxyConnect){
-            // ignore
+            channelFuture.channel().close();
         }
 
     }

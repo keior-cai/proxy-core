@@ -1,8 +1,6 @@
 package com.socks.proxy.netty.constant;
 
-import com.socks.proxy.protocol.DstServer;
-import com.socks.proxy.protocol.ICipher;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.*;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import io.netty.util.AttributeKey;
 
@@ -19,11 +17,21 @@ public interface AttrConstant{
     /**
      * 连接远程服务
      */
-    AttributeKey<DstServer>         REMOTE_SERVER       = AttributeKey.valueOf("remoteServer");
+    AttributeKey<TargetServer>      REMOTE_SERVER       = AttributeKey.valueOf("remoteServer");
+
+    /**
+     * 中间链接，local-server
+     */
+    AttributeKey<ServerMiddleProxy> MIDDLE_PROXY = AttributeKey.valueOf("serverService");
+
+    /**
+     * 目标地址连接
+     */
+    AttributeKey<TargetConnect> TARGET_SERVER = AttributeKey.valueOf("targetServer");
 
     /**
      * 连接远程服务
      */
-    AttributeKey<RemoteProxyConnect> TARGET_SERVICE = AttributeKey.valueOf("targetService");
+    AttributeKey<LocalMiddleProxy> TARGET_SERVICE = AttributeKey.valueOf("targetService");
 
 }

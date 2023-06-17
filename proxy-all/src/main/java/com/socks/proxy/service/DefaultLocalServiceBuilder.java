@@ -1,6 +1,7 @@
 package com.socks.proxy.service;
 
-import com.socks.proxy.netty.LocalServiceBuilder;
+import com.neovisionaries.ws.client.WebSocket;
+import com.socks.proxy.netty.local.LocalServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
@@ -17,12 +18,17 @@ import com.socks.proxy.protocol.handshake.local.SendRandomPasswordMessageHandler
 import com.socks.proxy.protocol.handshake.server.AckTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.server.AckUserMessage;
 import com.socks.proxy.protocol.handshake.server.PublicKeyMessage;
-import com.socks.proxy.protocol.websocket.*;
+import com.socks.proxy.protocol.listener.WebsocketMessageFactory;
+import com.socks.proxy.protocol.websocket.DefaultWebsocketMessageFactory;
+import com.socks.proxy.protocol.websocket.DefaultWebsocketPoolFactory;
+import com.socks.proxy.protocol.websocket.WebsocketConnectProxyServerFactory;
+import com.socks.proxy.protocol.websocket.WebsocketFactory;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,7 +48,7 @@ import java.util.Map;
 public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
 
     /**
-     * 消息处理器
+     *
      */
     private Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
 
@@ -89,13 +95,13 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         if(getPool() == null){
             setPool(new Pool());
         }
-        //        GenericObjectPoolConfig<WebSocket> poolConfig = new GenericObjectPoolConfig<>();
-        //        poolConfig.setMaxTotal(getPool().getMaxTotal());
-        //        poolConfig.setJmxEnabled(getPool().getJvmEnable());
-        //        poolConfig.setMaxIdle(getPool().getMaxIdle());
-        //        poolConfig.setMinIdle(getPool().getMinIdle());
-        //        return new DefaultWebsocketPoolFactory(getServerList(), poolConfig, codes, close);
-        return new DefaultWebsocketFactory(getServerList());
+        GenericObjectPoolConfig<WebSocket> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxTotal(getPool().getMaxTotal());
+        poolConfig.setJmxEnabled(getPool().getJvmEnable());
+        poolConfig.setMaxIdle(getPool().getMaxIdle());
+        poolConfig.setMinIdle(getPool().getMinIdle());
+        return new DefaultWebsocketPoolFactory(getServerList(), poolConfig, codes, close);
+        //        return new DefaultWebsocketFactory(getServerList());
     }
 
 

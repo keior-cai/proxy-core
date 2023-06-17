@@ -13,7 +13,6 @@
         <module>proxy-utils</module>
         <module>proxy-all</module>
         <module>proxy-protocol-handshake</module>
-        <module>proxy-protocol-middle</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -88,11 +87,6 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codes.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.proxy</groupId>
-                <artifactId>proxy-core</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

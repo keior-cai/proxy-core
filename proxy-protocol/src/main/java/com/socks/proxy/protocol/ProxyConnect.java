@@ -26,10 +26,4 @@ public interface ProxyConnect{
      */
     void close();
 
-
-    /**
-     * 通道设置属性
-     */
-    void setCipher(ICipher iCipher);
-
 }

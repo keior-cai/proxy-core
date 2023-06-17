@@ -24,6 +24,10 @@ public enum LocalProxyCommand implements ProxyCommand{
      * 发送用户信息
      */
     SEND_USER_INFO(3),
+    /**
+     * 重新连接
+     */
+    SEND_RECONNECT(4),
 
     ;
     private final int code;

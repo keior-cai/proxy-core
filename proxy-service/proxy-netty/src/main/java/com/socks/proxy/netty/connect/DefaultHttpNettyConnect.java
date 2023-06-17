@@ -1,7 +1,6 @@
 package com.socks.proxy.netty.connect;
 
-import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.DstServer;
+import com.socks.proxy.protocol.TargetServer;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -10,6 +9,10 @@ import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
+ * local connect proxy server use http connect of netty
+ * </p>
+ *
  * @author: chuangjie
  * @date: 2023/5/30
  **/
@@ -19,8 +22,8 @@ public class DefaultHttpNettyConnect extends AbstractNettyConnect{
     private static final String SUCCESS = "HTTP/1.1 200 Connection Established\r\n\r\n";
 
 
-    public DefaultHttpNettyConnect(ChannelHandlerContext context){
-        super(context);
+    public DefaultHttpNettyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
+        super(ctx, dstServer);
     }
 
 
@@ -36,9 +39,4 @@ public class DefaultHttpNettyConnect extends AbstractNettyConnect{
         context.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND));
     }
 
-
-    @Override
-    public DstServer getDstServer(){
-        return context.channel().attr(AttrConstant.REMOTE_SERVER).get();
-    }
 }

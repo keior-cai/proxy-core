@@ -1,53 +1,54 @@
 package com.socks.proxy.handshake;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpHeaders;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
+
+import java.util.Map;
 
 /**
  * @author: chuangjie
  * @date: 2023/6/5
  **/
-public class AdaptorMessageListener implements MessageListener{
+public class AdaptorMessageListener implements ServerMiddleMessageListener{
+
     @Override
-    public void onConnect(ChannelHandlerContext context, HttpHeaders headers, String s, String selectedSubprotocol){
+    public void onConnect(ServerMiddleProxy proxy, Map<String, String> headers, String s, String selectedSubprotocol){
 
     }
 
 
     @Override
-    public void onDisconnect(ChannelHandlerContext context){
+    public void onDisconnect(ServerMiddleProxy proxy){
 
     }
 
 
     @Override
-    public void onText(ChannelHandlerContext context, String message){
+    public void onText(ServerMiddleProxy proxy, String message){
 
     }
 
 
     @Override
-    public void onBinary(ChannelHandlerContext context, byte[] content){
+    public void onBinary(ServerMiddleProxy proxy, byte[] content){
 
     }
 
 
     @Override
-    public void onClose(ChannelHandlerContext context, int status, String reason){
+    public void onClose(ServerMiddleProxy proxy, int status, String reason){
 
     }
 
 
     @Override
-    public void onCallbackError(ChannelHandlerContext context, Throwable cause){
+    public void onCallbackError(ServerMiddleProxy proxy, Throwable cause){
 
     }
 
 
     @Override
-    public void onError(ChannelHandlerContext context, Throwable cause){
+    public void onError(ServerMiddleProxy proxy, Throwable cause){
 
     }
-
-
 }

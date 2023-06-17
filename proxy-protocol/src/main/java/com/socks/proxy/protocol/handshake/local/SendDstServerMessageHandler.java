@@ -1,8 +1,8 @@
 package com.socks.proxy.protocol.handshake.local;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxy.protocol.LocalProxyConnect;
-import com.socks.proxy.protocol.RemoteProxyConnect;
+import com.socks.proxy.protocol.LocalConnect;
+import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.handshake.SimpleLocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.server.AckUserMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SendDstServerMessageHandler extends SimpleLocalHandshakeMessageHandler<AckUserMessage>{
 
     @Override
-    protected void handleLocalMessage(LocalProxyConnect local, AckUserMessage message, RemoteProxyConnect remote){
+    protected void handleLocalMessage(LocalConnect local, AckUserMessage message, LocalMiddleProxy remote){
         remote.write(JSON.toJSONString(new SenTargetAddressMessage(local.getDstServer())));
 
     }

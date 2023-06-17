@@ -1,4 +1,4 @@
-package com.socks.proxy.netty;
+package com.socks.proxy.netty.local;
 
 import com.socks.proxy.protocol.handshake.HandshakeProtocolHandler;
 import com.socks.proxy.protocol.enums.Protocol;

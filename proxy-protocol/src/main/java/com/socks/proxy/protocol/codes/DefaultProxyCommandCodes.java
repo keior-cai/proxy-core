@@ -40,7 +40,7 @@ public class DefaultProxyCommandCodes<T extends ProxyMessage> implements ProxyCo
 
     @Override
     public String encodeObject(T message){
-        return AESUtil.encryptByDefaultKey(JSON.toJSONString(message));
+        return encodeStr(JSON.toJSONString(message));
     }
 
 

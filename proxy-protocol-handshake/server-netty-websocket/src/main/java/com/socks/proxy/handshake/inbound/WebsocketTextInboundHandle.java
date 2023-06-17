@@ -1,6 +1,8 @@
 package com.socks.proxy.handshake.inbound;
 
-import com.socks.proxy.handshake.MessageListener;
+import com.socks.proxy.handshake.NettyServerMiddleProxyFactory;
+import com.socks.proxy.protocol.ServerMiddleProxy;
+import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -13,16 +15,19 @@ import lombok.extern.slf4j.Slf4j;
 @ChannelHandler.Sharable
 public class WebsocketTextInboundHandle extends SimpleChannelInboundHandler<TextWebSocketFrame>{
 
-    private final MessageListener messageListener;
+    private final ServerMiddleMessageListener messageListener;
+
+    private final NettyServerMiddleProxyFactory factory;
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg){
         String text = msg.text();
+        ServerMiddleProxy proxy = factory.getProxy(ctx);
         try {
-            messageListener.onText(ctx, text);
+            messageListener.onText(proxy, text);
         } catch (Throwable cause) {
-            messageListener.onCallbackError(ctx, cause);
+            messageListener.onCallbackError(proxy, cause);
         }
     }
 }
