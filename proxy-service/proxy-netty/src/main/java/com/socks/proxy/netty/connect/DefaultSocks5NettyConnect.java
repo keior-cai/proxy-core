@@ -2,11 +2,14 @@ package com.socks.proxy.netty.connect;
 
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
 import io.netty.handler.codec.socksx.v5.Socks5AddressType;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * @author: chuangjie
@@ -15,8 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DefaultSocks5NettyConnect extends AbstractNettyConnect{
 
-    public DefaultSocks5NettyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
-        super(ctx, dstServer);
+    public DefaultSocks5NettyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
+                                     List<LocalConnectListener> listeners){
+        super(ctx, dstServer, listeners);
     }
 
 

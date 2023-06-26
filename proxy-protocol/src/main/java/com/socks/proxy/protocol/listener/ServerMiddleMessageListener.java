@@ -4,6 +4,12 @@ import com.socks.proxy.protocol.ServerMiddleProxy;
 
 import java.util.Map;
 
+/**
+ * <pre>
+ *  中间连接监听器,
+ *  ss-local -> ss-server
+ * </pre>
+ */
 public interface ServerMiddleMessageListener{
 
     void onConnect(ServerMiddleProxy proxy, Map<String, String> headers, String s, String selectedSubprotocol);

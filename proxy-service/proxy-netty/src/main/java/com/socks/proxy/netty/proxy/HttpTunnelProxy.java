@@ -37,8 +37,9 @@ public class HttpTunnelProxy extends AbstractProxy<HttpRequest>{
 
 
     @Override
-    protected LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
-        return new DefaultHttpNettyConnect(ctx, dstServer);
+    protected LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
+                                              List<LocalConnectListener> listeners){
+        return new DefaultHttpNettyConnect(ctx, dstServer, listeners);
     }
 
 

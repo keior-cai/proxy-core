@@ -39,7 +39,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         TargetServer remoteServer = resolveRemoteServer(msg);
         ChannelPipeline pipeline = ctx.pipeline();
-        LocalConnect localConnect = createProxyConnect(ctx, remoteServer);
+        LocalConnect localConnect = createProxyConnect(ctx, remoteServer, listeners);
         executor.execute(()->{
             LocalMiddleProxy connect = null;
             try {
@@ -96,6 +96,8 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
      *
      * @param ctx 本地连接通道，操作系统连接过着代理程序代理连接
      * @param dstServer 目标服务地址，端口
+     * @param listeners
      */
-    protected abstract LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer);
+    protected abstract LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
+                                                       List<LocalConnectListener> listeners);
 }

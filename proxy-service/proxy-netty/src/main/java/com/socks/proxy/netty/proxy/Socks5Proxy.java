@@ -3,8 +3,8 @@ package com.socks.proxy.netty.proxy;
 import com.socks.proxy.netty.connect.DefaultSocks5NettyConnect;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.DefaultTargetServer;
-import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.LocalConnect;
+import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.channel.ChannelHandler;
@@ -72,8 +72,10 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
 
 
         @Override
-        protected LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
-            return new DefaultSocks5NettyConnect(ctx, dstServer);
+        protected LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
+                                                  List<LocalConnectListener> listeners){
+            return new DefaultSocks5NettyConnect(ctx, dstServer, listeners);
+
         }
     }
 }

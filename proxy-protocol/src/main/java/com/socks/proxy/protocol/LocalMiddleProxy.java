@@ -1,6 +1,5 @@
 package com.socks.proxy.protocol;
 
-import com.neovisionaries.ws.client.WebSocketException;
 import com.socks.proxy.protocol.enums.ConnectStatus;
 
 /**
@@ -18,12 +17,6 @@ public interface LocalMiddleProxy extends ProxyConnect{
 
 
     ConnectStatus status();
-
-
-    TargetServer getDstServer();
-
-
-    void setDstServer(TargetServer dstServer);
 
 
     void setTarget(LocalMiddleProxy proxyConnect);

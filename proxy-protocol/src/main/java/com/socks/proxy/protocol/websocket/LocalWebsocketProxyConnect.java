@@ -3,7 +3,6 @@ package com.socks.proxy.protocol.websocket;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.socks.proxy.protocol.LocalMiddleProxy;
-import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCommandEncode;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.ConnectStatus;
@@ -78,7 +77,7 @@ public class LocalWebsocketProxyConnect implements LocalMiddleProxy{
 
     @Override
     public void close(){
-
+        webSocket.sendClose();
     }
 
 
@@ -86,18 +85,6 @@ public class LocalWebsocketProxyConnect implements LocalMiddleProxy{
     public void write(String message){
         String encodeStr = encode.encodeStr(message);
         webSocket.sendText(encodeStr);
-    }
-
-
-    @Override
-    public TargetServer getDstServer(){
-        return null;
-    }
-
-
-    @Override
-    public void setDstServer(TargetServer dstServer){
-
     }
 
 

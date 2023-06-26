@@ -1,12 +1,15 @@
 package com.socks.proxy.netty.connect;
 
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * <p>
@@ -22,8 +25,9 @@ public class DefaultHttpNettyConnect extends AbstractNettyConnect{
     private static final String SUCCESS = "HTTP/1.1 200 Connection Established\r\n\r\n";
 
 
-    public DefaultHttpNettyConnect(ChannelHandlerContext ctx, TargetServer dstServer){
-        super(ctx, dstServer);
+    public DefaultHttpNettyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
+                                   List<LocalConnectListener> listeners){
+        super(ctx, dstServer, listeners);
     }
 
 

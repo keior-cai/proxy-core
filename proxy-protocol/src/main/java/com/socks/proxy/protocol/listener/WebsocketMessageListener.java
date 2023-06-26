@@ -69,5 +69,7 @@ public class WebsocketMessageListener extends WebSocketAdapter{
 
     @Override
     public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
+        log.debug("close by middle");
+        context.close();
     }
 }

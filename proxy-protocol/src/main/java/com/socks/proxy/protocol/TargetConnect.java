@@ -7,5 +7,6 @@ package com.socks.proxy.protocol;
  * @date: 2023/6/17
  **/
 public interface TargetConnect extends ProxyConnect{
+
     void connect() throws Exception;
 }
