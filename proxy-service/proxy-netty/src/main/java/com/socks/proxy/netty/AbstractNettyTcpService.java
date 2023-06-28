@@ -21,11 +21,11 @@ public abstract class AbstractNettyTcpService implements TcpService{
 
     private final String bindHost;
 
-    private final ServerBootstrap bootstrap = new ServerBootstrap();
+    private ServerBootstrap bootstrap;
 
-    private final EventLoopGroup childGroup;
+    private EventLoopGroup childGroup;
 
-    private final EventLoopGroup masterGroup;
+    private EventLoopGroup masterGroup;
 
     private final ChannelHandler handler;
 
@@ -40,16 +40,13 @@ public abstract class AbstractNettyTcpService implements TcpService{
     public AbstractNettyTcpService(int port, String bindHost, ChannelHandler handler){
         this.port = port;
         this.bindHost = bindHost;
-        int cpuNum = Runtime.getRuntime().availableProcessors();
-        childGroup = new NioEventLoopGroup(cpuNum * 2, new NamedThreadFactory("reactive-child-", false));
-        masterGroup = new NioEventLoopGroup(cpuNum, new NamedThreadFactory("reactive-master-", false));
         this.handler = handler;
-        initializer();
     }
 
 
     @Override
     public void start(){
+        initializer();
         ChannelFuture future = bootstrap.bind(bindHost, port);
         try {
             future.sync();
@@ -62,7 +59,7 @@ public abstract class AbstractNettyTcpService implements TcpService{
                 future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 // ignore
-                future.cancel(false);
+                future.channel().close();
             }
         }, "tcp-server-main");
         thread.setDaemon(false);
@@ -71,8 +68,7 @@ public abstract class AbstractNettyTcpService implements TcpService{
     }
 
 
-    @Override
-    public void stop(){
+    private void stop(){
         if(thread == null || thread.isInterrupted()){
             return;
         }
@@ -84,10 +80,17 @@ public abstract class AbstractNettyTcpService implements TcpService{
         stop();
         masterGroup.shutdownGracefully();
         childGroup.shutdownGracefully();
+        this.bootstrap = null;
+        this.masterGroup = null;
+        this.childGroup = null;
     }
 
 
     public void initializer(){
+        int cpuNum = Runtime.getRuntime().availableProcessors();
+        childGroup = new NioEventLoopGroup(cpuNum * 2, new NamedThreadFactory("reactive-child-", false));
+        masterGroup = new NioEventLoopGroup(cpuNum, new NamedThreadFactory("reactive-master-", false));
+        this.bootstrap = new ServerBootstrap();
         bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP))
                 .childHandler(new ChannelInitializer<Channel>(){

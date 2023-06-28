@@ -13,6 +13,10 @@ import lombok.experimental.Accessors;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: chuangjie
@@ -49,6 +53,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private List<LocalConnectListener> listeners = new ArrayList<>();
 
+    private ExecutorService executor = new ThreadPoolExecutor(500, 500, 1000L, TimeUnit.MILLISECONDS,
+            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
+
     /**
      * 连接池
      */
@@ -80,9 +87,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                return new LocalHttpProxyService(port, connectFactory, listeners);
+                return new LocalHttpProxyService(port, connectFactory, listeners, executor);
             case SOCKS5:
-                return new LocalSocks5ProxyService(port, connectFactory, listeners);
+                return new LocalSocks5ProxyService(port, connectFactory, listeners, executor);
         }
         throw new RuntimeException();
     }

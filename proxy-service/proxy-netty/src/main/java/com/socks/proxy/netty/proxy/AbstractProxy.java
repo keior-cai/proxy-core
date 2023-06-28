@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +32,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     private final List<LocalConnectListener> listeners;
 
-    private final ThreadPoolExecutor executor = new ThreadPoolExecutor(500, 500, 1000L, TimeUnit.MILLISECONDS,
-            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
+    private final ExecutorService executor;
 
 
     @Override

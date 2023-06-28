@@ -7,6 +7,8 @@ import com.socks.proxy.protocol.handshake.HttpHandshakeProtocolHandler;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author: chuangjie
@@ -14,7 +16,7 @@ import java.util.List;
  **/
 public class LocalHttpProxyService extends AbstractNettyTcpService{
     public LocalHttpProxyService(int port, LocalConnectServerFactory connectFactory,
-                                 List<LocalConnectListener> listeners){
-        super(port, new LocalProxyCode(new HttpHandshakeProtocolHandler(), new HttpTunnelProxy(connectFactory, listeners)));
+                                 List<LocalConnectListener> listeners, ExecutorService executor){
+        super(port, new LocalProxyCode(new HttpHandshakeProtocolHandler(), new HttpTunnelProxy(connectFactory, listeners, executor)));
     }
 }

@@ -11,10 +11,4 @@ public interface TcpService{
      * 关闭tcp服务
      */
     void close();
-
-
-    /**
-     * 停止TCP服务，没有关闭
-     */
-    void stop();
 }

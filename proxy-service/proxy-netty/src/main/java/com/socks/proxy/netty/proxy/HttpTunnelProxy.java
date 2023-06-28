@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * resolve http proxy implement
@@ -25,8 +26,9 @@ import java.util.List;
 @ChannelHandler.Sharable
 public class HttpTunnelProxy extends AbstractProxy<HttpRequest>{
 
-    public HttpTunnelProxy(LocalConnectServerFactory connectFactory, List<LocalConnectListener> listeners){
-        super(connectFactory, listeners);
+    public HttpTunnelProxy(LocalConnectServerFactory connectFactory, List<LocalConnectListener> listeners,
+                           ExecutorService executor){
+        super(connectFactory, listeners, executor);
     }
 
 

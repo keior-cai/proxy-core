@@ -13,14 +13,14 @@ import com.socks.proxy.protocol.handshake.CloseMessageHandler;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
 import com.socks.proxy.protocol.handshake.handler.AckConnectSuccessMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.SendTargetServerMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.SendRandomPasswordMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.SendTargetServerMessageHandler;
 import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.AckUserMessage;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.listener.WebsocketMessageFactory;
+import com.socks.proxy.protocol.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketMessageFactory;
-import com.socks.proxy.protocol.websocket.DefaultWebsocketPoolFactory;
 import com.socks.proxy.protocol.websocket.WebsocketConnectProxyServerFactory;
 import com.socks.proxy.protocol.websocket.WebsocketFactory;
 import lombok.Getter;
@@ -35,6 +35,9 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: chuangjie
@@ -56,6 +59,12 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
 
     private ProxyCodes<? super ProxyMessage> codes;
 
+    private String username;
+
+    private String password;
+
+
+
 
     public TcpService builder(){
         if(getCodes() == null){
@@ -69,14 +78,13 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         if(messageHandlerMap == null){
             messageHandlerMap = new HashMap<>();
             initMessageHandlerMap();
-
         }
+
         if(getConnectFactory() == null){
             WebsocketFactory websocketFactory = createWebsocketPoolFactory();
             setConnectFactory(
                     new WebsocketConnectProxyServerFactory(websocketFactory, createWebsocketMessageFactory(), codes));
         }
-
         return super.builder();
     }
 
@@ -100,8 +108,8 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         poolConfig.setJmxEnabled(getPool().getJvmEnable());
         poolConfig.setMaxIdle(getPool().getMaxIdle());
         poolConfig.setMinIdle(getPool().getMinIdle());
-        return new DefaultWebsocketPoolFactory(getServerList(), poolConfig, codes, close);
-        //        return new DefaultWebsocketFactory(getServerList());
+        //        return new DefaultWebsocketPoolFactory(getServerList(), poolConfig, codes, close);
+        return new DefaultWebsocketFactory(getServerList());
     }
 
 
@@ -118,7 +126,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         messageHandlerMap.put(ServerProxyCommand.CONNECT_SUCCESS, new AckConnectSuccessMessageHandler());
         messageHandlerMap.put(ServerProxyCommand.ACK_USER_MESSAGE, new SendTargetServerMessageHandler());
         messageHandlerMap.put(ServerProxyCommand.SEND_PUBLIC_KEY,
-                new SendRandomPasswordMessageHandler(new ConnectUserInfo(null, null)));
+                new SendRandomPasswordMessageHandler(new ConnectUserInfo(username, password)));
         messageHandlerMap.put(ServerProxyCommand.CLOSE, new CloseMessageHandler());
     }
 }
