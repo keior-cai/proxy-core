@@ -53,8 +53,10 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private List<LocalConnectListener> listeners = new ArrayList<>();
 
-    private ExecutorService executor = new ThreadPoolExecutor(500, 500, 1000L, TimeUnit.MILLISECONDS,
-            new SynchronousQueue<>(), new ThreadPoolExecutor.CallerRunsPolicy());
+    /**
+     * 处理请求线程池
+     */
+    private ExecutorService executor;
 
     /**
      * 连接池
@@ -84,6 +86,10 @@ public class LocalServiceBuilder implements ServiceBuilder{
 
     @Override
     public TcpService builder(){
+        if(executor == null){
+            executor = new ThreadPoolExecutor(10, 200, 3000L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(),
+                    new ThreadPoolExecutor.CallerRunsPolicy());
+        }
         switch(protocol) {
             case HTTP:
             case HTTPS:

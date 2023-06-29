@@ -6,6 +6,19 @@ import java.security.SecureRandom;
 
 /**
  * 解密/加密工具
+ * <pre>
+ * {@link com.socks.proxy.cipher.LocalStreamCipher}
+ * {@link com.socks.proxy.stream.Aes128CfbCipher}
+ * {@link com.socks.proxy.stream.Aes192CfbCipher}
+ * {@link com.socks.proxy.stream.Aes256CfbCipher}
+ * {@link com.socks.proxy.stream.Chacha20Cipher}
+ * {@link com.socks.proxy.stream.Camellia192CfbCipher}
+ * {@link com.socks.proxy.stream.Camellia128CfbCipher}
+ * {@link com.socks.proxy.stream.Camellia256CfbCipher}
+ * {@link com.socks.proxy.stream.Chacha20IetfCipher}
+ * {@link com.socks.proxy.stream.Rc4Md5Cipher}
+ * {@link com.socks.proxy.stream.Salsa20Cipher}
+ * </pre>
  */
 public abstract class AbstractCipher{
 
@@ -66,11 +79,6 @@ public abstract class AbstractCipher{
 
     public byte[] getKey(){
         return key;
-    }
-
-
-    public String getCipherName(){
-        return cipherName;
     }
 
 

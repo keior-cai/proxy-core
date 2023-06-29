@@ -55,7 +55,7 @@ public abstract class AbstractNettyConnect implements LocalConnect{
 
 
             @Override
-            public void channelInactive(ChannelHandlerContext ctx) throws Exception{
+            public void channelInactive(ChannelHandlerContext ctx){
                 LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
                 for(LocalConnectListener listener : AbstractNettyConnect.this.listeners) {
                     listener.onLocalClose(remoteProxyConnect);
@@ -65,8 +65,10 @@ public abstract class AbstractNettyConnect implements LocalConnect{
 
             @Override
             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-                log.error("error", cause);
-                ctx.close();
+                LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+                for(LocalConnectListener listener : AbstractNettyConnect.this.listeners) {
+                    listener.onLocalClose(remoteProxyConnect);
+                }
             }
         });
     }

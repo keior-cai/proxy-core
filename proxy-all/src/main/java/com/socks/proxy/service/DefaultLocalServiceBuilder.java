@@ -35,11 +35,20 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * 默认ss-loca 服务构建者
+ * <pre>
+ *     用于构建ss-local服务的创建
+ *     由于构建服务需要的依赖比较多，因此使用构建者帮助使用者简单化的实现ss-local服务的创建
+ * </pre>
+ * 依赖参考
+ * <pre>
+ *  {@link com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler}
+ *  {@link com.socks.proxy.protocol.codes.ProxyCodes}
+ *  {@link com.socks.proxy.netty.local.LocalServiceBuilder}
+ * </pre>
+ *
  * @author: chuangjie
  * @date: 2023/6/4
  **/
@@ -51,19 +60,39 @@ import java.util.concurrent.TimeUnit;
 public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
 
     /**
-     *
+     * <pre>
+     * 消息处理器，接受ss-server发送过来的消息，并且对消息做出相应的处理
+     * key: 消息类型编码， value消息处理器
+     * </pre>
+     * <pre>
+     *     {@link com.socks.proxy.protocol.enums.ServerProxyCommand}
+     *     {@link com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler}
+     * </pre>
      */
     private Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
 
     private ProxyMessage close;
 
+    /**
+     * <pre>
+     * 消息解析器
+     * ss-local 于ss-server进行通信的时候，会对消息进行加密
+     * 所以这里需要使用解析器对消息进行加解密
+     * 这里的加解密不是发送数据源的加解密，这里只是对通信的消息进行加解密
+     * 发送数据源消息的加解密参考{@link com.socks.proxy.protocol.ICipher}
+     * </pre>
+     */
     private ProxyCodes<? super ProxyMessage> codes;
 
+    /**
+     * 连接ss-server使用的用户名
+     */
     private String username;
 
+    /**
+     * 连接ss-server使用的密码
+     */
     private String password;
-
-
 
 
     public TcpService builder(){
