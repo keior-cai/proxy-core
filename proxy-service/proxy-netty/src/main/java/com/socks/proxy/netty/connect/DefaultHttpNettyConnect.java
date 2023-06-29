@@ -2,12 +2,8 @@ package com.socks.proxy.netty.connect;
 
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -23,9 +19,6 @@ import java.util.List;
 @Slf4j
 public class DefaultHttpNettyConnect extends AbstractNettyConnect{
 
-    private static final String SUCCESS = "HTTP/1.1 200 Connection Established\r\n\r\n";
-
-
     public DefaultHttpNettyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
                                    List<LocalConnectListener> listeners){
         super(ctx, dstServer, listeners);
@@ -34,9 +27,10 @@ public class DefaultHttpNettyConnect extends AbstractNettyConnect{
 
     @Override
     public void writeConnectSuccess(){
-        log.debug("write to system proxy http response = {}", SUCCESS);
-        DefaultHttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        //        log.debug("write to system proxy http response = {}", SUCCESS);
+        HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         context.writeAndFlush(response);
+        context.pipeline().remove(HttpServerCodec.class);
     }
 
 

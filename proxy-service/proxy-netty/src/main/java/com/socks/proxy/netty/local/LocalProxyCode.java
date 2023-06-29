@@ -1,14 +1,13 @@
 package com.socks.proxy.netty.local;
 
-import com.socks.proxy.protocol.handshake.HandshakeProtocolHandler;
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.handshake.HandshakeProtocolHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import lombok.AllArgsConstructor;
@@ -35,8 +34,7 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                pipeline.addLast(new HttpServerCodec())
-                        .addLast(new HttpObjectAggregator(8192));
+                pipeline.addLast(new HttpServerCodec());
                 break;
             case SOCKS5:
                 pipeline.addLast(new SocksPortUnificationServerHandler());

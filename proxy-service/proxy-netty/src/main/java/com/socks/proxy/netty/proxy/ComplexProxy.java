@@ -36,5 +36,6 @@ public class ComplexProxy extends SimpleChannelInboundHandler<Object>{
         pipeline.addLast(new Socks5Proxy(factory, listeners, executor))
                 .addLast(new HttpTunnelProxy(factory, listeners, executor));
         ctx.fireChannelRead(msg);
+        pipeline.remove(this);
     }
 }
