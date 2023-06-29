@@ -23,17 +23,12 @@ import java.security.SecureRandom;
 public abstract class AbstractCipher{
 
     /**
-     * cipher name
-     */
-    private final String cipherName;
-    /**
      * key
      */
     private final byte[] key;
 
 
-    public AbstractCipher(String cipherName, String password){
-        this.cipherName = cipherName;
+    public AbstractCipher(String password){
         key = getKey(password, getKeyLength());
     }
 

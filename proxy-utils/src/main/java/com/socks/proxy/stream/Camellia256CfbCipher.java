@@ -15,7 +15,7 @@ public class Camellia256CfbCipher extends LocalStreamCipher{
      * @param password password
      */
     public Camellia256CfbCipher(String password){
-        super("camellia-256-cfb", password);
+        super(password);
     }
 
 

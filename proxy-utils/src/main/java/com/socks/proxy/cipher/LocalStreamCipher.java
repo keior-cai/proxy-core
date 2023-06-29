@@ -31,11 +31,10 @@ public abstract class LocalStreamCipher extends AbstractCipher{
     /**
      * localStreamCipher
      *
-     * @param cipherName cipherName
      * @param password password
      */
-    public LocalStreamCipher(String cipherName, String password){
-        super(cipherName, password);
+    public LocalStreamCipher(String password){
+        super(password);
         decodeStreamCipher = getNewCipherInstance();
         encodeStreamCipher = getNewCipherInstance();
     }

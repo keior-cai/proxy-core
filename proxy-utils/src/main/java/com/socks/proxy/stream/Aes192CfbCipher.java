@@ -15,7 +15,7 @@ public class Aes192CfbCipher extends LocalStreamCipher{
      * @param password password
      */
     public Aes192CfbCipher(String password){
-        super("aes-192-cfb", password);
+        super(password);
     }
 
 
