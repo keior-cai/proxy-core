@@ -21,5 +21,6 @@ public class LocalComplexProxyService extends AbstractNettyTcpService{
                                     List<LocalConnectListener> listeners, ExecutorService executor){
         super(port, new LocalProxyCode(new ComplexHandshakeProtocolHandler(),
                 new ComplexProxy(connectFactory, listeners, executor)));
+
     }
 }

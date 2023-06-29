@@ -5,6 +5,7 @@ import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,8 @@ public class DefaultHttpNettyConnect extends AbstractNettyConnect{
     @Override
     public void writeConnectSuccess(){
         log.debug("write to system proxy http response = {}", SUCCESS);
-        context.writeAndFlush(Unpooled.wrappedBuffer(SUCCESS.getBytes()));
+        DefaultHttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        context.writeAndFlush(response);
     }
 
 

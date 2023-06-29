@@ -2,7 +2,9 @@ package com.socks.proxy.netty;
 
 import com.socks.proxy.protocol.TcpService;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.ByteBufFormat;
@@ -92,12 +94,6 @@ public abstract class AbstractNettyTcpService implements TcpService{
         masterGroup = new NioEventLoopGroup(cpuNum, new NamedThreadFactory("reactive-master-", false));
         this.bootstrap = new ServerBootstrap();
         bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP))
-                .childHandler(new ChannelInitializer<Channel>(){
-                    @Override
-                    protected void initChannel(Channel ch){
-                        ch.pipeline().addLast(new LoggingHandler()).addLast(handler);
-                    }
-                });
+                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP)).childHandler(handler);
     }
 }

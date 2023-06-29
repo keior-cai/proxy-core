@@ -8,13 +8,16 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+@Slf4j
 @AllArgsConstructor
 @ChannelHandler.Sharable
 public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
@@ -27,11 +30,13 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws IOException{
         Protocol protocol = protocolHandler.handler(new ByteArrayInputStream(ByteBufUtil.getBytes(msg)));
+        log.debug("decode protocol = {}", protocol);
         ChannelPipeline pipeline = ctx.pipeline();
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                pipeline.addLast(new HttpServerCodec());
+                pipeline.addLast(new HttpServerCodec())
+                        .addLast(new HttpObjectAggregator(8192));
                 break;
             case SOCKS5:
                 pipeline.addLast(new SocksPortUnificationServerHandler());
