@@ -12,6 +12,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.BindException;
+
 /**
  * @author: chuangjie
  * @date: 2023/6/4
@@ -48,43 +50,50 @@ public abstract class AbstractNettyTcpService implements TcpService{
 
     @Override
     public void start(){
-        initializer();
-        ChannelFuture future = bootstrap.bind(bindHost, port);
         try {
+            initializer();
+            ChannelFuture future = bootstrap.bind(bindHost, port);
             future.sync();
+            thread = new Thread(()->{
+                try {
+                    future.channel().closeFuture().sync();
+                } catch (InterruptedException e) {
+                    // ignore
+                    future.channel().close();
+                } finally {
+                    stop();
+                }
+            }, "tcp-server-main");
+            thread.setDaemon(false);
+            thread.setPriority(Thread.NORM_PRIORITY);
+            thread.start();
         } catch (InterruptedException e) {
             close();
-            return;
-        }
-        thread = new Thread(()->{
-            try {
-                future.channel().closeFuture().sync();
-            } catch (InterruptedException e) {
-                // ignore
-                future.channel().close();
+        } catch (Exception e) {
+            if(e instanceof BindException){
+                log.error("port = {} already use please use other port.", port);
             }
-        }, "tcp-server-main");
-        thread.setDaemon(false);
-        thread.setPriority(Thread.NORM_PRIORITY);
-        thread.start();
+            stop();
+            throw e;
+        }
     }
 
 
     private void stop(){
-        if(thread == null || thread.isInterrupted()){
-            return;
-        }
-        thread.interrupt();
-    }
-
-
-    public void close(){
-        stop();
         masterGroup.shutdownGracefully();
         childGroup.shutdownGracefully();
         this.bootstrap = null;
         this.masterGroup = null;
         this.childGroup = null;
+    }
+
+
+    @Override
+    public void close(){
+        if(thread == null || thread.isInterrupted()){
+            return;
+        }
+        thread.interrupt();
     }
 
 
