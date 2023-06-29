@@ -20,5 +20,9 @@ public enum Protocol{
      * socks4 协议代理
      */
     SOCKS4,
+    /**
+     * 复合协议
+     */
+    COMPLEX,
 
 }

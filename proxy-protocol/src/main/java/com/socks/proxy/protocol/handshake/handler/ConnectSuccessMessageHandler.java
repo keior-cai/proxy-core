@@ -33,7 +33,7 @@ public class ConnectSuccessMessageHandler extends SimpleServerHandshakeMessageHa
     protected void handleServerMessage(ServerMiddleProxy proxy, SenTargetAddressMessage message, TargetConnect remote){
         log.debug("connect to target service = {}:{}", message.getHost(), message.getPort());
         TargetConnect target = factory.getProxyService(proxy,
-                new DefaultTargetServer(message.getHost(), message.getPort()));
+                new DefaultTargetServer(message.getHost(), message.getPort(), null));
         try {
             target.connect();
             proxy.setTarget(target);

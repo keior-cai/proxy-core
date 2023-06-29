@@ -34,9 +34,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
     private int port = 1081;
 
     /**
-     * local 启动代理协议, 默认使用socks5
+     * local 启动代理协议, 默认使用COMPLEX
      */
-    private Protocol protocol = Protocol.SOCKS5;
+    private Protocol protocol = Protocol.COMPLEX;
 
     /**
      * ss-server 服务器地址
@@ -96,6 +96,8 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 return new LocalHttpProxyService(port, connectFactory, listeners, executor);
             case SOCKS5:
                 return new LocalSocks5ProxyService(port, connectFactory, listeners, executor);
+            case COMPLEX:
+                return new LocalComplexProxyService(port, connectFactory, listeners, executor);
         }
         throw new RuntimeException();
     }

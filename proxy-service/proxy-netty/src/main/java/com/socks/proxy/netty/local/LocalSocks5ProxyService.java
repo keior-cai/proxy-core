@@ -9,9 +9,10 @@ import com.socks.proxy.protocol.listener.LocalConnectListener;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
+ * socks5 ss-local代理服务
+ *
  * @author: chuangjie
  * @date: 2023/6/4
  **/

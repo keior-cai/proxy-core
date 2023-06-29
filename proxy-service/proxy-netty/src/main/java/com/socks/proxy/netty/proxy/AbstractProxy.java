@@ -14,9 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 代理处理器
@@ -96,7 +93,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
      *
      * @param ctx 本地连接通道，操作系统连接过着代理程序代理连接
      * @param dstServer 目标服务地址，端口
-     * @param listeners
+     * @param listeners 监听处理器
      */
     protected abstract LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
                                                        List<LocalConnectListener> listeners);

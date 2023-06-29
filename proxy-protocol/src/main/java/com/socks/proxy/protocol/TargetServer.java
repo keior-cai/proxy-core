@@ -1,5 +1,7 @@
 package com.socks.proxy.protocol;
 
+import com.socks.proxy.protocol.enums.Protocol;
+
 /**
  * <p>define target server InetAddress</p>
  * {@link com.socks.proxy.protocol.DefaultTargetServer}
@@ -16,4 +18,10 @@ public interface TargetServer{
 
 
     int port();
+
+
+    /**
+     *
+     */
+    Protocol sourceProtocol();
 }

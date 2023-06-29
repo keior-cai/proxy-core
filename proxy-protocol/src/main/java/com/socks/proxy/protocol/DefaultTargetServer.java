@@ -1,5 +1,6 @@
 package com.socks.proxy.protocol;
 
+import com.socks.proxy.protocol.enums.Protocol;
 import lombok.AllArgsConstructor;
 
 /**
@@ -16,6 +17,8 @@ public class DefaultTargetServer implements TargetServer{
 
     private int port;
 
+    private Protocol protocol;
+
 
     @Override
     public String host(){
@@ -26,5 +29,11 @@ public class DefaultTargetServer implements TargetServer{
     @Override
     public int port(){
         return port;
+    }
+
+
+    @Override
+    public Protocol sourceProtocol(){
+        return protocol;
     }
 }
