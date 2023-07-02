@@ -4,7 +4,6 @@ import com.socks.proxy.netty.local.LocalServiceBuilder;
 import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.LocalMiddleProxy;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
 import com.socks.proxy.service.DefaultLocalServiceBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +62,6 @@ public class Test{
             public void onBinary(LocalConnect local, byte[] message, LocalMiddleProxy remote){
 
             }
-        });
-        TcpService local = localServiceBuilder.builder();
-        local.start();
+        }).builder().start();
     }
 }

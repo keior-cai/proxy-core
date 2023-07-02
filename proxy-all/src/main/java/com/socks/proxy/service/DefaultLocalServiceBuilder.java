@@ -35,6 +35,9 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 默认ss-loca 服务构建者
@@ -71,8 +74,6 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
      */
     private Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
 
-    private ProxyMessage close;
-
     /**
      * <pre>
      * 消息解析器
@@ -96,6 +97,10 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
 
 
     public TcpService builder(){
+        if(getExecutor() == null){
+            setExecutor(new ThreadPoolExecutor(10, 200, 3000L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(),
+                    new ThreadPoolExecutor.CallerRunsPolicy()));
+        }
         if(getCodes() == null){
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
             codeMap.put(ServerProxyCommand.SEND_PUBLIC_KEY.getCode(), PublicKeyMessage.class);
@@ -151,6 +156,9 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
     }
 
 
+    /**
+     * 初始化默认消息处理器
+     */
     private void initMessageHandlerMap(){
         messageHandlerMap.put(ServerProxyCommand.CONNECT_SUCCESS, new AckConnectSuccessMessageHandler());
         messageHandlerMap.put(ServerProxyCommand.ACK_USER_MESSAGE, new SendTargetServerMessageHandler());

@@ -3,6 +3,7 @@ package com.socks.proxy.netty.local;
 import com.socks.proxy.netty.ServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.exception.UnKnowProtocolException;
 import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
 import lombok.Getter;
@@ -14,9 +15,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: chuangjie
@@ -86,10 +84,6 @@ public class LocalServiceBuilder implements ServiceBuilder{
 
     @Override
     public TcpService builder(){
-        if(executor == null){
-            executor = new ThreadPoolExecutor(10, 200, 3000L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(),
-                    new ThreadPoolExecutor.CallerRunsPolicy());
-        }
         switch(protocol) {
             case HTTP:
             case HTTPS:
@@ -99,6 +93,6 @@ public class LocalServiceBuilder implements ServiceBuilder{
             case COMPLEX:
                 return new LocalComplexProxyService(port, connectFactory, listeners, executor);
         }
-        throw new RuntimeException();
+        throw new UnKnowProtocolException();
     }
 }
