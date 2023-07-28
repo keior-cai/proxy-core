@@ -1,7 +1,7 @@
 package com.socks.proxy.protocol.handshake;
 
 import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleProxy;
+import com.socks.proxy.protocol.LocalMiddleService;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 
 /**
@@ -12,7 +12,7 @@ import com.socks.proxy.protocol.codes.ProxyMessage;
  * 也可以是ss-server通知ss-local处理请求消息
  * </pre>
  */
-public interface LocalHandshakeMessageHandler{
+public interface LocalHandshakeMessageHandler<I extends ProxyMessage> {
 
     /**
      * <pre>
@@ -24,8 +24,8 @@ public interface LocalHandshakeMessageHandler{
      * @param message ss-server 发送过来的消息对象
      *         这里的消息对象是由ss-server发送过来经过{@link com.socks.proxy.protocol.codes.ProxyCommandDecode}解析之后得到的
      * @param remote 远程连接指代ss-local于ss-server之间的连接，也有可能不是连接例如UDP之类的
-     *         具体参考{@link com.socks.proxy.protocol.LocalMiddleProxy}定义的实现
+     *         具体参考{@link LocalMiddleService}定义的实现
      */
-    void handle(LocalConnect local, ProxyMessage message, LocalMiddleProxy remote);
+    void handle(LocalConnect local, I message, LocalMiddleService remote);
 
 }

@@ -6,6 +6,7 @@ import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,8 +29,12 @@ public class WebSocketBinaryInboundHandle extends SimpleChannelInboundHandler<Bi
         ServerMiddleProxy proxy = factory.getProxy(ctx);
         byte[] bytes = ByteBufUtil.getBytes(msg.content());
         ICipher iCipher = ctx.channel().attr(WebsocketAttrConstant.CIPHER).get();
+        log.debug("receive proxy middle data\n {}",ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(bytes)));
         try {
-            messageListener.onBinary(proxy, iCipher.decode(bytes));
+            byte[] decode = iCipher.decode(bytes);
+            log.debug("decode proxy middle data\n {}",ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(decode)));
+            messageListener.onBinary(proxy, decode);
+            proxy.getTarget().write(decode);
         } catch (Throwable cause) {
             messageListener.onCallbackError(proxy, cause);
         }

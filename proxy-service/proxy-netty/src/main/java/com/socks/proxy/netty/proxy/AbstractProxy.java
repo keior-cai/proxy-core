@@ -2,7 +2,7 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleProxy;
+import com.socks.proxy.protocol.LocalMiddleService;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
@@ -37,10 +37,12 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
         TargetServer remoteServer = resolveRemoteServer(msg);
         ChannelPipeline pipeline = ctx.pipeline();
         LocalConnect localConnect = createProxyConnect(ctx, remoteServer, listeners);
+        ctx.channel().attr(AttrConstant.LOCAL_CONNECT).set(localConnect);
         executor.execute(()->{
-            LocalMiddleProxy connect = null;
+            LocalMiddleService connect = null;
             try {
-                connect = factory.getProxyService(localConnect);
+                connect = factory.getProxyService(localConnect, remoteServer);
+                localConnect.setRemoteChannel(connect);
                 for(LocalConnectListener listener : listeners) {
                     listener.onCreate(localConnect, remoteServer, connect);
                 }
@@ -48,7 +50,6 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
                 for(LocalConnectListener listener : listeners) {
                     listener.onConnect(localConnect, remoteServer, connect);
                 }
-                localConnect.setRemoteChannel(connect);
             } catch (Exception e) {
                 for(LocalConnectListener listener : listeners) {
                     listener.onCallbackError(localConnect, connect, e);
@@ -63,18 +64,20 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx){
-        LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+        LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+        LocalConnect localConnect = ctx.channel().attr(AttrConstant.LOCAL_CONNECT).get();
         for(LocalConnectListener listener : listeners) {
-            listener.onLocalClose(remoteProxyConnect);
+            listener.onLocalClose(localConnect, remoteProxyConnect);
         }
     }
 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-        LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+        LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+        LocalConnect localConnect = ctx.channel().attr(AttrConstant.LOCAL_CONNECT).get();
         for(LocalConnectListener listener : listeners) {
-            listener.onError(remoteProxyConnect, cause);
+            listener.onError(localConnect, remoteProxyConnect, cause);
         }
     }
 

@@ -26,7 +26,7 @@ public interface LocalConnect extends ProxyConnect{
      *    system sending data to this channel that will forward data to target server by this channel
      * </pre>
      */
-    void setRemoteChannel(LocalMiddleProxy channel);
+    void setRemoteChannel(LocalMiddleService channel);
 
 
     /**
@@ -44,5 +44,7 @@ public interface LocalConnect extends ProxyConnect{
      * 通道设置属性
      */
     void setCipher(ICipher iCipher);
+
+    ICipher getCipher();
 
 }

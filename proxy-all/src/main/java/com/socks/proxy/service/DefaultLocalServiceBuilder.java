@@ -1,13 +1,17 @@
 package com.socks.proxy.service;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.neovisionaries.ws.client.WebSocket;
 import com.socks.proxy.netty.local.LocalServiceBuilder;
+import com.socks.proxy.protocol.EncodeLocalMiddleServiceProxyFactory;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
+import com.socks.proxy.protocol.factory.DirectLocalConnectServerFactory;
+import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.CloseMessageHandler;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
@@ -18,6 +22,8 @@ import com.socks.proxy.protocol.handshake.handler.SendTargetServerMessageHandler
 import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.AckUserMessage;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
+import com.socks.proxy.protocol.listener.DefaultSendBinaryListener;
+import com.socks.proxy.protocol.listener.LoggerLocalConnectListener;
 import com.socks.proxy.protocol.listener.WebsocketMessageFactory;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketMessageFactory;
@@ -32,6 +38,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +79,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
      *     {@link com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler}
      * </pre>
      */
-    private Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
+    private Map<ProxyCommand, LocalHandshakeMessageHandler<?>> messageHandlerMap;
 
     /**
      * <pre>
@@ -101,6 +108,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
             setExecutor(new ThreadPoolExecutor(10, 200, 3000L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(),
                     new ThreadPoolExecutor.CallerRunsPolicy()));
         }
+
         if(getCodes() == null){
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
             codeMap.put(ServerProxyCommand.SEND_PUBLIC_KEY.getCode(), PublicKeyMessage.class);
@@ -113,12 +121,20 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
             messageHandlerMap = new HashMap<>();
             initMessageHandlerMap();
         }
-
+        if(CollectionUtil.isEmpty(getListeners())){
+            setListeners(Arrays.asList(new LoggerLocalConnectListener(),
+                    new DefaultSendBinaryListener(messageHandlerMap, new EncodeLocalMiddleServiceProxyFactory(codes))));
+        }
         if(getConnectFactory() == null){
             WebsocketFactory websocketFactory = createWebsocketPoolFactory();
-            setConnectFactory(
-                    new WebsocketConnectProxyServerFactory(websocketFactory, createWebsocketMessageFactory(), codes));
+            WebsocketConnectProxyServerFactory connectFactory = new WebsocketConnectProxyServerFactory(websocketFactory,
+                    createWebsocketMessageFactory(), new EncodeLocalMiddleServiceProxyFactory(codes));
+
+            //            setConnectFactory(connectFactory);
+            setConnectFactory(new RuleLocalConnectServerFactory(connectFactory,
+                    new DirectLocalConnectServerFactory(getListeners())));
         }
+
         return super.builder();
     }
 
@@ -151,8 +167,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
      * 创建消息处理工厂
      */
     private WebsocketMessageFactory createWebsocketMessageFactory(){
-        log.info("load message handle = {}", messageHandlerMap);
-        return new DefaultWebsocketMessageFactory(messageHandlerMap, codes);
+        return new DefaultWebsocketMessageFactory(codes, getListeners());
     }
 
 

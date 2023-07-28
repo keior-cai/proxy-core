@@ -15,7 +15,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <pre>
@@ -29,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSocket> implements WebsocketPoolFactory{
 
     private final GenericObjectPool<WebSocket>             pool;
-    private       Thread                                   thread;
     private final ProxyCommandEncode<? super ProxyMessage> encode;
 
     private final WebsocketFactory factory;
@@ -124,24 +122,7 @@ public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSock
     }
 
 
-    public void print(){
-        thread = new Thread(()->{
-            while(!Thread.currentThread().isInterrupted()) {
-                log.info("pool active {}, waiters = {}, now count = {} total = {}", pool.getNumActive(),
-                        pool.getNumWaiters(), pool.getCreatedCount() - pool.getDestroyedCount(), pool.getMaxTotal());
-                try {
-                    TimeUnit.MILLISECONDS.sleep(5000L);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        });
-        thread.start();
-    }
-
-
     public void close(){
-        thread.interrupt();
         pool.clear();
         pool.close();
     }

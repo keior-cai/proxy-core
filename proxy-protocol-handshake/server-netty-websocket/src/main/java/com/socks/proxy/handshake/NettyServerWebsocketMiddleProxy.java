@@ -70,4 +70,5 @@ public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
     public void setCipher(ICipher cipher){
         context.channel().attr(WebsocketAttrConstant.CIPHER).set(cipher);
     }
+
 }

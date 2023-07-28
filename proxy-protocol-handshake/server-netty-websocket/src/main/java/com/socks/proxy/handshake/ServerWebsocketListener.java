@@ -63,8 +63,6 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
 
     @Override
     public void onBinary(ServerMiddleProxy proxy, byte[] content){
-        log.debug("receive local byte size = {}", content.length);
-        proxy.getTarget().write(content);
     }
 
 

@@ -3,7 +3,7 @@ package com.socks.proxy.netty.connect;
 import com.socks.proxy.netty.constant.AttrConstant;
 import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleProxy;
+import com.socks.proxy.protocol.LocalMiddleService;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.listener.LocalConnectListener;
 import io.netty.buffer.ByteBuf;
@@ -38,36 +38,36 @@ public abstract class AbstractNettyConnect implements LocalConnect{
             @Override
             protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
                 byte[] content = ByteBufUtil.getBytes(msg);
+                LocalMiddleService remoteProxyConnect = context.channel().attr(AttrConstant.TARGET_SERVICE).get();
+                for(LocalConnectListener listener : listeners) {
+                    listener.onSendBinary(AbstractNettyConnect.this, content, remoteProxyConnect);
+                }
                 if(log.isDebugEnabled()){
-                    log.debug("receive system proxy byteBuf \n {}",
-                            ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(content)));
+                    log.debug("pre send to proxy service data\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(content)));
                 }
-                ICipher cipher = ctx.channel().attr(AttrConstant.CIPHER_KEY).get();
-                byte[] bytes = cipher.encode(content);
-                log.debug("send byte to server size = {}", bytes.length);
-                LocalMiddleProxy remoteProxyConnect = context.channel().attr(AttrConstant.TARGET_SERVICE).get();
-                if(remoteProxyConnect != null){
-                    remoteProxyConnect.write(bytes);
-                } else {
-                    log.warn("remote proxy channel is empty.");
+                ICipher iCipher = ctx.channel().attr(AttrConstant.CIPHER_KEY).get();
+                byte[] encode = iCipher.encode(content);
+                if(log.isDebugEnabled()){
+                    log.debug("after send to proxy service data\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(encode)));
                 }
+                remoteProxyConnect.write(encode);
             }
 
 
             @Override
             public void channelInactive(ChannelHandlerContext ctx){
-                LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+                LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
                 for(LocalConnectListener listener : AbstractNettyConnect.this.listeners) {
-                    listener.onLocalClose(remoteProxyConnect);
+                    listener.onLocalClose(AbstractNettyConnect.this, remoteProxyConnect);
                 }
             }
 
 
             @Override
             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-                LocalMiddleProxy remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
+                LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
                 for(LocalConnectListener listener : AbstractNettyConnect.this.listeners) {
-                    listener.onLocalClose(remoteProxyConnect);
+                    listener.onLocalClose(AbstractNettyConnect.this, remoteProxyConnect);
                 }
             }
         });
@@ -82,11 +82,7 @@ public abstract class AbstractNettyConnect implements LocalConnect{
 
     @Override
     public void write(byte[] content){
-        ICipher cipher = context.channel().attr(AttrConstant.CIPHER_KEY).get();
-        log.debug("receive proxy service byte size = {}", content.length);
-        byte[] bytes = cipher.decode(content);
-        log.debug("send to system proxy byte size = {}", bytes.length);
-        context.writeAndFlush(Unpooled.wrappedBuffer(bytes));
+        context.writeAndFlush(Unpooled.wrappedBuffer(content));
     }
 
 
@@ -97,7 +93,7 @@ public abstract class AbstractNettyConnect implements LocalConnect{
 
 
     @Override
-    public void setRemoteChannel(LocalMiddleProxy channel){
+    public void setRemoteChannel(LocalMiddleService channel){
         context.channel().attr(AttrConstant.TARGET_SERVICE).set(channel);
     }
 
@@ -105,6 +101,12 @@ public abstract class AbstractNettyConnect implements LocalConnect{
     @Override
     public void setCipher(ICipher iCipher){
         context.channel().attr(AttrConstant.CIPHER_KEY).set(iCipher);
+    }
+
+
+    @Override
+    public ICipher getCipher(){
+        return context.channel().attr(AttrConstant.CIPHER_KEY).get();
     }
 
 

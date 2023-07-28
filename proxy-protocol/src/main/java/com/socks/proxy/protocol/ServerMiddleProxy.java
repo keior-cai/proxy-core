@@ -22,7 +22,6 @@ public interface ServerMiddleProxy extends ProxyConnect{
     TargetConnect getTarget();
 
 
-
     /**
      * 设置目标连接
      *

@@ -5,12 +5,12 @@ import com.socks.proxy.cipher.AbstractCipher;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.DefaultCipher;
 import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleProxy;
+import com.socks.proxy.protocol.LocalMiddleService;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
-import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
+import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
@@ -31,16 +31,14 @@ import org.apache.commons.lang3.RandomStringUtils;
  **/
 @Slf4j
 @AllArgsConstructor
-public class SendRandomPasswordMessageHandler implements LocalHandshakeMessageHandler{
+public class SendRandomPasswordMessageHandler implements LocalHandshakeMessageHandler<PublicKeyMessage>{
 
     private final ConnectUserInfo userInfo;
 
 
     @Override
-    public void handle(LocalConnect local, ProxyMessage message, LocalMiddleProxy remote){
-        PublicKeyMessage publicKeyMessage = (PublicKeyMessage) message;
-        String publicKey = publicKeyMessage.getPublicKey();
-
+    public void handle(LocalConnect local, PublicKeyMessage message, LocalMiddleService remote){
+        String publicKey = message.getPublicKey();
         String random = RandomStringUtils.randomNumeric(userInfo.getPasswordLen());
         log.debug("password = {} public key = {}", random, publicKey);
         String decrypt = null;

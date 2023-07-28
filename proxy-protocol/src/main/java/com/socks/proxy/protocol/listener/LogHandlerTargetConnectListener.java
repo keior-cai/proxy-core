@@ -41,7 +41,6 @@ public class LogHandlerTargetConnectListener implements TargetConnectListener, S
 
     @Override
     public void onBinary(ServerMiddleProxy delegate, byte[] bytes){
-        log.debug("target proxy send binary size = {}", bytes.length);
     }
 
 

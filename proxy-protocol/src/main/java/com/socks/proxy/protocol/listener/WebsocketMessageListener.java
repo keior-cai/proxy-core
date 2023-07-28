@@ -5,16 +5,11 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.codes.ProxyCodes;
-import com.socks.proxy.protocol.codes.ProxyMessage;
-import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
-import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
 import com.socks.proxy.protocol.websocket.LocalWebsocketProxyConnect;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author: chuangjie
@@ -26,31 +21,32 @@ public class WebsocketMessageListener extends WebSocketAdapter{
 
     private final LocalConnect context;
 
-    private final Map<ProxyCommand, LocalHandshakeMessageHandler> messageHandlerMap;
-
-    private ProxyCodes<? super ProxyMessage> codes;
+    private final List<LocalConnectListener> listeners;
 
 
     @Override
     public void onTextMessage(WebSocket websocket, String text){
-        log.debug("receive text message = {}", text);
-        ProxyMessage decode = codes.decode(text);
-        log.debug("receive proxy message = {}", decode);
-        ProxyCommand command = ServerProxyCommand.of(decode.getCommand());
-        LocalHandshakeMessageHandler remoteMessageHandler = messageHandlerMap.get(command);
-        remoteMessageHandler.handle(context, decode, new LocalWebsocketProxyConnect(websocket, codes));
+        for(LocalConnectListener listener : listeners) {
+            listener.onMessage(context, text, new LocalWebsocketProxyConnect(websocket));
+        }
     }
 
 
     @Override
     public void onBinaryMessage(WebSocket websocket, byte[] binary){
-        context.write(binary);
+        for(LocalConnectListener listener : listeners) {
+            listener.onBinary(context, binary, new LocalWebsocketProxyConnect(websocket));
+        }
+        byte[] decode = context.getCipher().decode(binary);
+        context.write(decode);
     }
 
 
     @Override
     public void onError(WebSocket websocket, WebSocketException cause){
-
+        for(LocalConnectListener listener : listeners) {
+            listener.onError(context, new LocalWebsocketProxyConnect(websocket), cause);
+        }
     }
 
 
@@ -62,14 +58,17 @@ public class WebsocketMessageListener extends WebSocketAdapter{
 
     @Override
     public void handleCallbackError(WebSocket websocket, Throwable cause){
-        log.error("handle error", cause);
-        context.close();
+        for(LocalConnectListener listener : listeners) {
+            listener.onCallbackError(context, new LocalWebsocketProxyConnect(websocket), cause);
+        }
     }
 
 
     @Override
     public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
-        log.debug("close by middle");
-        context.close();
+        for(LocalConnectListener listener : listeners) {
+            listener.onLocalClose(context, new LocalWebsocketProxyConnect(websocket));
+        }
+        //        context.close();
     }
 }

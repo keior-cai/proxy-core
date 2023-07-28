@@ -5,7 +5,7 @@ import com.socks.proxy.protocol.enums.ConnectStatus;
 /**
  * 定义远程服务ss-server连接对象
  */
-public interface LocalMiddleProxy extends ProxyConnect{
+public interface LocalMiddleService extends ProxyConnect{
 
     void write(String message);
 
@@ -17,8 +17,5 @@ public interface LocalMiddleProxy extends ProxyConnect{
 
 
     ConnectStatus status();
-
-
-    void setTarget(LocalMiddleProxy proxyConnect);
 
 }
