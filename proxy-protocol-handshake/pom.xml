@@ -12,7 +12,7 @@
 
     <artifactId>proxy-protocol-handshake</artifactId>
     <modules>
-        <module>server-netty-websocket</module>
+        <module>server-handshake-websocket</module>
     </modules>
     <dependencies>
         <dependency>

@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>com.proxy</groupId>
-            <artifactId>server-shakehands-websocket</artifactId>
+            <artifactId>server-handshake-websocket</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
