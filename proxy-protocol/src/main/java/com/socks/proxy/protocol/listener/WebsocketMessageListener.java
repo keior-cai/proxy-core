@@ -4,6 +4,7 @@ import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketFrame;
+import com.socks.proxy.protocol.ICipher;
 import com.socks.proxy.protocol.LocalConnect;
 import com.socks.proxy.protocol.websocket.LocalWebsocketProxyConnect;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,8 @@ public class WebsocketMessageListener extends WebSocketAdapter{
         for(LocalConnectListener listener : listeners) {
             listener.onBinary(context, binary, new LocalWebsocketProxyConnect(websocket));
         }
-        byte[] decode = context.getCipher().decode(binary);
+        ICipher cipher = context.getCipher();
+        byte[] decode = cipher.decode(binary);
         context.write(decode);
     }
 

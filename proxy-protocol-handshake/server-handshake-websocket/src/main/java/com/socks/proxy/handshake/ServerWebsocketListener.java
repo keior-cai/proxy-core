@@ -74,7 +74,10 @@ public class ServerWebsocketListener extends AdaptorMessageListener{
 
     @Override
     public void onError(ServerMiddleProxy proxy, Throwable cause){
-        proxy.getTarget().close();
+        TargetConnect target = proxy.getTarget();
+        if(target != null){
+            target.close();
+        }
         proxy.close();
     }
 

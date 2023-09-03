@@ -18,6 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SendTargetServerMessageHandler implements LocalHandshakeMessageHandler<AckUserMessage>{
     @Override
     public void handle(LocalConnect local, AckUserMessage message, LocalMiddleService remote){
-        remote.write(JSON.toJSONString(new SenTargetAddressMessage(local.getDstServer())));
+        String target = JSON.toJSONString(new SenTargetAddressMessage(local.getDstServer()));
+        if(log.isDebugEnabled()){
+            log.debug("local = {} remote = {} send message = {}", local.channelId(), remote.channelId(), target);
+        }
+        remote.write(target);
     }
 }

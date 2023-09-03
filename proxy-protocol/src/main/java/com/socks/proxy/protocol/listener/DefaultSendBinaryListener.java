@@ -70,7 +70,7 @@ public class DefaultSendBinaryListener implements LocalConnectListener{
 
     @Override
     public void onBinary(LocalConnect local, byte[] message, LocalMiddleService remote){
-        local.write(message);
+
     }
 
 
@@ -85,6 +85,9 @@ public class DefaultSendBinaryListener implements LocalConnectListener{
         ProxyCommand command = ServerProxyCommand.of(commandCode);
         LocalHandshakeMessageHandler<?> remoteMessageHandler = messageHandlerMap.get(command);
         ParameterizedType type = (ParameterizedType) remoteMessageHandler.getClass().getGenericInterfaces()[0];
+        if(log.isDebugEnabled()){
+            log.debug("handle receive message class - {}, command = {}", type, command);
+        }
         remoteMessageHandler.handle(context, object.to(type.getActualTypeArguments()[0]),
                 factory.getService(localMiddleService));
     }

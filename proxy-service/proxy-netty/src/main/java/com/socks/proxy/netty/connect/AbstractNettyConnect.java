@@ -47,9 +47,6 @@ public abstract class AbstractNettyConnect implements LocalConnect{
                 }
                 ICipher iCipher = ctx.channel().attr(AttrConstant.CIPHER_KEY).get();
                 byte[] encode = iCipher.encode(content);
-                if(log.isDebugEnabled()){
-                    log.debug("after send to proxy service data\n{}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(encode)));
-                }
                 remoteProxyConnect.write(encode);
             }
 

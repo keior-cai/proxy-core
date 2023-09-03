@@ -6,15 +6,18 @@ import com.socks.proxy.protocol.ServerMiddleProxy;
 import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author: chuangjie
  * @date: 2023/6/17
  **/
+@Slf4j
 public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
 
     private final ChannelHandlerContext context;
@@ -36,8 +39,14 @@ public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
 
     @Override
     public void write(byte[] content){
+        if(log.isDebugEnabled()){
+            log.debug("target server send buffer = {}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(content)));
+        }
         ICipher iCipher = context.channel().attr(WebsocketAttrConstant.CIPHER).get();
         byte[] encode = iCipher.encode(content);
+        if(log.isDebugEnabled()){
+            log.debug("target server send encode buffer = {}", ByteBufUtil.prettyHexDump(Unpooled.wrappedBuffer(encode)));
+        }
         context.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(encode)));
     }
 
@@ -50,7 +59,11 @@ public class NettyServerWebsocketMiddleProxy implements ServerMiddleProxy{
 
     @Override
     public void write(String message){
-        context.writeAndFlush(new TextWebSocketFrame(codes.encodeStr(message)));
+        String s = codes.encodeStr(message);
+        if(log.isDebugEnabled()){
+            log.debug("send local message = {}", s);
+        }
+        context.writeAndFlush(new TextWebSocketFrame(s));
     }
 
 

@@ -131,8 +131,15 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
                     createWebsocketMessageFactory(), new EncodeLocalMiddleServiceProxyFactory(codes));
 
             //            setConnectFactory(connectFactory);
-            setConnectFactory(new RuleLocalConnectServerFactory(connectFactory,
-                    new DirectLocalConnectServerFactory(getListeners())));
+            RuleLocalConnectServerFactory ruleFactory = new RuleLocalConnectServerFactory(
+                    connectFactory, new DirectLocalConnectServerFactory(getListeners()));
+            ruleFactory.addDomain("google.com");
+            ruleFactory.addDomain("54.89.135.129");
+            ruleFactory.addDomain("157.240.17.14");
+            ruleFactory.addDomain("14.119.104.189");
+            ruleFactory.addDomain("baidu.com");
+            ruleFactory.addDomain("14.119.104.254");
+            setConnectFactory(ruleFactory);
         }
 
         return super.builder();
