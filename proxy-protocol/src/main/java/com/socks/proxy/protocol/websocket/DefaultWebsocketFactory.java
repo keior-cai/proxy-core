@@ -4,6 +4,7 @@ import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,7 +29,7 @@ public class DefaultWebsocketFactory implements WebsocketFactory{
 
 
     @Override
-    public WebSocket getClient() throws Exception{
+    public WebSocket getClient() throws IOException{
         int len = address.size();
         int index = (int) (COUNTER.incrementAndGet() % len);
         URI target = address.get(index);

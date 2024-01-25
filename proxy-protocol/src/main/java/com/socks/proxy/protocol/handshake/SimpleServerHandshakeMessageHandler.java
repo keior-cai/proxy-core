@@ -1,8 +1,7 @@
 package com.socks.proxy.protocol.handshake;
 
-import com.socks.proxy.protocol.ServerMiddleProxy;
-import com.socks.proxy.protocol.TargetConnect;
 import com.socks.proxy.protocol.codes.ProxyMessage;
+import com.socks.proxy.protocol.connect.ProxyConnect;
 
 /**
  * @author: chuangjie
@@ -13,11 +12,11 @@ public abstract class SimpleServerHandshakeMessageHandler<I extends ProxyMessage
         implements ServerHandshakeMessageHandler{
 
     @Override
-    public void handle(ServerMiddleProxy local, ProxyMessage message, TargetConnect middleProxy){
-        handleServerMessage(local, (I) message, middleProxy);
+    public void handle(ProxyConnect local, ProxyMessage message, ProxyConnect target){
+        handleServerMessage(local, (I) message, target);
     }
 
 
-    protected abstract void handleServerMessage(ServerMiddleProxy local, I message, TargetConnect middleProxy);
+    protected abstract void handleServerMessage(ProxyConnect local, I message, ProxyConnect target);
 
 }

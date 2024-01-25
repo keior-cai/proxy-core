@@ -4,6 +4,9 @@ import com.socks.proxy.protocol.command.ProxyCommand;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Getter
 @AllArgsConstructor
 public enum LocalProxyCommand implements ProxyCommand{
@@ -29,16 +32,31 @@ public enum LocalProxyCommand implements ProxyCommand{
      */
     SEND_RECONNECT(4),
 
+    /**
+     * 未知代理消息
+     */
+    UNKNOWN(-999),
+
     ;
     private final int code;
 
 
-    public static ProxyCommand of(int command){
+    private static final Map<Integer, LocalProxyCommand> map = new HashMap<>();
+
+    static {
         for(LocalProxyCommand proxyCommand : LocalProxyCommand.values()) {
-            if(proxyCommand.code == command){
-                return proxyCommand;
-            }
+            map.put(proxyCommand.getCode(), proxyCommand);
         }
-        return null;
     }
+
+
+    public static LocalProxyCommand of(int command){
+
+        return map.getOrDefault(command, UNKNOWN);
+    }
+
+    public static boolean isLocalCommand(int command){
+        return map.containsKey(command);
+    }
+
 }

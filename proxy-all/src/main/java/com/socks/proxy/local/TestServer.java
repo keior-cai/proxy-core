@@ -10,7 +10,8 @@ import com.socks.proxy.service.DefaultServerServiceBuilder;
 public class TestServer{
     public static void main(String[] args){
         TcpService service = new DefaultServerServiceBuilder()
-                .setPort(8082).builder();
+                .setPort(8083).builder();
         service.start();
+        System.out.println("启动成功");
     }
 }

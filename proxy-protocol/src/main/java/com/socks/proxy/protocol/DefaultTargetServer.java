@@ -36,4 +36,9 @@ public class DefaultTargetServer implements TargetServer{
     public Protocol sourceProtocol(){
         return protocol;
     }
+
+    @Override
+    public String toString(){
+        return sourceProtocol()+"://"+host()+":"+port();
+    }
 }

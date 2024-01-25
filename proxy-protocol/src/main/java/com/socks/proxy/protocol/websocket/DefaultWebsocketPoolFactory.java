@@ -12,6 +12,7 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -44,8 +45,13 @@ public class DefaultWebsocketPoolFactory extends BasePooledObjectFactory<WebSock
     }
 
 
-    public WebSocket getClient() throws Exception{
-        WebSocket webSocket = pool.borrowObject();
+    public WebSocket getClient() throws IOException{
+        WebSocket webSocket = null;
+        try {
+            webSocket = pool.borrowObject();
+        } catch (Exception e) {
+            throw new IOException();
+        }
         if(Objects.equals(webSocket.getState(), WebSocketState.OPEN)){
             try {
                 webSocket.sendPing();

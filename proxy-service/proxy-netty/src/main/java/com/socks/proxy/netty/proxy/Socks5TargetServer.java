@@ -12,4 +12,5 @@ public class Socks5TargetServer extends DefaultTargetServer{
     public Socks5TargetServer(Socks5CommandRequest request){
         super(request.dstAddr(), request.dstPort(), Protocol.SOCKS5);
     }
+
 }

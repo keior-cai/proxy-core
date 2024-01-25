@@ -3,31 +3,21 @@ package com.socks.proxy.service;
 import cn.hutool.core.collection.CollectionUtil;
 import com.neovisionaries.ws.client.WebSocket;
 import com.socks.proxy.netty.local.LocalServiceBuilder;
-import com.socks.proxy.protocol.EncodeLocalMiddleServiceProxyFactory;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
-import com.socks.proxy.protocol.factory.DirectLocalConnectServerFactory;
-import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
+import com.socks.proxy.protocol.factory.WebsocketProxyConnectFactory;
 import com.socks.proxy.protocol.handshake.CloseMessage;
-import com.socks.proxy.protocol.handshake.CloseMessageHandler;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.config.ConnectUserInfo;
-import com.socks.proxy.protocol.handshake.handler.AckConnectSuccessMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.SendRandomPasswordMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.SendTargetServerMessageHandler;
 import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.AckUserMessage;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
-import com.socks.proxy.protocol.listener.DefaultSendBinaryListener;
 import com.socks.proxy.protocol.listener.LoggerLocalConnectListener;
-import com.socks.proxy.protocol.listener.WebsocketMessageFactory;
+import com.socks.proxy.protocol.listener.MessageListener;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketFactory;
-import com.socks.proxy.protocol.websocket.DefaultWebsocketMessageFactory;
-import com.socks.proxy.protocol.websocket.WebsocketConnectProxyServerFactory;
 import com.socks.proxy.protocol.websocket.WebsocketFactory;
 import lombok.Getter;
 import lombok.Setter;
@@ -119,27 +109,28 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         }
         if(messageHandlerMap == null){
             messageHandlerMap = new HashMap<>();
-            initMessageHandlerMap();
         }
         if(CollectionUtil.isEmpty(getListeners())){
-            setListeners(Arrays.asList(new LoggerLocalConnectListener(),
-                    new DefaultSendBinaryListener(messageHandlerMap, new EncodeLocalMiddleServiceProxyFactory(codes))));
+            setListeners(Arrays.asList(new LoggerLocalConnectListener(), new MessageListener(codes)));
+            //            setListeners(Arrays.asList(new LoggerLocalConnectListener(),
+            //                    new DefaultSendBinaryListener(messageHandlerMap, new EncodeLocalMiddleServiceProxyFactory(codes))));
         }
         if(getConnectFactory() == null){
             WebsocketFactory websocketFactory = createWebsocketPoolFactory();
-            WebsocketConnectProxyServerFactory connectFactory = new WebsocketConnectProxyServerFactory(websocketFactory,
-                    createWebsocketMessageFactory(), new EncodeLocalMiddleServiceProxyFactory(codes));
+            //            WebsocketConnectProxyServerFactory connectFactory = new WebsocketConnectProxyServerFactory(websocketFactory,
+            //                    createWebsocketMessageFactory(), new EncodeLocalMiddleServiceProxyFactory(codes));
 
             //            setConnectFactory(connectFactory);
-            RuleLocalConnectServerFactory ruleFactory = new RuleLocalConnectServerFactory(
-                    connectFactory, new DirectLocalConnectServerFactory(getListeners()));
-            ruleFactory.addDomain("google.com");
-            ruleFactory.addDomain("54.89.135.129");
-            ruleFactory.addDomain("157.240.17.14");
-            ruleFactory.addDomain("14.119.104.189");
-            ruleFactory.addDomain("baidu.com");
-            ruleFactory.addDomain("14.119.104.254");
-            setConnectFactory(ruleFactory);
+            WebsocketProxyConnectFactory factory = new WebsocketProxyConnectFactory(websocketFactory);
+            //            RuleLocalConnectServerFactory ruleFactory = new RuleLocalConnectServerFactory(factory,
+            //                    new DirectLocalConnectServerFactory(getListeners()));
+            //            ruleFactory.addDomain("google.com");
+            //            ruleFactory.addDomain("54.89.135.129");
+            //            ruleFactory.addDomain("157.240.17.14");
+            //            ruleFactory.addDomain("14.119.104.189");
+            //            ruleFactory.addDomain("baidu.com");
+            //            ruleFactory.addDomain("14.119.104.254");
+            setConnectFactory(factory);
         }
 
         return super.builder();
@@ -169,23 +160,4 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         return new DefaultWebsocketFactory(getServerList());
     }
 
-
-    /**
-     * 创建消息处理工厂
-     */
-    private WebsocketMessageFactory createWebsocketMessageFactory(){
-        return new DefaultWebsocketMessageFactory(codes, getListeners());
-    }
-
-
-    /**
-     * 初始化默认消息处理器
-     */
-    private void initMessageHandlerMap(){
-        messageHandlerMap.put(ServerProxyCommand.CONNECT_SUCCESS, new AckConnectSuccessMessageHandler());
-        messageHandlerMap.put(ServerProxyCommand.ACK_USER_MESSAGE, new SendTargetServerMessageHandler());
-        messageHandlerMap.put(ServerProxyCommand.SEND_PUBLIC_KEY,
-                new SendRandomPasswordMessageHandler(new ConnectUserInfo(username, password)));
-        messageHandlerMap.put(ServerProxyCommand.CLOSE, new CloseMessageHandler());
-    }
 }

@@ -4,12 +4,10 @@ import com.socks.proxy.protocol.TcpService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.ByteBufFormat;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.BindException;
@@ -61,27 +59,32 @@ public abstract class AbstractNettyTcpService implements TcpService{
                     // ignore
                     future.channel().close();
                 } finally {
-                    stop();
+                    close();
                 }
             }, "tcp-server-main");
             thread.setDaemon(false);
             thread.setPriority(Thread.NORM_PRIORITY);
             thread.start();
+            log.info("start service port is = {}", port);
         } catch (InterruptedException e) {
             close();
         } catch (Exception e) {
             if(e instanceof BindException){
                 log.error("port = {} already use please use other port.", port);
             }
-            stop();
+            close();
             throw e;
         }
     }
 
 
     private void stop(){
-        masterGroup.shutdownGracefully();
-        childGroup.shutdownGracefully();
+        if(masterGroup != null){
+            masterGroup.shutdownGracefully();
+        }
+        if(childGroup != null){
+            childGroup.shutdownGracefully();
+        }
         this.bootstrap = null;
         this.masterGroup = null;
         this.childGroup = null;
@@ -90,6 +93,7 @@ public abstract class AbstractNettyTcpService implements TcpService{
 
     @Override
     public void close(){
+        stop();
         if(thread == null || thread.isInterrupted()){
             return;
         }
@@ -102,7 +106,14 @@ public abstract class AbstractNettyTcpService implements TcpService{
         childGroup = new NioEventLoopGroup(cpuNum * 2, new NamedThreadFactory("reactive-child-", false));
         masterGroup = new NioEventLoopGroup(cpuNum, new NamedThreadFactory("reactive-master-", false));
         this.bootstrap = new ServerBootstrap();
-        bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP)).childHandler(handler);
+        bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class).handler(initHandler())
+                .childHandler(handler);
     }
+
+
+    protected ChannelHandler initHandler(){
+        return new ChannelHandlerAdapter(){
+        };
+    }
+
 }

@@ -2,10 +2,13 @@ package com.socks.proxy.netty.local;
 
 import com.socks.proxy.netty.ServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
+import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.exception.UnKnowProtocolException;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
-import com.socks.proxy.protocol.listener.LocalConnectListener;
+import com.socks.proxy.protocol.factory.ProxyFactory;
+import com.socks.proxy.protocol.handshake.handler.WebsocketLocalProxyMessageHandler;
+import com.socks.proxy.protocol.listener.ProxyListener;
+import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -44,12 +47,12 @@ public class LocalServiceBuilder implements ServiceBuilder{
     /**
      * 连接远程服务工厂
      */
-    private LocalConnectServerFactory connectFactory;
+    private ProxyFactory connectFactory;
 
     /**
      * 本地连接监听器
      */
-    private List<LocalConnectListener> listeners = new ArrayList<>();
+    private List<ProxyListener> listeners = new ArrayList<>();
 
     /**
      * 处理请求线程池
@@ -62,7 +65,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
     private Pool pool;
 
 
-    public LocalServiceBuilder addListener(LocalConnectListener listener){
+    public LocalServiceBuilder addListener(ProxyListener listener){
         listeners.add(listener);
         return this;
     }
@@ -84,14 +87,17 @@ public class LocalServiceBuilder implements ServiceBuilder{
 
     @Override
     public TcpService builder(){
+        RSAUtil rsaUtil = new RSAUtil();
+        WebsocketLocalProxyMessageHandler handler = new WebsocketLocalProxyMessageHandler(rsaUtil,
+                new DefaultProxyCommandCodes<>(), connectFactory);
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                return new LocalHttpProxyService(port, connectFactory, listeners, executor);
+                return new LocalHttpProxyService(port, handler);
             case SOCKS5:
-                return new LocalSocks5ProxyService(port, connectFactory, listeners, executor);
+                return new LocalSocks5ProxyService(port, handler);
             case COMPLEX:
-                return new LocalComplexProxyService(port, connectFactory, listeners, executor);
+                return new LocalComplexProxyService(port, handler);
         }
         throw new UnKnowProtocolException();
     }

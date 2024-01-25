@@ -1,8 +1,7 @@
 package com.socks.proxy.protocol.handshake.handler;
 
 import com.alibaba.fastjson2.JSON;
-import com.socks.proxy.protocol.ServerMiddleProxy;
-import com.socks.proxy.protocol.TargetConnect;
+import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.handshake.SimpleServerHandshakeMessageHandler;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.handshake.message.SendReconnectMessage;
@@ -19,8 +18,8 @@ public class ReconnectHandler extends SimpleServerHandshakeMessageHandler<SendRe
 
 
     @Override
-    protected void handleServerMessage(ServerMiddleProxy local, SendReconnectMessage message,
-                                       TargetConnect middleProxy){
+    protected void handleServerMessage(ProxyConnect local, SendReconnectMessage message,
+                                       ProxyConnect target){
         local.write(JSON.toJSONString(new PublicKeyMessage(publicKey)));
     }
 }

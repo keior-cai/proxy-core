@@ -1,12 +1,11 @@
 package com.socks.proxy.handshake.inbound;
 
-import com.socks.proxy.handshake.NettyServerMiddleProxyFactory;
-import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
+import com.socks.proxy.handshake.connect.WebsocketProxyChannel;
+import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketCloseStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,26 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 @ChannelHandler.Sharable
 public class WebsocketCloseInboundHandle extends SimpleChannelInboundHandler<CloseWebSocketFrame>{
 
-    private final ServerMiddleMessageListener messageListener;
-
-    private final NettyServerMiddleProxyFactory factory;
+    private final ProxyMessageHandler handler;
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CloseWebSocketFrame msg){
-        messageListener.onClose(factory.getProxy(ctx), msg.statusCode(), msg.reasonText());
+        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), msg.reasonText() );
     }
 
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx){
-        messageListener.onClose(factory.getProxy(ctx), WebSocketCloseStatus.NORMAL_CLOSURE.code(),
-                WebSocketCloseStatus.INTERNAL_SERVER_ERROR.reasonText());
-    }
-
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-        messageListener.onError(factory.getProxy(ctx), cause);
-    }
 }

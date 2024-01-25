@@ -1,10 +1,10 @@
 package com.socks.proxy.protocol.factory;
 
-import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleService;
-import com.socks.proxy.protocol.NoCodeCipher;
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.connect.RegisterProxyConnect;
+import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -14,19 +14,18 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author: chuangjie
  * @date: 2023/7/9
  **/
-public class RuleLocalConnectServerFactory implements LocalConnectServerFactory{
+public class RuleLocalConnectServerFactory implements ProxyFactory{
 
-    private final LocalConnectServerFactory targetServerFactory;
+    private final ProxyFactory targetServerFactory;
 
-    private final LocalConnectServerFactory directFactory;
+    private final ProxyFactory directFactory;
 
     private final Set<String> domainMap = new CopyOnWriteArraySet<>();
 
     private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
 
 
-    public RuleLocalConnectServerFactory(LocalConnectServerFactory targetServerFactory,
-                                         LocalConnectServerFactory directFactory){
+    public RuleLocalConnectServerFactory(ProxyFactory targetServerFactory, ProxyFactory directFactory){
 
         this.targetServerFactory = targetServerFactory;
         this.directFactory = directFactory;
@@ -34,16 +33,13 @@ public class RuleLocalConnectServerFactory implements LocalConnectServerFactory{
 
 
     @Override
-    public LocalMiddleService getProxyService(LocalConnect channel, TargetServer remoteServer){
-        LocalMiddleService proxyService;
+    public RegisterProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
+        RegisterProxyConnect proxyService = null;
         if(domainRule(remoteServer.host())){
-            proxyService = targetServerFactory.getProxyService(channel, remoteServer);
+            proxyService = targetServerFactory.create(remoteServer, handler);
         } else {
-            proxyService = directFactory.getProxyService(channel, remoteServer);
-            channel.writeConnectSuccess();
+            proxyService = directFactory.create(remoteServer, handler);
         }
-        channel.setRemoteChannel(proxyService);
-        channel.setCipher(new NoCodeCipher());
         return proxyService;
     }
 

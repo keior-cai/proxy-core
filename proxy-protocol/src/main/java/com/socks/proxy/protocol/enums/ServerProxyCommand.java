@@ -4,6 +4,9 @@ import com.socks.proxy.protocol.command.ProxyCommand;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author: chuangjie
  * @date: 2023/6/10
@@ -40,17 +43,28 @@ public enum ServerProxyCommand implements ProxyCommand{
      * 确认收到用户消息
      */
     ACK_USER_MESSAGE(6),
-    ;
+
+    /**
+     * 未知消息类型
+     */
+    UNKNOWN(-8888);
 
     private final int code;
 
+    private static final Map<Integer, ServerProxyCommand> map = new HashMap<>();
 
-    public static ProxyCommand of(int command){
+    static{
         for(ServerProxyCommand proxyCommand : ServerProxyCommand.values()) {
-            if(proxyCommand.code == command){
-                return proxyCommand;
-            }
+            map.put(proxyCommand.getCode(), proxyCommand);
         }
-        return null;
+    }
+
+    public static ServerProxyCommand of(int command){
+        return map.getOrDefault(command, UNKNOWN);
+    }
+
+
+    public static boolean isServiceCommand(int command){
+        return map.containsKey(command);
     }
 }

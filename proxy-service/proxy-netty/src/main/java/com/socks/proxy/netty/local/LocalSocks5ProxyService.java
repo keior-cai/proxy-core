@@ -1,13 +1,9 @@
 package com.socks.proxy.netty.local;
 
-import com.socks.proxy.netty.AbstractNettyTcpService;
+import com.socks.proxy.netty.proxy.Socks5CommandHandler;
 import com.socks.proxy.netty.proxy.Socks5Proxy;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.Socks5HandshakeProtocolHandler;
-import com.socks.proxy.protocol.listener.LocalConnectListener;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
+import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
 
 /**
  * socks5 ss-local代理服务
@@ -15,12 +11,11 @@ import java.util.concurrent.ExecutorService;
  * @author: chuangjie
  * @date: 2023/6/4
  **/
-public class LocalSocks5ProxyService extends AbstractNettyTcpService{
+public class LocalSocks5ProxyService extends AbstractLocalProxyService{
 
-    public LocalSocks5ProxyService(int port, LocalConnectServerFactory connectFactory,
-                                   List<LocalConnectListener> listeners, ExecutorService executor){
+    public LocalSocks5ProxyService(int port, AbstractLocalProxyMessageHandler messageHandler){
         super(port, new LocalProxyCode(new Socks5HandshakeProtocolHandler(),
-                new Socks5Proxy(connectFactory, listeners, executor)));
-
+                new Socks5Proxy(new Socks5CommandHandler(messageHandler)), messageHandler));
     }
+
 }

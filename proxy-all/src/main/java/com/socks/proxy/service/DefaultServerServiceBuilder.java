@@ -1,26 +1,18 @@
 package com.socks.proxy.service;
 
-import com.socks.proxy.handshake.DefaultServerMiddleProxyFactory;
-import com.socks.proxy.handshake.ServerWebsocketListener;
 import com.socks.proxy.handshake.WebsocketHandler;
-import com.socks.proxy.netty.DefaultNettyConnectServerFactory;
+import com.socks.proxy.handshake.handler.NettyWebsocketProxyMessageHandler;
 import com.socks.proxy.netty.ServerServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
-import com.socks.proxy.protocol.factory.TargetConnectFactory;
 import com.socks.proxy.protocol.handshake.ServerHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.AckUserMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.ConnectSuccessMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ReconnectHandler;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendReconnectMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
-import com.socks.proxy.protocol.listener.LogHandlerTargetConnectListener;
-import com.socks.proxy.protocol.listener.ServerMiddleMessageListener;
-import com.socks.proxy.protocol.listener.TargetConnectListener;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author: chuangjie
@@ -43,30 +34,17 @@ import java.util.stream.Collectors;
 @Accessors(chain = true)
 public class DefaultServerServiceBuilder extends ServerServiceBuilder{
 
-    private ServerMiddleMessageListener messageListener;
-
     private List<ServerHandshakeMessageHandler> handlerList = new ArrayList<>();
 
     private ProxyCodes<? super ProxyMessage> codes;
 
     private RSAUtil rsaUtil;
 
-    private TargetConnectFactory connectFactory;
-
-    private List<TargetConnectListener> listeners;
-
 
     @Override
     public TcpService builder(){
         if(rsaUtil == null){
             this.rsaUtil = new RSAUtil();
-        }
-        if(listeners == null){
-            listeners = new ArrayList<>();
-            listeners.add(new LogHandlerTargetConnectListener());
-        }
-        if(connectFactory == null){
-            connectFactory = new DefaultNettyConnectServerFactory(listeners);
         }
         if(codes == null){
             Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
@@ -77,19 +55,13 @@ public class DefaultServerServiceBuilder extends ServerServiceBuilder{
         }
 
         if(handlerList.isEmpty()){
-            handlerList.add(new AckUserMessageHandler(rsaUtil));
-            handlerList.add(new ConnectSuccessMessageHandler(connectFactory));
+            //            handlerList.add(new AckUserMessageHandler(rsaUtil));
+            //            handlerList.add(new ConnectSuccessMessageHandler(connectFactory));
             handlerList.add(new ReconnectHandler(rsaUtil.getPublicKey()));
 
         }
-
-        if(messageListener == null){
-            Map<Class<? extends ProxyMessage>, List<ServerHandshakeMessageHandler>> handlerMap = handlerList.stream()
-                    .collect(Collectors.groupingBy(this::getProxyMessageClass, Collectors.toList()));
-            messageListener = new ServerWebsocketListener(handlerMap, codes, rsaUtil.getPublicKey());
-        }
         if(getHandler() == null){
-            setHandler(new WebsocketHandler(messageListener, new DefaultServerMiddleProxyFactory(codes)));
+            setHandler(new WebsocketHandler(()->new NettyWebsocketProxyMessageHandler(rsaUtil)));
         }
         return super.builder();
     }

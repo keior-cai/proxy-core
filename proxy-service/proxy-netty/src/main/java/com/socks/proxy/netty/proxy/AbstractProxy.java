@@ -1,19 +1,18 @@
 package com.socks.proxy.netty.proxy;
 
-import com.socks.proxy.netty.constant.AttrConstant;
-import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleService;
+import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
-import com.socks.proxy.protocol.listener.LocalConnectListener;
+import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.logging.ByteBufFormat;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * 代理处理器
@@ -25,59 +24,35 @@ import java.util.concurrent.ExecutorService;
 @AllArgsConstructor
 public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
-    private final LocalConnectServerFactory factory;
-
-    private final List<LocalConnectListener> listeners;
-
-    private final ExecutorService executor;
+    private final AbstractLocalProxyMessageHandler handler;
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
-        TargetServer remoteServer = resolveRemoteServer(msg);
-        ChannelPipeline pipeline = ctx.pipeline();
-        LocalConnect localConnect = createProxyConnect(ctx, remoteServer, listeners);
-        ctx.channel().attr(AttrConstant.LOCAL_CONNECT).set(localConnect);
-        executor.execute(()->{
-            LocalMiddleService connect = null;
-            try {
-                connect = factory.getProxyService(localConnect, remoteServer);
-                localConnect.setRemoteChannel(connect);
-                for(LocalConnectListener listener : listeners) {
-                    listener.onCreate(localConnect, remoteServer, connect);
-                }
-                connect.connect();
-                for(LocalConnectListener listener : listeners) {
-                    listener.onConnect(localConnect, remoteServer, connect);
-                }
-            } catch (Exception e) {
-                for(LocalConnectListener listener : listeners) {
-                    listener.onCallbackError(localConnect, connect, e);
-                }
-                log.error("connect server fail message = {}", e.getMessage());
-                localConnect.writeConnectFail();
-            }
-        });
-        pipeline.remove(this);
-    }
-
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx){
-        LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
-        LocalConnect localConnect = ctx.channel().attr(AttrConstant.LOCAL_CONNECT).get();
-        for(LocalConnectListener listener : listeners) {
-            listener.onLocalClose(localConnect, remoteProxyConnect);
+        log.debug("receive {} handshake", this.getClass().getSimpleName());
+        TargetServer target = resolveRemoteServer(msg);
+        ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+        try {
+            handler.serviceConnect(new DirectConnectChannel(ctx.channel()), target);
+            pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
+            // 这里需要写成功，或者失败
+//            writeSuccess(ctx, msg, target);
+        } catch (Exception e) {
+//            writeFail(ctx, msg, target);
+            handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
         }
     }
 
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-        LocalMiddleService remoteProxyConnect = ctx.channel().attr(AttrConstant.TARGET_SERVICE).get();
-        LocalConnect localConnect = ctx.channel().attr(AttrConstant.LOCAL_CONNECT).get();
-        for(LocalConnectListener listener : listeners) {
-            listener.onError(localConnect, remoteProxyConnect, cause);
+    @AllArgsConstructor
+    private static class ReadLocalInboundHandler extends SimpleChannelInboundHandler<ByteBuf>{
+
+        private final AbstractLocalProxyMessageHandler connect;
+
+
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
+            connect.handleTargetBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
         }
     }
 
@@ -92,12 +67,14 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
 
     /**
-     * 创建ss-server服务连接对象
-     *
-     * @param ctx 本地连接通道，操作系统连接过着代理程序代理连接
-     * @param dstServer 目标服务地址，端口
-     * @param listeners 监听处理器
+     * 通知请求服务，代理连接准备就绪
      */
-    protected abstract LocalConnect createProxyConnect(ChannelHandlerContext ctx, TargetServer dstServer,
-                                                       List<LocalConnectListener> listeners);
+    protected abstract void writeSuccess(ChannelHandlerContext context, I msg, TargetServer target);
+
+
+    /**
+     * 通知请求服务，代理连接连接失败
+     */
+    protected abstract void writeFail(ChannelHandlerContext context, I msg, TargetServer target);
+
 }

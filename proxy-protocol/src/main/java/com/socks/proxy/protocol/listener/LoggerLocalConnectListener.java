@@ -1,7 +1,6 @@
 package com.socks.proxy.protocol.listener;
 
-import com.socks.proxy.protocol.LocalConnect;
-import com.socks.proxy.protocol.LocalMiddleService;
+import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.TargetServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,51 +9,27 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/7/22
  **/
 @Slf4j
-public class LoggerLocalConnectListener implements LocalConnectListener{
+public class LoggerLocalConnectListener implements ProxyListener{
+
     @Override
-    public void onCreate(LocalConnect local, TargetServer remoteServer, LocalMiddleService remote){
-        log.debug("CREATE id = {} TARGET = {}:{}", local.channelId(), remoteServer.host(), remoteServer.port());
+    public void onConnect(ProxyConnect connect, TargetServer target){
+        if(log.isDebugEnabled()){
+            log.debug("connect = {}, target = {}", connect.channelId(), target);
+        }
     }
 
 
     @Override
-    public void onConnect(LocalConnect local, TargetServer remoteServer, LocalMiddleService remote){
-
+    public void onCreate(TargetServer target, ProxyConnect connect){
+        if(log.isDebugEnabled()){
+            log.debug("create connect = {}, channelId = {}", target, connect.channelId());
+        }
     }
 
 
     @Override
-    public void onCallbackError(LocalConnect local, LocalMiddleService remote, Throwable e){
-        log.error("error LOCAL = {}", local.channelId(), e);
+    public void onConnectError(TargetServer target, Throwable throwable){
+        log.error("fail connect target = {}", target, throwable);
     }
 
-
-    @Override
-    public void onLocalClose(LocalConnect context, LocalMiddleService remote){
-
-    }
-
-
-    @Override
-    public void onError(LocalConnect context, LocalMiddleService connect, Throwable cause){
-
-    }
-
-
-    @Override
-    public void onSendBinary(LocalConnect local, byte[] message, LocalMiddleService remote){
-
-    }
-
-
-    @Override
-    public void onBinary(LocalConnect local, byte[] message, LocalMiddleService remote){
-
-    }
-
-
-    @Override
-    public void onMessage(LocalConnect context, String message, LocalMiddleService localMiddleService){
-        log.debug("LOCAL MIDDLE = {} RECEIVE MESSAGE = {}", localMiddleService.channelId(), message);
-    }
 }

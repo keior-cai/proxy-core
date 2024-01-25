@@ -84,8 +84,12 @@ public class RSAUtil{
     /**
      * 加密方法 source： 源数据
      */
-    public String encrypt(String source) throws Exception{
-        return encrypt(source, publicKey);
+    public String encrypt(String source){
+        try {
+            return encrypt(source, publicKey);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -104,15 +108,20 @@ public class RSAUtil{
     /**
      * 解密算法 cryptograph:密文
      */
-    public String decrypt(String cryptograph) throws Exception{
-        Key key = getPrivateKey(privateKey);
-        /* 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
-        Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] b1 = Base64.decodeBase64(cryptograph.getBytes());
-        /* 执行解密操作 */
-        byte[] b = cipher.doFinal(b1);
-        return new String(b);
+    public String decrypt(String cryptograph){
+        try {
+            Key key = getPrivateKey(privateKey);
+            /* 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
+            Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[] b1 = Base64.decodeBase64(cryptograph.getBytes());
+            /* 执行解密操作 */
+            byte[] b = cipher.doFinal(b1);
+            return new String(b);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 

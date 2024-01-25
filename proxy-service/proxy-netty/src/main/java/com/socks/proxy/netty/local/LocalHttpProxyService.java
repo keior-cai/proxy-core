@@ -1,13 +1,8 @@
 package com.socks.proxy.netty.local;
 
-import com.socks.proxy.netty.AbstractNettyTcpService;
 import com.socks.proxy.netty.proxy.HttpTunnelProxy;
-import com.socks.proxy.protocol.factory.LocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.HttpHandshakeProtocolHandler;
-import com.socks.proxy.protocol.listener.LocalConnectListener;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
+import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
 
 /**
  * ss-local http代理服务
@@ -15,10 +10,9 @@ import java.util.concurrent.ExecutorService;
  * @author: chuangjie
  * @date: 2023/6/4
  **/
-public class LocalHttpProxyService extends AbstractNettyTcpService{
-    public LocalHttpProxyService(int port, LocalConnectServerFactory connectFactory,
-                                 List<LocalConnectListener> listeners, ExecutorService executor){
-        super(port, new LocalProxyCode(new HttpHandshakeProtocolHandler(),
-                new HttpTunnelProxy(connectFactory, listeners, executor)));
+public class LocalHttpProxyService extends AbstractLocalProxyService{
+    public LocalHttpProxyService(int port, AbstractLocalProxyMessageHandler proxyHandler){
+        super(port, new LocalProxyCode(new HttpHandshakeProtocolHandler(), new HttpTunnelProxy(proxyHandler),
+                proxyHandler));
     }
 }

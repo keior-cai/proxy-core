@@ -7,6 +7,7 @@ import com.socks.proxy.util.FieldNameUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,6 +21,11 @@ import java.util.Map;
 public class DefaultProxyCommandCodes<T extends ProxyMessage> implements ProxyCodes<T>{
 
     private final Map<Integer, Class<? extends ProxyMessage>> commandMap;
+
+
+    public DefaultProxyCommandCodes(){
+        this(new HashMap<>());
+    }
 
 
     @Override
