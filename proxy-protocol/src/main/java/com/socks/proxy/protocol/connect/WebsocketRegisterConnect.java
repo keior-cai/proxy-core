@@ -5,7 +5,6 @@ import com.socks.proxy.protocol.listener.ProxyListener;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.Vector;
 
 /**
@@ -70,12 +69,6 @@ public class WebsocketRegisterConnect implements RegisterProxyConnect{
     @Override
     public void close(){
         client.sendClose();
-    }
-
-
-    @Override
-    public void register(List<ProxyListener> listener){
-        listeners.addAll(listener);
     }
 
 
