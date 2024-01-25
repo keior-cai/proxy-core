@@ -28,6 +28,8 @@ public class ProxyContext{
      */
     private String random;
 
+    private CountDownLatch count;
+
     private TargetServer server;
 
 

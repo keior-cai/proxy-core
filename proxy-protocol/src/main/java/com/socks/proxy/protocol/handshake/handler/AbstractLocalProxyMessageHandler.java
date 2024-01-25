@@ -16,6 +16,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 客户端处理协议
@@ -33,6 +34,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     @Override
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
+        proxyContext.setCount(new CountDownLatch(1));
         putProxyContext(local, proxyContext);
     }
 
@@ -46,8 +48,13 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
 
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(target);
-        Optional.ofNullable(proxyContext).ifPresent(context->context.decodeWrite(binary));
+        try {
+            ProxyContext proxyContext = getProxyContext(target);
+            proxyContext.getCount().await();
+            Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -81,7 +88,8 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
                         JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", rsaUtil.encrypt(s)))));
                 break;
             case CONNECT_SUCCESS:
-                // 这里需要通知本地服务，连接成功
+                // 这里来处理连接成功问题
+                proxyContext.getCount().countDown();
                 break;
             case ACK_USER_MESSAGE:
                 TargetServer server = proxyContext.getServer();

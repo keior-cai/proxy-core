@@ -2,8 +2,6 @@ package com.socks.proxy.protocol.factory;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketException;
-import com.neovisionaries.ws.client.WebSocketState;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.RegisterProxyConnect;
 import com.socks.proxy.protocol.connect.WebsocketRegisterConnect;
@@ -12,7 +10,6 @@ import com.socks.proxy.protocol.websocket.WebsocketFactory;
 import lombok.AllArgsConstructor;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * @author: chuangjie
