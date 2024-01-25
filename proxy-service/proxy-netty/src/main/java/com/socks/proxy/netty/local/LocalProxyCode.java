@@ -31,6 +31,7 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
 
     private final ProxyMessageHandler messageHandler;
 
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws IOException{
         messageHandler.handlerShakeEvent(new DirectConnectChannel(ctx.channel()), Collections.emptyMap());
@@ -39,8 +40,7 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                pipeline.addLast(new HttpServerCodec())
-                        .addLast(new HttpObjectAggregator(65536));
+                pipeline.addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(65536));
                 break;
             case SOCKS5:
                 pipeline.addLast(new SocksPortUnificationServerHandler());
