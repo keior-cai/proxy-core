@@ -14,19 +14,16 @@ import java.util.Map;
 
 /**
  * @author ccj
- * @date 2019/8/26 19:25
- * @description rsa 加密工具
  **/
+@Getter
 public class RSAUtil{
 
     private static final String CHAR_ENCODING = "UTF-8";
 
     private static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";
 
-    @Getter
     private final String privateKey;
 
-    @Getter
     private final String publicKey;
 
 

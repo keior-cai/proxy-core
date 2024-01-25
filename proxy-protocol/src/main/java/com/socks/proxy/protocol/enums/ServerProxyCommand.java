@@ -29,10 +29,6 @@ public enum ServerProxyCommand implements ProxyCommand{
      */
     CONNECT_ERROR(3),
 
-    /**
-     * 连接目标服务成功
-     */
-    CONNECT_SUCCESS(4),
 
     /**
      * 发送RSA公钥
@@ -43,6 +39,11 @@ public enum ServerProxyCommand implements ProxyCommand{
      * 确认收到用户消息
      */
     ACK_USER_MESSAGE(6),
+
+    /**
+     * 连接目标服务成功
+     */
+    CONNECT_SUCCESS(7),
 
     /**
      * 未知消息类型

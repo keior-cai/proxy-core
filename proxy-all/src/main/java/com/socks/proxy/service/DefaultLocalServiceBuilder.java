@@ -8,13 +8,8 @@ import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.factory.WebsocketProxyConnectFactory;
-import com.socks.proxy.protocol.handshake.CloseMessage;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.handshake.message.AckTargetAddressMessage;
-import com.socks.proxy.protocol.handshake.message.AckUserMessage;
-import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.listener.LoggerLocalConnectListener;
 import com.socks.proxy.protocol.listener.MessageListener;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketFactory;
@@ -80,7 +75,7 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
      * 发送数据源消息的加解密参考{@link com.socks.proxy.protocol.ICipher}
      * </pre>
      */
-    private ProxyCodes<? super ProxyMessage> codes;
+    private ProxyCodes codes;
 
     /**
      * 连接ss-server使用的用户名
@@ -100,20 +95,10 @@ public class DefaultLocalServiceBuilder extends LocalServiceBuilder{
         }
 
         if(getCodes() == null){
-            Map<Integer, Class<? extends ProxyMessage>> codeMap = new HashMap<>();
-            codeMap.put(ServerProxyCommand.SEND_PUBLIC_KEY.getCode(), PublicKeyMessage.class);
-            codeMap.put(ServerProxyCommand.ACK_USER_MESSAGE.getCode(), AckUserMessage.class);
-            codeMap.put(ServerProxyCommand.CONNECT_SUCCESS.getCode(), AckTargetAddressMessage.class);
-            codeMap.put(ServerProxyCommand.CLOSE.getCode(), CloseMessage.class);
-            setCodes(new DefaultProxyCommandCodes<>(codeMap));
+            setCodes(new DefaultProxyCommandCodes());
         }
         if(messageHandlerMap == null){
             messageHandlerMap = new HashMap<>();
-        }
-        if(CollectionUtil.isEmpty(getListeners())){
-            setListeners(Arrays.asList(new LoggerLocalConnectListener(), new MessageListener(codes)));
-            //            setListeners(Arrays.asList(new LoggerLocalConnectListener(),
-            //                    new DefaultSendBinaryListener(messageHandlerMap, new EncodeLocalMiddleServiceProxyFactory(codes))));
         }
         if(getConnectFactory() == null){
             WebsocketFactory websocketFactory = createWebsocketPoolFactory();

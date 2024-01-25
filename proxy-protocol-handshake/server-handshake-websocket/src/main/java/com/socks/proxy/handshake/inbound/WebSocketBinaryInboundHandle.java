@@ -20,6 +20,9 @@ public class WebSocketBinaryInboundHandle extends SimpleChannelInboundHandler<Bi
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, BinaryWebSocketFrame msg){
+        if(log.isDebugEnabled()){
+            log.debug("receive local binary data");
+        }
         handler.handleLocalBinaryMessage(new WebsocketProxyChannel(ctx.channel()), ByteBufUtil.getBytes(msg.content()));
     }
 

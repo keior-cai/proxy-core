@@ -3,9 +3,9 @@ package com.socks.proxy.handshake.handler;
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.handshake.handler.AbstractServiceProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.AbstractServiceProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -16,6 +16,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.ByteBufFormat;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,7 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
 
 
     public NettyWebsocketProxyMessageHandler(RSAUtil rsaUtil){
-        super(rsaUtil, new DefaultProxyCommandCodes<>());
+        super(rsaUtil, new DefaultProxyCommandCodes());
         int processors = Runtime.getRuntime().availableProcessors();
         group = new NioEventLoopGroup(processors * 2);
         init();
@@ -60,7 +61,8 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
 
 
     private void init(){
-        bootstrap.group(group).channel(NioSocketChannel.class).handler(new LoggingHandler(LogLevel.DEBUG));
+        bootstrap.group(group).channel(NioSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
     }
 
 
@@ -77,6 +79,9 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
     }
 
 
+    /**
+     * 转发本地客户端数据到目标服务上
+     */
     @AllArgsConstructor
     private static class ForwardBinaryData extends SimpleChannelInboundHandler<ByteBuf>{
 
@@ -85,7 +90,9 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
-            log.info("收到客户端发送过来的请求数据");
+            if(log.isDebugEnabled()){
+                log.debug("receive target server binary data");
+            }
             handler.handleTargetBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
         }
     }

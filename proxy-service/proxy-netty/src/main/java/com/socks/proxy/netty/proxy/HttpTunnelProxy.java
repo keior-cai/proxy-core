@@ -2,7 +2,6 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

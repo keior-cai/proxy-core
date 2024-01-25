@@ -1,14 +1,8 @@
 package com.socks.proxy.protocol.codes;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.util.AESUtil;
-import com.socks.proxy.util.FieldNameUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 代理消息命令编码
@@ -18,41 +12,11 @@ import java.util.Map;
  **/
 @Slf4j
 @AllArgsConstructor
-public class DefaultProxyCommandCodes<T extends ProxyMessage> implements ProxyCodes<T>{
-
-    private final Map<Integer, Class<? extends ProxyMessage>> commandMap;
-
-
-    public DefaultProxyCommandCodes(){
-        this(new HashMap<>());
-    }
-
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public T decode(String str){
-        String content = AESUtil.decryptByDefaultKey(str);
-        JSONObject object = JSON.parseObject(content);
-        if(object == null){
-            return null;
-        }
-        String commandField = FieldNameUtils.getFieldName(ProxyMessage::getCommand);
-        Integer command = object.getInteger(commandField);
-        log.debug("receive command = {}", command);
-        Class<? extends ProxyMessage> clazz = commandMap.get(command);
-        return (T) object.toJavaObject(clazz);
-    }
-
+public class DefaultProxyCommandCodes implements ProxyCodes{
 
     @Override
     public String decodeStr(String str){
         return AESUtil.decryptByDefaultKey(str);
-    }
-
-
-    @Override
-    public String encodeObject(T message){
-        return encodeStr(JSON.toJSONString(message));
     }
 
 

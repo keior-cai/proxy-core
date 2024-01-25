@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.codes.ProxyCodes;
-import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
@@ -27,14 +26,15 @@ import java.util.Optional;
 @Slf4j
 public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMessageHandler{
 
-    public AbstractServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes<? super ProxyMessage> codes){
+    public AbstractServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes){
         super(rsaUtil, codes);
     }
 
 
     @Override
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
-        local.write(codes.encodeObject(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey()))));
+        local.write(codes.encodeStr(
+                JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
         putProxyContext(local, new ProxyContext());
     }
 
@@ -60,8 +60,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
                 String decrypt = rsaUtil.decrypt(sendUserMessage.getRandom());
-                proxyContext.setCipher(
-                        CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
+                proxyContext.setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
                 proxyContext.setRandom(decrypt);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckUserMessage())));
                 break;

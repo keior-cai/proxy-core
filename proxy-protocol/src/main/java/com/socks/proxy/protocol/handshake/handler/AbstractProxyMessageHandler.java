@@ -41,7 +41,7 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
 
     protected final RSAUtil rsaUtil;
 
-    protected final ProxyCodes<? super ProxyMessage> codes;
+    protected final ProxyCodes codes;
 
     @Getter
     private final Map<String, ProxyContext> contextMap = new ConcurrentHashMap<>();
@@ -50,12 +50,18 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
     @Override
     public void handleLocalTextMessage(ProxyConnect local, String text){
         JSONObject msg = JSON.parseObject(codes.decodeStr(text));
+        if(log.isDebugEnabled()){
+            log.debug("receive message = {}", msg);
+        }
         int commandValue = msg.getIntValue(FieldNameUtils.getFieldName(ProxyMessage::getCommand));
         if(LocalProxyCommand.isLocalCommand(commandValue)){
             LocalProxyCommand command = LocalProxyCommand.of(commandValue);
+            log.debug("receive local command = {}", command);
             handleLocalMessage(local, msg, command);
         } else if(ServerProxyCommand.isServiceCommand(commandValue)){
-            handleServiceMessage(local, msg, ServerProxyCommand.of(commandValue));
+            ServerProxyCommand command = ServerProxyCommand.of(commandValue);
+            log.debug("receive service command = {}", command);
+            handleServiceMessage(local, msg, command);
         } else {
             local.close();
         }
@@ -99,10 +105,11 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
             if(Objects.nonNull(remove)){
                 Optional.ofNullable(remove.getConnect()).map(ProxyConnect::channelId).ifPresent(contextMap::remove);
             }
-        }else{
+        } else {
             log.debug("remove connect Id is empty.");
         }
     }
+
 
     protected void putProxyContext(ProxyConnect connect, ProxyContext context){
         contextMap.put(connect.channelId(), context);

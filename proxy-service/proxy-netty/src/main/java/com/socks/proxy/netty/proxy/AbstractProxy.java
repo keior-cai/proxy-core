@@ -52,7 +52,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
-            connect.handleTargetBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
+            connect.handleLocalBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
         }
     }
 

@@ -7,7 +7,6 @@ import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.exception.UnKnowProtocolException;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.WebsocketLocalProxyMessageHandler;
-import com.socks.proxy.protocol.listener.ProxyListener;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +14,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -50,11 +48,6 @@ public class LocalServiceBuilder implements ServiceBuilder{
     private ProxyFactory connectFactory;
 
     /**
-     * 本地连接监听器
-     */
-    private List<ProxyListener> listeners = new ArrayList<>();
-
-    /**
      * 处理请求线程池
      */
     private ExecutorService executor;
@@ -63,13 +56,6 @@ public class LocalServiceBuilder implements ServiceBuilder{
      * 连接池
      */
     private Pool pool;
-
-
-    public LocalServiceBuilder addListener(ProxyListener listener){
-        listeners.add(listener);
-        return this;
-    }
-
 
     @Getter
     @Setter
@@ -89,7 +75,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
     public TcpService builder(){
         RSAUtil rsaUtil = new RSAUtil();
         WebsocketLocalProxyMessageHandler handler = new WebsocketLocalProxyMessageHandler(rsaUtil,
-                new DefaultProxyCommandCodes<>(), connectFactory);
+                new DefaultProxyCommandCodes(), connectFactory);
         switch(protocol) {
             case HTTP:
             case HTTPS:

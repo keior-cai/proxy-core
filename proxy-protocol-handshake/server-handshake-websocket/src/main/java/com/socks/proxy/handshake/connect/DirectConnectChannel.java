@@ -1,10 +1,8 @@
 package com.socks.proxy.handshake.connect;
 
-import com.socks.proxy.handshake.constant.AttrConstant;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 import lombok.AllArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
