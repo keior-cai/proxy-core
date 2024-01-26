@@ -1,5 +1,6 @@
 package com.socks.proxy.netty.local;
 
+import com.socks.proxy.netty.AbstractNettyTcpService;
 import com.socks.proxy.netty.proxy.ComplexProxy;
 import com.socks.proxy.netty.proxy.HttpTunnelProxy;
 import com.socks.proxy.netty.proxy.Socks5CommandHandler;
@@ -17,7 +18,7 @@ import java.util.List;
  * @author: chuangjie
  * @date: 2023/6/29
  **/
-public class LocalComplexProxyService extends AbstractLocalProxyService{
+public class LocalComplexProxyService extends AbstractNettyTcpService{
 
     public LocalComplexProxyService(int port, AbstractLocalProxyMessageHandler messageHandler){
         super(port, of(messageHandler));
