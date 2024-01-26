@@ -1,17 +1,13 @@
 package com.socks.proxy.service;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.neovisionaries.ws.client.WebSocket;
 import com.socks.proxy.netty.local.LocalServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
-import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.command.ProxyCommand;
 import com.socks.proxy.protocol.factory.WebsocketProxyConnectFactory;
 import com.socks.proxy.protocol.handshake.LocalHandshakeMessageHandler;
-import com.socks.proxy.protocol.listener.LoggerLocalConnectListener;
-import com.socks.proxy.protocol.listener.MessageListener;
 import com.socks.proxy.protocol.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.protocol.websocket.WebsocketFactory;
 import lombok.Getter;
@@ -23,7 +19,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

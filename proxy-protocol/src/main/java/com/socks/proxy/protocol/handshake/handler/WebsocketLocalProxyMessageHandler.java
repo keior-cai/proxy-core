@@ -2,7 +2,6 @@ package com.socks.proxy.protocol.handshake.handler;
 
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
-import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.connect.RegisterProxyConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
@@ -23,8 +22,7 @@ public class WebsocketLocalProxyMessageHandler extends AbstractLocalProxyMessage
     private final ProxyFactory factory;
 
 
-    public WebsocketLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes<? super ProxyMessage> codes,
-                                             ProxyFactory factory){
+    public WebsocketLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ProxyFactory factory){
         super(rsaUtil, codes);
         this.factory = factory;
     }
