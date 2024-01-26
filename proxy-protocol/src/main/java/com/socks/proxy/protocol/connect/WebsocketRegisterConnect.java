@@ -1,11 +1,10 @@
 package com.socks.proxy.protocol.connect;
 
-import com.neovisionaries.ws.client.*;
-import com.socks.proxy.protocol.listener.ProxyListener;
+import com.neovisionaries.ws.client.WebSocket;
+import com.neovisionaries.ws.client.WebSocketException;
+import com.neovisionaries.ws.client.WebSocketState;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 
 /**
  * @author: chuangjie
@@ -15,36 +14,9 @@ public class WebsocketRegisterConnect implements RegisterProxyConnect{
 
     private final WebSocket client;
 
-    private final List<ProxyListener> listeners = new Vector<>();
-
 
     public WebsocketRegisterConnect(WebSocket client){
         this.client = client;
-        this.client.addListener(new WebSocketAdapter(){
-            @Override
-            public void onBinaryMessage(WebSocket websocket, byte[] binary){
-                for(ProxyListener listener : listeners) {
-                    listener.onMessage(WebsocketRegisterConnect.this, WebsocketRegisterConnect.this, binary);
-                }
-            }
-
-
-            @Override
-            public void onTextMessage(WebSocket websocket, String text){
-                for(ProxyListener listener : listeners) {
-                    listener.onMessage(WebsocketRegisterConnect.this, WebsocketRegisterConnect.this, text);
-                }
-            }
-
-
-            @Override
-            public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame,
-                                       WebSocketFrame clientCloseFrame, boolean closedByServer){
-                for(ProxyListener listener : listeners) {
-                    listener.onClose(WebsocketRegisterConnect.this, WebsocketRegisterConnect.this);
-                }
-            }
-        });
     }
 
 
