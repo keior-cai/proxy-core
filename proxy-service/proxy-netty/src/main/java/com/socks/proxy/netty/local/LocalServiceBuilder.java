@@ -6,7 +6,7 @@ import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.exception.UnKnowProtocolException;
 import com.socks.proxy.protocol.factory.ProxyFactory;
-import com.socks.proxy.protocol.handshake.handler.WebsocketLocalProxyMessageHandler;
+import com.socks.proxy.handshake.WebsocketLocalProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import lombok.Getter;
 import lombok.Setter;

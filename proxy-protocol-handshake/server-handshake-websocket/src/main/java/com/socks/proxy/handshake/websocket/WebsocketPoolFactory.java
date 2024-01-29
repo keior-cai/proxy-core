@@ -1,4 +1,4 @@
-package com.socks.proxy.protocol.websocket;
+package com.socks.proxy.handshake.websocket;
 
 import com.neovisionaries.ws.client.WebSocket;
 

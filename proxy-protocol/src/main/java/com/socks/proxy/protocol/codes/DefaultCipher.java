@@ -1,4 +1,4 @@
-package com.socks.proxy.protocol;
+package com.socks.proxy.protocol.codes;
 
 import com.socks.proxy.cipher.AbstractCipher;
 import lombok.AllArgsConstructor;

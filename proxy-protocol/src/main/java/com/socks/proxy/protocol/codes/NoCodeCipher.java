@@ -1,4 +1,4 @@
-package com.socks.proxy.protocol;
+package com.socks.proxy.protocol.codes;
 
 /**
  * @author: chuangjie

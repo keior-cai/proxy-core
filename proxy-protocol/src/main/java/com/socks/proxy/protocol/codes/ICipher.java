@@ -1,9 +1,9 @@
-package com.socks.proxy.protocol;
+package com.socks.proxy.protocol.codes;
 
 /**
  * 请求向目的服务发送数据和目的服务向本地机器发送数据加解密处理定义
  * <pre>
- * {@link com.socks.proxy.protocol.DefaultCipher}
+ * {@link DefaultCipher}
  * {@link com.socks.proxy.cipher.AbstractCipher}
  * {@link com.socks.proxy.cipher.CipherProvider}
  * {@link com.socks.proxy.cipher.LocalStreamCipher}
