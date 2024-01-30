@@ -5,7 +5,7 @@ import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.RegisterProxyConnect;
-import com.socks.proxy.protocol.connect.WebsocketRegisterConnect;
+import com.socks.proxy.handshake.connect.WebsocketRegisterConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import lombok.AllArgsConstructor;

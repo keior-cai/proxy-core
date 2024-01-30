@@ -1,8 +1,9 @@
-package com.socks.proxy.protocol.connect;
+package com.socks.proxy.handshake.connect;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
+import com.socks.proxy.protocol.connect.RegisterProxyConnect;
 
 import java.util.Objects;
 
