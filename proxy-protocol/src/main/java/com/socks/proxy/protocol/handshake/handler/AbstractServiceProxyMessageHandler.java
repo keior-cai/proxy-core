@@ -6,7 +6,6 @@ import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.message.*;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
@@ -32,29 +31,9 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
 
 
     @Override
-    public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
-        local.write(codes.encodeStr(
-                JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
-        putProxyContext(local, new ProxyContext());
-    }
-
-
-    @Override
-    public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(local);
-        Optional.ofNullable(proxyContext).ifPresent(context->context.decodeWrite(binary));
-    }
-
-
-    @Override
-    public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(target);
-        Optional.ofNullable(proxyContext).ifPresent(context->context.encodeWrite(binary));
-    }
-
-
-    @Override
-    protected void handleLocalMessage(ProxyConnect connect, JSONObject msg, LocalProxyCommand command){
+    protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg){
+        LocalProxyCommand command = LocalProxyCommand.of(commandValue);
+        log.debug("receive local commandValue = {} command = {}", commandValue, command);
         ProxyContext proxyContext = getProxyContext(connect);
         switch(command) {
             case SEND_USER_INFO:
@@ -87,8 +66,24 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
 
 
     @Override
-    protected void handleServiceMessage(ProxyConnect connect, JSONObject msg, ServerProxyCommand command){
-        throw new NoSuchMethodError();
+    public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
+        local.write(codes.encodeStr(
+                JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
+        putProxyContext(local, new ProxyContext());
+    }
+
+
+    @Override
+    public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
+        ProxyContext proxyContext = getProxyContext(local);
+        Optional.ofNullable(proxyContext).ifPresent(context->context.decodeWrite(binary));
+    }
+
+
+    @Override
+    public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
+        ProxyContext proxyContext = getProxyContext(target);
+        Optional.ofNullable(proxyContext).ifPresent(context->context.encodeWrite(binary));
     }
 
 

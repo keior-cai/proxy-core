@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.connect.ProxyConnect;
-import com.socks.proxy.protocol.enums.LocalProxyCommand;
-import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.util.FieldNameUtils;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
@@ -54,19 +52,11 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
             log.debug("receive message = {}", msg);
         }
         int commandValue = msg.getIntValue(FieldNameUtils.getFieldName(ProxyMessage::getCommand));
-        if(LocalProxyCommand.isLocalCommand(commandValue)){
-            LocalProxyCommand command = LocalProxyCommand.of(commandValue);
-            log.debug("receive local command = {}", command);
-            handleLocalMessage(local, msg, command);
-        } else if(ServerProxyCommand.isServiceCommand(commandValue)){
-            ServerProxyCommand command = ServerProxyCommand.of(commandValue);
-            log.debug("receive service command = {}", command);
-            handleServiceMessage(local, msg, command);
-        } else {
-            local.close();
-        }
-
+        handelProxyMessage(local, commandValue, msg);
     }
+
+
+    abstract protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg);
 
 
     @Override
@@ -114,10 +104,4 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
     protected void putProxyContext(ProxyConnect connect, ProxyContext context){
         contextMap.put(connect.channelId(), context);
     }
-
-
-    protected abstract void handleLocalMessage(ProxyConnect connect, JSONObject msg, LocalProxyCommand command);
-
-
-    protected abstract void handleServiceMessage(ProxyConnect connect, JSONObject msg, ServerProxyCommand command);
 }

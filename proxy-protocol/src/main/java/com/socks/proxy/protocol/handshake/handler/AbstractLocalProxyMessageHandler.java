@@ -7,7 +7,6 @@ import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
-import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
@@ -30,6 +29,40 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
 
     public AbstractLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes){
         super(rsaUtil, codes);
+    }
+
+
+    @Override
+    protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg){
+        ServerProxyCommand command = ServerProxyCommand.of(commandValue);
+        log.debug("receive service value = {} command = {}", commandValue, command);
+        ProxyContext proxyContext = getProxyContext(connect);
+        switch(command) {
+            case SEND_PUBLIC_KEY:
+                String s = RandomStringUtils.randomAlphanumeric(10);
+                proxyContext.setRandom(s);
+                AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
+                proxyContext.setCipher(cipher);
+                getProxyContext(proxyContext.getConnect()).setCipher(cipher);
+                connect.write(codes.encodeStr(
+                        JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", rsaUtil.encrypt(s)))));
+                break;
+            case CONNECT_SUCCESS:
+                // 这里来处理连接成功问题
+                proxyContext.getCount().countDown();
+                log.debug("now send message byte to target");
+                break;
+            case ACK_USER_MESSAGE:
+                TargetServer server = proxyContext.getServer();
+                connect.write(
+                        codes.encodeStr(JSON.toJSONString(new SenTargetAddressMessage(server.host(), server.port()))));
+                break;
+            default:
+            case UNKNOWN:
+            case CLOSE:
+                connect.close();
+                break;
+        }
     }
 
 
@@ -78,41 +111,4 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
      */
     public abstract ProxyConnect serviceConnect(ProxyConnect local, TargetServer targetServer);
 
-
-    @Override
-    protected void handleServiceMessage(ProxyConnect connect, JSONObject msg, ServerProxyCommand command){
-        ProxyContext proxyContext = getProxyContext(connect);
-        switch(command) {
-            case SEND_PUBLIC_KEY:
-                String s = RandomStringUtils.randomAlphanumeric(10);
-                proxyContext.setRandom(s);
-                AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
-                proxyContext.setCipher(cipher);
-                getProxyContext(proxyContext.getConnect()).setCipher(cipher);
-                connect.write(codes.encodeStr(
-                        JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", rsaUtil.encrypt(s)))));
-                break;
-            case CONNECT_SUCCESS:
-                // 这里来处理连接成功问题
-                proxyContext.getCount().countDown();
-                log.debug("now send message byte to target");
-                break;
-            case ACK_USER_MESSAGE:
-                TargetServer server = proxyContext.getServer();
-                connect.write(
-                        codes.encodeStr(JSON.toJSONString(new SenTargetAddressMessage(server.host(), server.port()))));
-                break;
-            default:
-            case UNKNOWN:
-            case CLOSE:
-                connect.close();
-                break;
-        }
-    }
-
-
-    @Override
-    protected void handleLocalMessage(ProxyConnect connect, JSONObject msg, LocalProxyCommand command){
-        throw new NoSuchMethodError();
-    }
 }
