@@ -2,6 +2,7 @@ package proxy;
 
 import com.socks.proxy.netty.local.LocalHttpProxyService;
 import com.socks.proxy.protocol.TcpService;
+import com.socks.proxy.protocol.codes.NoCodeProxyCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.service.DefaultLocalServiceBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +39,13 @@ public class LocalHttpProxyServiceTest{
 
     @Test
     public void testDirectSocks5ProxyServer() throws URISyntaxException{
-        TcpService service = new DefaultLocalServiceBuilder().setPassword("123456").setUsername("admin").setPort(1088)
-                .setProtocol(Protocol.SOCKS5).setServerList(Collections.singletonList(new URI("ws://127.0.0.1:8083")))
+        TcpService service = new DefaultLocalServiceBuilder()
+                .setPassword("123456")
+                .setCodes(new NoCodeProxyCodes())
+                .setUsername("admin")
+                .setPort(1088)
+                .setProtocol(Protocol.SOCKS5)
+                .setServerList(Collections.singletonList(new URI("ws://127.0.0.1:8083")))
                 .builder();
         service.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
