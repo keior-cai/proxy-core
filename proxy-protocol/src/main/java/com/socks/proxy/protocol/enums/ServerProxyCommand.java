@@ -29,6 +29,10 @@ public enum ServerProxyCommand implements ProxyCommand{
      */
     CONNECT_ERROR(3),
 
+    /**
+     * 连接目标服务成功
+     */
+    CONNECT_SUCCESS(4),
 
     /**
      * 发送RSA公钥
@@ -40,10 +44,6 @@ public enum ServerProxyCommand implements ProxyCommand{
      */
     ACK_USER_MESSAGE(6),
 
-    /**
-     * 连接目标服务成功
-     */
-    CONNECT_SUCCESS(7),
 
     /**
      * 未知消息类型
@@ -64,8 +64,4 @@ public enum ServerProxyCommand implements ProxyCommand{
         return map.getOrDefault(command, UNKNOWN);
     }
 
-
-    public static boolean isServiceCommand(int command){
-        return map.containsKey(command);
-    }
 }

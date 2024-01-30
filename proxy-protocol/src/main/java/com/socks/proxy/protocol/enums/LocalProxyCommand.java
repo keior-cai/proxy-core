@@ -54,9 +54,4 @@ public enum LocalProxyCommand implements ProxyCommand{
 
         return map.getOrDefault(command, UNKNOWN);
     }
-
-    public static boolean isLocalCommand(int command){
-        return map.containsKey(command);
-    }
-
 }
