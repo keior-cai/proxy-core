@@ -176,12 +176,12 @@ public class LocalServiceBuilder implements ServiceBuilder{
         }
         if(pool == null){
             this.pool = new Pool();
+            GenericObjectPoolConfig<WebSocket> poolConfig = new GenericObjectPoolConfig<>();
+            poolConfig.setMaxTotal(pool.getMaxTotal());
+            poolConfig.setJmxEnabled(pool.getJvmEnable());
+            poolConfig.setMaxIdle(pool.getMaxIdle());
+            poolConfig.setMinIdle(pool.getMinIdle());
         }
-        GenericObjectPoolConfig<WebSocket> poolConfig = new GenericObjectPoolConfig<>();
-        poolConfig.setMaxTotal(getPool().getMaxTotal());
-        poolConfig.setJmxEnabled(getPool().getJvmEnable());
-        poolConfig.setMaxIdle(getPool().getMaxIdle());
-        poolConfig.setMinIdle(getPool().getMinIdle());
         return new DefaultWebsocketFactory(getServerList());
     }
 }
