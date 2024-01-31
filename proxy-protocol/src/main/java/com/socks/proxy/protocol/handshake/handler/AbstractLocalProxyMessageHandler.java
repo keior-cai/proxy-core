@@ -10,6 +10,7 @@ import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
+import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -44,8 +45,10 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
                 AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
                 proxyContext.setCipher(cipher);
                 getProxyContext(proxyContext.getConnect()).setCipher(cipher);
+//                String random = RandomStringUtils.randomNumeric(userInfo.getPasswordLen());
+
                 connect.write(codes.encodeStr(
-                        JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", rsaUtil.encrypt(s)))));
+                        JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s))))));
                 break;
             case CONNECT_SUCCESS:
                 // 这里来处理连接成功问题
