@@ -3,7 +3,7 @@ package com.socks.proxy.handshake.connect;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
-import com.socks.proxy.protocol.connect.RegisterProxyConnect;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 
 import java.util.Objects;
 
@@ -11,7 +11,7 @@ import java.util.Objects;
  * @author: chuangjie
  * @date: 2024/1/24
  **/
-public class WebsocketRegisterConnect implements RegisterProxyConnect{
+public class WebsocketRegisterConnect implements ConnectProxyConnect{
 
     private final WebSocket client;
 

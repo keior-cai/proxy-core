@@ -6,7 +6,7 @@ package com.socks.proxy.protocol.connect;
  * @author: chuangjie
  * @date: 2024/1/24
  **/
-public interface RegisterProxyConnect extends ProxyConnect{
+public interface ConnectProxyConnect extends ProxyConnect{
 
     /**
      * 创建连接

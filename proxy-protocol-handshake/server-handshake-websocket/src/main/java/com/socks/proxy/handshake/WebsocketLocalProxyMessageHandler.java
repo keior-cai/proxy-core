@@ -3,7 +3,7 @@ package com.socks.proxy.handshake;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
-import com.socks.proxy.protocol.connect.RegisterProxyConnect;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
@@ -35,7 +35,7 @@ public class WebsocketLocalProxyMessageHandler extends AbstractLocalProxyMessage
         ProxyContext proxyContext = getProxyContext(local);
         proxyContext.setServer(targetServer);
         try {
-            RegisterProxyConnect targetConnect = factory.create(targetServer, this);
+            ConnectProxyConnect targetConnect = factory.create(targetServer, this);
             proxyContext.setConnect(targetConnect);
             ProxyContext targetContext = new ProxyContext();
             targetContext.setServer(targetServer);

@@ -7,7 +7,7 @@ import com.neovisionaries.ws.client.WebSocketFrame;
 import com.socks.proxy.handshake.connect.WebsocketRegisterConnect;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.connect.RegisterProxyConnect;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
 
 
     @Override
-    public RegisterProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException{
+    public ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException{
         WebSocket client = factory.getClient();
         client.addListener(new BlockWebsocketProtocol(handler));
         return new WebsocketRegisterConnect(client);

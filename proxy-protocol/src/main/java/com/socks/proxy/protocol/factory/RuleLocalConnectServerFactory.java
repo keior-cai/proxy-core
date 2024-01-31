@@ -1,7 +1,7 @@
 package com.socks.proxy.protocol.factory;
 
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.connect.RegisterProxyConnect;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 
 import java.io.IOException;
@@ -33,8 +33,8 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
 
 
     @Override
-    public RegisterProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
-        RegisterProxyConnect proxyService = null;
+    public ConnectProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
+        ConnectProxyConnect proxyService = null;
         if(domainRule(remoteServer.host())){
             proxyService = targetServerFactory.create(remoteServer, handler);
         } else {
