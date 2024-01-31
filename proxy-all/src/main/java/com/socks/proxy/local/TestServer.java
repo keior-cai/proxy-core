@@ -12,8 +12,6 @@ import com.socks.proxy.util.RSAUtil;
 public class TestServer{
     public static void main(String[] args){
         TcpService service = new DefaultServerServiceBuilder()
-                .setCodes(new NoCodeProxyCodes())
-                .setRsaUtil(new RSAUtil())
                 .setPort(8083).builder();
         service.start();
         System.out.println("启动成功");
