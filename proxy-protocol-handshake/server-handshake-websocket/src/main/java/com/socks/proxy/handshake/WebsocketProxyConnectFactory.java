@@ -2,10 +2,12 @@ package com.socks.proxy.handshake;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketException;
+import com.neovisionaries.ws.client.WebSocketFrame;
+import com.socks.proxy.handshake.connect.WebsocketRegisterConnect;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.RegisterProxyConnect;
-import com.socks.proxy.handshake.connect.WebsocketRegisterConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import lombok.AllArgsConstructor;
@@ -45,6 +47,18 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
         @Override
         public void onBinaryMessage(WebSocket websocket, byte[] binary){
             handler.handleTargetBinaryMessage(new WebsocketRegisterConnect(websocket), binary);
+        }
+
+
+        @Override
+        public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
+            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), frame.getCloseReason());
+        }
+
+
+        @Override
+        public void onError(WebSocket websocket, WebSocketException cause){
+            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), cause.getMessage());
         }
     }
 }

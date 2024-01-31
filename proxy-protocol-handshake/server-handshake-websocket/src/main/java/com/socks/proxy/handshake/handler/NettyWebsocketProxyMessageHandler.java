@@ -95,5 +95,17 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
             }
             handler.handleTargetBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
         }
+
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx){
+            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), "目标服务断开连接");
+        }
+
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
+            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), "连接发生异常:" + cause.getMessage());
+        }
     }
 }
