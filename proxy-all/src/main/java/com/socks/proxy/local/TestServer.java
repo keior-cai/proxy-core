@@ -1,9 +1,7 @@
 package com.socks.proxy.local;
 
+import com.socks.proxy.netty.ServerServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
-import com.socks.proxy.protocol.codes.NoCodeProxyCodes;
-import com.socks.proxy.service.DefaultServerServiceBuilder;
-import com.socks.proxy.util.RSAUtil;
 
 /**
  * @author: chuangjie
@@ -11,8 +9,7 @@ import com.socks.proxy.util.RSAUtil;
  **/
 public class TestServer{
     public static void main(String[] args){
-        TcpService service = new DefaultServerServiceBuilder()
-                .setPort(8083).builder();
+        TcpService service = new ServerServiceBuilder().setPort(8083).builder();
         service.start();
         System.out.println("启动成功");
     }

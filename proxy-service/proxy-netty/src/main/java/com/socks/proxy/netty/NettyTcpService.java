@@ -13,11 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.BindException;
 
 /**
+ * netty tcp 服务
+ *
  * @author: chuangjie
  * @date: 2023/6/4
  **/
 @Slf4j
-public abstract class AbstractNettyTcpService implements TcpService{
+public class NettyTcpService implements TcpService{
 
     private final int port;
 
@@ -34,12 +36,12 @@ public abstract class AbstractNettyTcpService implements TcpService{
     private Thread thread;
 
 
-    public AbstractNettyTcpService(int port, ChannelHandler handler){
+    public NettyTcpService(int port, ChannelHandler handler){
         this(port, "0.0.0.0", handler);
     }
 
 
-    public AbstractNettyTcpService(int port, String bindHost, ChannelHandler handler){
+    public NettyTcpService(int port, String bindHost, ChannelHandler handler){
         this.port = port;
         this.bindHost = bindHost;
         this.handler = handler;

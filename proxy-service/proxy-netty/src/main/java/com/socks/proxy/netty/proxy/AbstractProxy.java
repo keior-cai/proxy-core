@@ -35,11 +35,9 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
         try {
             handler.serviceConnect(new DirectConnectChannel(ctx.channel()), target);
             pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
-            // 这里需要写成功，或者失败
             writeSuccess(ctx, msg, target);
         } catch (Exception e) {
             writeFail(ctx, msg, target);
-            handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
         }
     }
 
