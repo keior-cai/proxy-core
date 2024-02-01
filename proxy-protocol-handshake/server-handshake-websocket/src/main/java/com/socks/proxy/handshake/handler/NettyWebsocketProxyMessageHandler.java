@@ -44,17 +44,17 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
         int processors = Runtime.getRuntime().availableProcessors();
         group = new NioEventLoopGroup(processors * 2);
         init();
-        new Thread(()->{
-            while(!Thread.currentThread().isInterrupted()) {
-                Map<String, ProxyContext> contextMap = NettyWebsocketProxyMessageHandler.this.getContextMap();
-                contextMap.forEach((k, v)->log.info("k = {}, v = {}", k, v));
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
+//        new Thread(()->{
+//            while(!Thread.currentThread().isInterrupted()) {
+//                Map<String, ProxyContext> contextMap = NettyWebsocketProxyMessageHandler.this.getContextMap();
+//                contextMap.forEach((k, v)->log.info("k = {}, v = {}", k, v));
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        }).start();
     }
 
 
