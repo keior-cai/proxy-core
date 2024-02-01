@@ -47,9 +47,7 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
         new Thread(()->{
             while(!Thread.currentThread().isInterrupted()) {
                 Map<String, ProxyContext> contextMap = NettyWebsocketProxyMessageHandler.this.getContextMap();
-                contextMap.forEach((k, v)->{
-                    log.info("k = {}, v = {}", k, v);
-                });
+                contextMap.forEach((k, v)->log.info("k = {}, v = {}", k, v));
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -99,13 +97,13 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx){
-            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), "目标服务断开连接");
+            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), new Exception("目标服务断开连接"));
         }
 
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), "连接发生异常:" + cause.getMessage());
+            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), new Exception("连接发生异常:" + cause.getMessage()));
         }
     }
 }

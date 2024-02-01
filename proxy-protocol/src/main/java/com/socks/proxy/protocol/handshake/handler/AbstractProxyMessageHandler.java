@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 默认协议，协议处理消息
@@ -60,25 +61,20 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
 
 
     @Override
-    public void handleTargetClose(ProxyConnect target, String reason){
-        ProxyContext proxyContext = contextMap.get(target.channelId());
-        contextMap.remove(target.channelId());
-        if(Objects.nonNull(proxyContext)){
-            Optional.ofNullable(proxyContext.getConnect()).map(ProxyConnect::channelId).ifPresent(contextMap::remove);
+    public void handleTargetClose(ProxyConnect target, Exception e){
+        if(log.isDebugEnabled()){
+            log.debug("remove target connect = {}， reason = {}", target.channelId(), e.getMessage(), e);
         }
+        remove(target);
     }
 
 
     @Override
-    public void handleLocalClose(ProxyConnect local, String reason){
+    public void handleLocalClose(ProxyConnect local, Exception e){
         if(log.isDebugEnabled()){
-            log.debug("remove connect = {}， reason = {}", local.channelId(), reason);
+            log.debug("remove local connect = {}， reason = {}", local.channelId(), e.getMessage(), e);
         }
-        ProxyContext proxyContext = contextMap.get(local.channelId());
-        contextMap.remove(local.channelId());
-        if(Objects.nonNull(proxyContext)){
-            Optional.ofNullable(proxyContext.getConnect()).map(ProxyConnect::channelId).ifPresent(contextMap::remove);
-        }
+        remove(local);
     }
 
 
@@ -87,12 +83,16 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
     }
 
 
-    protected void remove(ProxyConnect connect, String reason){
+    protected void remove(ProxyConnect connect){
         Optional<String> optional = Optional.ofNullable(connect).map(ProxyConnect::channelId);
         if(optional.isPresent()){
-            log.debug("connect Id = {} remove reason = {}", connect.channelId(), reason);
+            connect.close();
             ProxyContext remove = contextMap.remove(optional.get());
             if(Objects.nonNull(remove)){
+                Optional.ofNullable(remove.getCount()).filter(item->item.getCount() > 0)
+                        .ifPresent(CountDownLatch::countDown);
+                Optional.ofNullable(remove.getConnect())
+                        .ifPresent(ProxyConnect::close);
                 Optional.ofNullable(remove.getConnect()).map(ProxyConnect::channelId).ifPresent(contextMap::remove);
             }
         } else {

@@ -38,7 +38,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
         switch(command) {
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
-                String decrypt = rsaUtil.decrypt(sendUserMessage.getRandom());
+                String decrypt = rsaUtil.decrypt(AESUtil.decryptByDefaultKey(sendUserMessage.getRandom()));
                 proxyContext.setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
                 proxyContext.setRandom(decrypt);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckUserMessage())));
@@ -55,7 +55,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckTargetAddressMessage())));
                 break;
             case CLOSE:
-                handleLocalClose(connect, "服务端发送关闭连接命令");
+                handleLocalClose(connect, new Exception("服务端发送关闭连接命令"));
                 break;
             default:
             case UNKNOWN:

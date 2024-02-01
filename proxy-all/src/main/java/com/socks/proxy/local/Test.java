@@ -1,6 +1,6 @@
 package com.socks.proxy.local;
 
-import com.socks.proxy.netty.local.LocalServiceBuilder;
+import com.socks.proxy.netty.LocalServiceBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;

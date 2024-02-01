@@ -96,19 +96,6 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
 
     }
 
-
-    @Override
-    public void handleTargetClose(ProxyConnect target, String reason){
-        remove(target, reason);
-    }
-
-
-    @Override
-    public void handleLocalClose(ProxyConnect local, String reason){
-        remove(local, reason);
-    }
-
-
     /**
      * 本地创建与服务端连接
      */

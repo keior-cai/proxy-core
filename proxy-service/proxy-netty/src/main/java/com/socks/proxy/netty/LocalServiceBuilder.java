@@ -1,12 +1,11 @@
-package com.socks.proxy.netty.local;
+package com.socks.proxy.netty;
 
 import com.neovisionaries.ws.client.WebSocket;
 import com.socks.proxy.handshake.WebsocketLocalProxyMessageHandler;
 import com.socks.proxy.handshake.WebsocketProxyConnectFactory;
 import com.socks.proxy.handshake.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
-import com.socks.proxy.netty.NettyTcpService;
-import com.socks.proxy.netty.ServiceBuilder;
+import com.socks.proxy.netty.local.LocalProxyCode;
 import com.socks.proxy.netty.proxy.ComplexProxy;
 import com.socks.proxy.netty.proxy.HttpTunnelProxy;
 import com.socks.proxy.netty.proxy.Socks5CommandHandler;

@@ -52,13 +52,19 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
 
         @Override
         public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
-            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), frame.getCloseReason());
+            handler.handleTargetClose(new WebsocketRegisterConnect(websocket),  new Exception(frame.getCloseReason()));
         }
 
 
         @Override
         public void onError(WebSocket websocket, WebSocketException cause){
-            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), cause.getMessage());
+            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), new Exception(cause.getMessage()));
+        }
+
+
+        @Override
+        public void onUnexpectedError(WebSocket websocket, WebSocketException cause){
+            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), new Exception(cause.getMessage()));
         }
     }
 }

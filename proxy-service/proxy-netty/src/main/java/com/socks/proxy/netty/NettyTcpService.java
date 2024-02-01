@@ -115,6 +115,7 @@ public class NettyTcpService implements TcpService{
 
     protected ChannelHandler initHandler(){
         return new ChannelHandlerAdapter(){
+
         };
     }
 

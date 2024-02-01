@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  * @author: chuangjie
  * @date: 2023/6/4
  **/
+@Slf4j
 public class WebsocketHandler extends ChannelInitializer<Channel>{
 
     private final WebSocketServerProtocolConfig protocolConfig;
@@ -61,8 +62,16 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
         ProxyMessageHandler handler = handlerFactory.get();
         pipeline.addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(65535))
                 .addLast(new WebSocketServerProtocolHandler(protocolConfig))
-                .addLast(new WebsocketHandshakeCompleteEvent(handler)).addLast(new WebsocketTextInboundHandle(handler))
-                .addLast(new WebSocketBinaryInboundHandle(handler)).addLast(new WebsocketCloseInboundHandle(handler));
+                .addLast(new WebsocketHandshakeCompleteEvent(handler))
+                .addLast(new WebsocketTextInboundHandle(handler))
+                .addLast(new WebSocketBinaryInboundHandle(handler))
+                .addLast(new WebsocketCloseInboundHandle(handler))
+                .addLast(new ChannelInboundHandlerAdapter(){
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
+                        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), new Exception(cause));
+                    }
+                });
     }
 
 
@@ -81,12 +90,13 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
             HttpHeaders headers = evt.requestHeaders();
             headers.entries().forEach(item->headerValue.put(item.getKey(), item.getValue()));
             handler.handlerShakeEvent(new WebsocketProxyChannel(ctx.channel()), headerValue);
+            log.info("socket connect = {} map = {}", ctx.channel().remoteAddress(), headerValue);
         }
 
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx){
-            handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "客户端断开连接");
+            handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), new Exception("客户端断开连接"));
         }
     }
 }
