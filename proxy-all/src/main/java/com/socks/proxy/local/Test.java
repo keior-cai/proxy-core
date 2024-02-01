@@ -14,7 +14,7 @@ import java.util.Collections;
 public class Test{
     public static void main(String[] args) throws Exception{
         LocalServiceBuilder localServiceBuilder = new LocalServiceBuilder().setServerList(
-                Collections.singletonList(new URI("ws://chuangjie.icu:8041"))).setPort(1082);
+                Collections.singletonList(new URI("ws://chuangjie.icu:8043"))).setPort(1082);
         localServiceBuilder.builder().start();
     }
 }
