@@ -90,7 +90,6 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
             HttpHeaders headers = evt.requestHeaders();
             headers.entries().forEach(item->headerValue.put(item.getKey(), item.getValue()));
             handler.handlerShakeEvent(new WebsocketProxyChannel(ctx.channel()), headerValue);
-            log.info("socket connect = {} map = {}", ctx.channel().remoteAddress(), headerValue);
         }
 
 

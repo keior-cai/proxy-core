@@ -33,10 +33,8 @@ public class MapConnectContextManager implements ConnectContextManager{
 
     @Override
     public void putTargetConnect(ProxyConnect connect, ProxyContext proxyContext){
-        if(log.isDebugEnabled()){
-            ProxyConnect contextConnect = proxyContext.getConnect();
-            log.debug("L:= {} | R:={}",contextConnect.remoteAddress(), connect.remoteAddress());
-        }
+        ProxyConnect contextConnect = proxyContext.getConnect();
+        log.info("L:= {} | R:={}", contextConnect.remoteAddress(), connect.remoteAddress());
         contextMap.put(connect.channelId(), proxyContext);
     }
 
