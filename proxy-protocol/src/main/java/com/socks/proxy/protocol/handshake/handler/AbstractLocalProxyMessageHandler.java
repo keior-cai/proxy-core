@@ -72,7 +72,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
         proxyContext.getProxyInfo().setCount(new CountDownLatch(1));
-        manager.putConnect(local, proxyContext);
+        manager.putLocalConnect(local, proxyContext);
     }
 
 

@@ -1,5 +1,7 @@
 package com.socks.proxy.protocol.connect;
 
+import java.net.SocketAddress;
+
 /**
  * 定义代理连接对象
  */
@@ -32,5 +34,10 @@ public interface ProxyConnect{
      */
     void close();
 
+
+    /**
+     * 连接地址
+     */
+    SocketAddress remoteAddress();
 
 }

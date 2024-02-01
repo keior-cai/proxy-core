@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import lombok.AllArgsConstructor;
 
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -41,6 +42,12 @@ public class DirectConnectChannel implements ProxyConnect{
     @Override
     public void close(){
         context.close();
+    }
+
+
+    @Override
+    public SocketAddress remoteAddress(){
+        return context.remoteAddress();
     }
 
 

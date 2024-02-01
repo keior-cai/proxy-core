@@ -26,8 +26,8 @@ public class LocalHttpProxyServiceTest{
         TcpService service = new LocalServiceBuilder().setPassword("123456")
                 //                .setCodes(new NoCodeProxyCodes())
                 .setUsername("admin").setPort(1088).setProtocol(Protocol.SOCKS5)
-                .setServerList(Collections.singletonList(new URI("ws://chuangjie.icu:8043")))
-//                                .setServerList(Collections.singletonList(new URI("ws://127.0.0.1:8083")))
+//                .setServerList(Collections.singletonList(new URI("ws://chuangjie.icu:8043")))
+                                .setServerList(Collections.singletonList(new URI("ws://127.0.0.1:8083")))
                 .builder();
         service.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();

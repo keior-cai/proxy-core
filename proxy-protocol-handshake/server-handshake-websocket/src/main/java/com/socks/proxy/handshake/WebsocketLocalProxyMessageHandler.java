@@ -43,8 +43,8 @@ public class WebsocketLocalProxyMessageHandler extends AbstractLocalProxyMessage
             ProxyContext targetContext = new ProxyContext();
             targetContext.setProxyInfo(proxyInfo);
             targetContext.setConnect(local);
-            manager.putConnect(targetConnect, targetContext);
             targetConnect.connect();
+            manager.putTargetConnect(targetConnect, targetContext);
         } catch (IOException e) {
             throw new Error(e);
         }

@@ -56,7 +56,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
                 localContext.setProxyInfo(proxyContext.getProxyInfo());
                 localContext.setConnect(connect);
                 // 正方向维护
-                manager.putConnect(proxyConnect, localContext);
+                manager.putTargetConnect(proxyConnect, localContext);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckTargetAddressMessage())));
                 break;
             case CLOSE:
@@ -74,7 +74,8 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         local.write(codes.encodeStr(
                 JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
-        manager.putConnect(local, new ProxyContext());
+        manager.putLocalConnect(local, new ProxyContext());
+//        manager.putProxyConnect(local);
     }
 
 

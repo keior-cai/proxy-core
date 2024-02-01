@@ -1,5 +1,7 @@
 package com.socks.proxy.protocol.connect;
 
+import java.net.SocketAddress;
+
 /**
  * 注册事件监听代理连接
  *
@@ -12,4 +14,5 @@ public interface ConnectProxyConnect extends ProxyConnect{
      * 创建连接
      */
     void connect();
+
 }

@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.AllArgsConstructor;
 
+import java.net.SocketAddress;
 import java.util.Objects;
 
 /**
@@ -44,6 +45,12 @@ public class WebsocketProxyChannel implements ProxyConnect{
     public void close(){
         // ???
         context.writeAndFlush(new CloseWebSocketFrame());
+    }
+
+
+    @Override
+    public SocketAddress remoteAddress(){
+        return context.remoteAddress();
     }
 
 
