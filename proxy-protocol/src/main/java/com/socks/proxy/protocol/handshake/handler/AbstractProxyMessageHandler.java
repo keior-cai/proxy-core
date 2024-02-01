@@ -5,17 +5,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyMessage;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.util.FieldNameUtils;
 import com.socks.proxy.util.RSAUtil;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * 默认协议，协议处理消息
@@ -42,8 +36,7 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
 
     protected final ProxyCodes codes;
 
-    @Getter
-    private final Map<String, ProxyContext> contextMap = new ConcurrentHashMap<>();
+    protected final ConnectContextManager manager;
 
 
     @Override
@@ -65,7 +58,7 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
         if(log.isDebugEnabled()){
             log.debug("remove target connect = {}， reason = {}", target.channelId(), e.getMessage(), e);
         }
-        remove(target);
+        manager.removeAll(target);
     }
 
 
@@ -74,34 +67,6 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
         if(log.isDebugEnabled()){
             log.debug("remove local connect = {}， reason = {}", local.channelId(), e.getMessage(), e);
         }
-        remove(local);
-    }
-
-
-    protected ProxyContext getProxyContext(ProxyConnect connect){
-        return contextMap.get(connect.channelId());
-    }
-
-
-    protected void remove(ProxyConnect connect){
-        Optional<String> optional = Optional.ofNullable(connect).map(ProxyConnect::channelId);
-        if(optional.isPresent()){
-            connect.close();
-            ProxyContext remove = contextMap.remove(optional.get());
-            if(Objects.nonNull(remove)){
-                Optional.ofNullable(remove.getProxyInfo().getCount()).filter(item->item.getCount() > 0)
-                        .ifPresent(CountDownLatch::countDown);
-                Optional.ofNullable(remove.getConnect())
-                        .ifPresent(ProxyConnect::close);
-                Optional.ofNullable(remove.getConnect()).map(ProxyConnect::channelId).ifPresent(contextMap::remove);
-            }
-        } else {
-            log.debug("remove connect Id is empty.");
-        }
-    }
-
-
-    protected void putProxyContext(ProxyConnect connect, ProxyContext context){
-        contextMap.put(connect.channelId(), context);
+        manager.removeAll(local);
     }
 }

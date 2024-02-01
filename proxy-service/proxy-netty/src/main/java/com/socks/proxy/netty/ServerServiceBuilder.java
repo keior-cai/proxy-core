@@ -6,6 +6,8 @@ import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.NoCodeProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
+import com.socks.proxy.protocol.handshake.MapConnectContextManager;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
 import lombok.Getter;
@@ -36,6 +38,8 @@ public class ServerServiceBuilder implements ServiceBuilder{
      */
     private boolean useCodes = true;
 
+    private ConnectContextManager connectContextManager;
+
 
     @Override
     public TcpService builder(){
@@ -45,8 +49,12 @@ public class ServerServiceBuilder implements ServiceBuilder{
 
 
     private void init(){
+        if(connectContextManager == null){
+            this.connectContextManager = new MapConnectContextManager();
+        }
         if(handler == null){
-            this.handler = new WebsocketHandler(()->new NettyWebsocketProxyMessageHandler(rsaUtil));
+            this.handler = new WebsocketHandler(
+                    ()->new NettyWebsocketProxyMessageHandler(rsaUtil, codes, connectContextManager));
         }
         if(codes == null && useCodes){
             codes = new DefaultProxyCommandCodes();

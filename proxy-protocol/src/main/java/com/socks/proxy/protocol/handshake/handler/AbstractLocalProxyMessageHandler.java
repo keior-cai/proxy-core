@@ -8,6 +8,7 @@ import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
@@ -28,8 +29,8 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMessageHandler{
 
-    public AbstractLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes){
-        super(rsaUtil, codes);
+    public AbstractLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+        super(rsaUtil, codes, manager);
     }
 
 
@@ -37,7 +38,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg){
         ServerProxyCommand command = ServerProxyCommand.of(commandValue);
         log.debug("receive service value = {} command = {}", commandValue, command);
-        ProxyContext proxyContext = getProxyContext(connect);
+        ProxyContext proxyContext = manager.getContext(connect);
         switch(command) {
             case SEND_PUBLIC_KEY:
                 String s = RandomStringUtils.randomAlphanumeric(10);
@@ -45,8 +46,8 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
                 proxyInfo.setRandom(s);
                 AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
                 proxyInfo.setCipher(cipher);
-                connect.write(codes.encodeStr(
-                        JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s))))));
+                connect.write(codes.encodeStr(JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test",
+                        AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s))))));
                 break;
             case CONNECT_SUCCESS:
                 // 这里来处理连接成功问题
@@ -71,14 +72,14 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
         proxyContext.getProxyInfo().setCount(new CountDownLatch(1));
-        putProxyContext(local, proxyContext);
+        manager.putConnect(local, proxyContext);
     }
 
 
     @Override
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         try {
-            ProxyContext proxyContext = getProxyContext(local);
+            ProxyContext proxyContext = manager.getContext(local);
             proxyContext.getProxyInfo().getCount().await();
             Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
         } catch (InterruptedException e) {
@@ -89,15 +90,15 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
 
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(target);
+        ProxyContext proxyContext = manager.getContext(target);
         Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
 
     }
+
 
     /**
      * 本地创建与服务端连接
      */
     public abstract void serviceConnect(ProxyConnect local, TargetServer targetServer);
-
 
 }

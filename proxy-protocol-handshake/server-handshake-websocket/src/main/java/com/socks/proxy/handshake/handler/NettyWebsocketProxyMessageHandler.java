@@ -1,10 +1,10 @@
 package com.socks.proxy.handshake.handler;
 
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
-import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
+import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.handler.AbstractServiceProxyMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.bootstrap.Bootstrap;
@@ -22,7 +22,6 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -39,22 +38,22 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
     private final EventLoopGroup group;
 
 
-    public NettyWebsocketProxyMessageHandler(RSAUtil rsaUtil){
-        super(rsaUtil, new DefaultProxyCommandCodes());
+    public NettyWebsocketProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+        super(rsaUtil, codes, manager);
         int processors = Runtime.getRuntime().availableProcessors();
         group = new NioEventLoopGroup(processors * 2);
         init();
-//        new Thread(()->{
-//            while(!Thread.currentThread().isInterrupted()) {
-//                Map<String, ProxyContext> contextMap = NettyWebsocketProxyMessageHandler.this.getContextMap();
-//                contextMap.forEach((k, v)->log.info("k = {}, v = {}", k, v));
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        }).start();
+        //        new Thread(()->{
+        //            while(!Thread.currentThread().isInterrupted()) {
+        //                Map<String, ProxyContext> contextMap = NettyWebsocketProxyMessageHandler.this.getContextMap();
+        //                contextMap.forEach((k, v)->log.info("k = {}, v = {}", k, v));
+        //                try {
+        //                    Thread.sleep(3000);
+        //                } catch (InterruptedException e) {
+        //                    throw new RuntimeException(e);
+        //                }
+        //            }
+        //        }).start();
     }
 
 
@@ -103,7 +102,8 @@ public class NettyWebsocketProxyMessageHandler extends AbstractServiceProxyMessa
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()), new Exception("连接发生异常:" + cause.getMessage()));
+            handler.handleTargetClose(new DirectConnectChannel(ctx.channel()),
+                    new Exception("连接发生异常:" + cause.getMessage()));
         }
     }
 }

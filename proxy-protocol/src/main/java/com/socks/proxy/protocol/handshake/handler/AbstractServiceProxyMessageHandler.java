@@ -8,6 +8,7 @@ import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.message.*;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
@@ -27,8 +28,8 @@ import java.util.Optional;
 @Slf4j
 public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMessageHandler{
 
-    public AbstractServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes){
-        super(rsaUtil, codes);
+    public AbstractServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+        super(rsaUtil, codes, manager);
     }
 
 
@@ -36,7 +37,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
     protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg){
         LocalProxyCommand command = LocalProxyCommand.of(commandValue);
         log.debug("receive local commandValue = {} command = {}", commandValue, command);
-        ProxyContext proxyContext = getProxyContext(connect);
+        ProxyContext proxyContext = manager.getContext(connect);
         switch(command) {
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
@@ -55,7 +56,7 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
                 localContext.setProxyInfo(proxyContext.getProxyInfo());
                 localContext.setConnect(connect);
                 // 正方向维护
-                putProxyContext(proxyConnect, localContext);
+                manager.putConnect(proxyConnect, localContext);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckTargetAddressMessage())));
                 break;
             case CLOSE:
@@ -73,20 +74,20 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         local.write(codes.encodeStr(
                 JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
-        putProxyContext(local, new ProxyContext());
+        manager.putConnect(local, new ProxyContext());
     }
 
 
     @Override
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(local);
+        ProxyContext proxyContext = manager.getContext(local);
         Optional.ofNullable(proxyContext).ifPresent(context->context.decodeWrite(binary));
     }
 
 
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
-        ProxyContext proxyContext = getProxyContext(target);
+        ProxyContext proxyContext = manager.getContext(target);
         Optional.ofNullable(proxyContext).ifPresent(context->context.encodeWrite(binary));
     }
 

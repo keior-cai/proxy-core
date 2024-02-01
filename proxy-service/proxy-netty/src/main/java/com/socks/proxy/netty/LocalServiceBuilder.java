@@ -17,10 +17,7 @@ import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.exception.UnKnowProtocolException;
 import com.socks.proxy.protocol.factory.ProxyFactory;
-import com.socks.proxy.protocol.handshake.ComplexHandshakeProtocolHandler;
-import com.socks.proxy.protocol.handshake.HandshakeProtocolHandler;
-import com.socks.proxy.protocol.handshake.HttpHandshakeProtocolHandler;
-import com.socks.proxy.protocol.handshake.Socks5HandshakeProtocolHandler;
+import com.socks.proxy.protocol.handshake.*;
 import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -106,6 +103,11 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private ProxyCodes codes;
 
+    /**
+     * 连接管理器
+     */
+    private ConnectContextManager manager;
+
     @Getter
     @Setter
     @ToString
@@ -123,8 +125,8 @@ public class LocalServiceBuilder implements ServiceBuilder{
     @Override
     public TcpService builder(){
         init();
-        AbstractLocalProxyMessageHandler handler = new WebsocketLocalProxyMessageHandler(rsaUtil, codes,
-                connectFactory);
+        AbstractLocalProxyMessageHandler handler = new WebsocketLocalProxyMessageHandler(rsaUtil, codes, connectFactory,
+                manager);
         switch(protocol) {
             case HTTP:
             case HTTPS:
@@ -162,6 +164,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
         }
         if(codes == null){
             codes = new DefaultProxyCommandCodes();
+        }
+        if(manager == null){
+            manager = new MapConnectContextManager();
         }
     }
 
