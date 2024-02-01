@@ -82,23 +82,24 @@ public class RSAUtil{
      * 加密方法 source： 源数据
      */
     public String encrypt(String source){
-        try {
-            return encrypt(source, publicKey);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return encrypt(source, publicKey);
+
     }
 
 
-    public static String encrypt(String source, String publicKey) throws Exception{
-        Key key = getPublicKey(publicKey);
-        /* 得到Cipher对象来实现对源数据的RSA加密 */
-        Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] b = source.getBytes();
-        /* 执行加密操作 */
-        byte[] b1 = cipher.doFinal(b);
-        return new String(Base64.encodeBase64URLSafe(b1), CHAR_ENCODING);
+    public String encrypt(String source, String publicKey){
+        try {
+            Key key = getPublicKey(publicKey);
+            /* 得到Cipher对象来实现对源数据的RSA加密 */
+            Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] b = source.getBytes();
+            /* 执行加密操作 */
+            byte[] b1 = cipher.doFinal(b);
+            return new String(Base64.encodeBase64URLSafe(b1), CHAR_ENCODING);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

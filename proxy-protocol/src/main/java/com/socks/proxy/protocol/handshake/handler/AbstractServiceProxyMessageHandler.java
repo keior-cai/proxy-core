@@ -72,10 +72,9 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
 
     @Override
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
-        local.write(codes.encodeStr(
-                JSON.toJSONString(new PublicKeyMessage(AESUtil.encryptByDefaultKey(rsaUtil.getPublicKey())))));
+        local.write(codes.encodeStr(JSON.toJSONString(new PublicKeyMessage(rsaUtil.getPublicKey()))));
         manager.putLocalConnect(local, new ProxyContext());
-//        manager.putProxyConnect(local);
+        //        manager.putProxyConnect(local);
     }
 
 

@@ -9,6 +9,7 @@ import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
+import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
@@ -41,13 +42,14 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
         ProxyContext proxyContext = manager.getContext(connect);
         switch(command) {
             case SEND_PUBLIC_KEY:
+                PublicKeyMessage message = msg.toJavaObject(PublicKeyMessage.class);
                 String s = RandomStringUtils.randomAlphanumeric(10);
                 ProxyInfo proxyInfo = proxyContext.getProxyInfo();
                 proxyInfo.setRandom(s);
                 AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
                 proxyInfo.setCipher(cipher);
                 connect.write(codes.encodeStr(JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test",
-                        AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s))))));
+                        AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s, message.getPublicKey()))))));
                 break;
             case CONNECT_SUCCESS:
                 // 这里来处理连接成功问题
