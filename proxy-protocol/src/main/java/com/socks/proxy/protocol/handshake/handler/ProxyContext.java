@@ -1,11 +1,9 @@
 package com.socks.proxy.protocol.handshake.handler;
 
-import com.socks.proxy.cipher.AbstractCipher;
-import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import lombok.Data;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.Optional;
 
 /**
  * 代理上下文
@@ -19,18 +17,9 @@ public class ProxyContext{
     private ProxyConnect connect;
 
     /**
-     * 流式数据加密工具
+     * 代理信息
      */
-    private AbstractCipher cipher;
-
-    /**
-     * 加密随机数
-     */
-    private String random;
-
-    private CountDownLatch count;
-
-    private TargetServer server;
+    private ProxyInfo proxyInfo = new ProxyInfo();
 
 
     public void write(byte[] binary){
@@ -39,11 +28,11 @@ public class ProxyContext{
 
 
     public void encodeWrite(byte[] binary){
-        write(cipher.encodeBytes(binary));
+        Optional.ofNullable(proxyInfo).map(ProxyInfo::getCipher).ifPresent(item->write(item.encodeBytes(binary)));
     }
 
 
     public void decodeWrite(byte[] binary){
-        write(cipher.decodeBytes(binary));
+        Optional.ofNullable(proxyInfo).map(ProxyInfo::getCipher).ifPresent(item->write(item.decodeBytes(binary)));
     }
 }

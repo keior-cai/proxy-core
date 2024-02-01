@@ -11,12 +11,12 @@ import java.util.Objects;
  * @author: chuangjie
  * @date: 2024/1/24
  **/
-public class WebsocketRegisterConnect implements ConnectProxyConnect{
+public class WebsocketConnect implements ConnectProxyConnect{
 
     private final WebSocket client;
 
 
-    public WebsocketRegisterConnect(WebSocket client){
+    public WebsocketConnect(WebSocket client){
         this.client = client;
     }
 

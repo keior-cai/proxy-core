@@ -3,8 +3,7 @@ package com.socks.proxy.handshake;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
-import com.neovisionaries.ws.client.WebSocketFrame;
-import com.socks.proxy.handshake.connect.WebsocketRegisterConnect;
+import com.socks.proxy.handshake.connect.WebsocketConnect;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
@@ -28,7 +27,7 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
     public ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException{
         WebSocket client = factory.getClient();
         client.addListener(new BlockWebsocketProtocol(handler));
-        return new WebsocketRegisterConnect(client);
+        return new WebsocketConnect(client);
     }
 
 
@@ -40,31 +39,31 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
 
         @Override
         public void onTextMessage(WebSocket websocket, String text){
-            handler.handleLocalTextMessage(new WebsocketRegisterConnect(websocket), text);
+            handler.handleLocalTextMessage(new WebsocketConnect(websocket), text);
         }
 
 
         @Override
         public void onBinaryMessage(WebSocket websocket, byte[] binary){
-            handler.handleTargetBinaryMessage(new WebsocketRegisterConnect(websocket), binary);
+            handler.handleTargetBinaryMessage(new WebsocketConnect(websocket), binary);
         }
 
 
         @Override
-        public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
-            handler.handleTargetClose(new WebsocketRegisterConnect(websocket),  new Exception(frame.getCloseReason()));
+        public void handleCallbackError(WebSocket websocket, Throwable cause){
+            handler.handleLocalClose(new WebsocketConnect(websocket), new Exception(cause));
         }
 
 
         @Override
         public void onError(WebSocket websocket, WebSocketException cause){
-            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), new Exception(cause.getMessage()));
+            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception(cause.getMessage()));
         }
 
 
         @Override
         public void onUnexpectedError(WebSocket websocket, WebSocketException cause){
-            handler.handleTargetClose(new WebsocketRegisterConnect(websocket), new Exception(cause.getMessage()));
+            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception(cause.getMessage()));
         }
     }
 }

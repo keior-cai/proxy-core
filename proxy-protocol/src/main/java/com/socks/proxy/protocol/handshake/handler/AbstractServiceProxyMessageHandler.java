@@ -3,9 +3,11 @@ package com.socks.proxy.protocol.handshake.handler;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.cipher.CipherProvider;
+import com.socks.proxy.protocol.DefaultTargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
+import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.handshake.message.*;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
@@ -39,16 +41,18 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
                 String decrypt = rsaUtil.decrypt(AESUtil.decryptByDefaultKey(sendUserMessage.getRandom()));
-                proxyContext.setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
-                proxyContext.setRandom(decrypt);
+                proxyContext.getProxyInfo().setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
+                proxyContext.getProxyInfo().setRandom(decrypt);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckUserMessage())));
                 break;
             case SEND_DST_ADDR:
                 SenTargetAddressMessage addrMessage = msg.toJavaObject(SenTargetAddressMessage.class);
                 ProxyConnect proxyConnect = targetConnect(addrMessage.getHost(), addrMessage.getPort());
                 proxyContext.setConnect(proxyConnect);
+                proxyContext.getProxyInfo().setServer(
+                        new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(), Protocol.UNKNOWN));
                 ProxyContext localContext = new ProxyContext();
-                localContext.setCipher(proxyContext.getCipher());
+                localContext.setProxyInfo(proxyContext.getProxyInfo());
                 localContext.setConnect(connect);
                 // 正方向维护
                 putProxyContext(proxyConnect, localContext);

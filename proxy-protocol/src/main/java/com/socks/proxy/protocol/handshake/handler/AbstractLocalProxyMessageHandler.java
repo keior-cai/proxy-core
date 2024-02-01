@@ -41,22 +41,20 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
         switch(command) {
             case SEND_PUBLIC_KEY:
                 String s = RandomStringUtils.randomAlphanumeric(10);
-                proxyContext.setRandom(s);
+                ProxyInfo proxyInfo = proxyContext.getProxyInfo();
+                proxyInfo.setRandom(s);
                 AbstractCipher cipher = CipherProvider.getByName("aes-256-cfb", s);
-                proxyContext.setCipher(cipher);
-                getProxyContext(proxyContext.getConnect()).setCipher(cipher);
-//                String random = RandomStringUtils.randomNumeric(userInfo.getPasswordLen());
-
+                proxyInfo.setCipher(cipher);
                 connect.write(codes.encodeStr(
                         JSON.toJSONString(new SendUserMessage("aes-256-cfb", "test", "test", AESUtil.encryptByDefaultKey(rsaUtil.encrypt(s))))));
                 break;
             case CONNECT_SUCCESS:
                 // 这里来处理连接成功问题
-                proxyContext.getCount().countDown();
+                proxyContext.getProxyInfo().getCount().countDown();
                 log.debug("now send message byte to target");
                 break;
             case ACK_USER_MESSAGE:
-                TargetServer server = proxyContext.getServer();
+                TargetServer server = proxyContext.getProxyInfo().getServer();
                 connect.write(
                         codes.encodeStr(JSON.toJSONString(new SenTargetAddressMessage(server.host(), server.port()))));
                 break;
@@ -72,7 +70,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     @Override
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
-        proxyContext.setCount(new CountDownLatch(1));
+        proxyContext.getProxyInfo().setCount(new CountDownLatch(1));
         putProxyContext(local, proxyContext);
     }
 
@@ -81,7 +79,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         try {
             ProxyContext proxyContext = getProxyContext(local);
-            proxyContext.getCount().await();
+            proxyContext.getProxyInfo().getCount().await();
             Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -99,6 +97,7 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     /**
      * 本地创建与服务端连接
      */
-    public abstract ProxyConnect serviceConnect(ProxyConnect local, TargetServer targetServer);
+    public abstract void serviceConnect(ProxyConnect local, TargetServer targetServer);
+
 
 }

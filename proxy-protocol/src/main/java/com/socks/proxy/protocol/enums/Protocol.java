@@ -25,4 +25,9 @@ public enum Protocol{
      */
     COMPLEX,
 
+    /**
+     * 未知协议
+     */
+    UNKNOWN
+
 }

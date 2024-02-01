@@ -7,6 +7,7 @@ import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
+import com.socks.proxy.protocol.handshake.handler.ProxyInfo;
 import com.socks.proxy.util.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,19 +32,18 @@ public class WebsocketLocalProxyMessageHandler extends AbstractLocalProxyMessage
 
 
     @Override
-    public ProxyConnect serviceConnect(ProxyConnect local, TargetServer targetServer){
+    public void serviceConnect(ProxyConnect local, TargetServer targetServer){
         ProxyContext proxyContext = getProxyContext(local);
-        proxyContext.setServer(targetServer);
+        ProxyInfo proxyInfo = proxyContext.getProxyInfo();
+        proxyInfo.setServer(targetServer);
         try {
             ConnectProxyConnect targetConnect = factory.create(targetServer, this);
             proxyContext.setConnect(targetConnect);
             ProxyContext targetContext = new ProxyContext();
-            targetContext.setServer(targetServer);
+            targetContext.setProxyInfo(proxyInfo);
             targetContext.setConnect(local);
-            targetContext.setCount(proxyContext.getCount());
             putProxyContext(targetConnect, targetContext);
             targetConnect.connect();
-            return targetConnect;
         } catch (IOException e) {
             throw new Error(e);
         }

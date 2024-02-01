@@ -89,7 +89,7 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
             connect.close();
             ProxyContext remove = contextMap.remove(optional.get());
             if(Objects.nonNull(remove)){
-                Optional.ofNullable(remove.getCount()).filter(item->item.getCount() > 0)
+                Optional.ofNullable(remove.getProxyInfo().getCount()).filter(item->item.getCount() > 0)
                         .ifPresent(CountDownLatch::countDown);
                 Optional.ofNullable(remove.getConnect())
                         .ifPresent(ProxyConnect::close);
