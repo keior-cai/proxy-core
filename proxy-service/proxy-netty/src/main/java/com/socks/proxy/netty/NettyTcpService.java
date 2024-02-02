@@ -100,6 +100,7 @@ public class NettyTcpService implements TcpService{
             return;
         }
         thread.interrupt();
+        log.info("tcp service close success");
     }
 
 

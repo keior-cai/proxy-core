@@ -56,4 +56,30 @@ public class LocalHttpProxyServiceTest{
         log.info("http body = {}", forObject);
         tcpService.close();
     }
+
+    @Test
+    public void testRestart(){
+        TcpService tcpService = createTcpService();
+        tcpService.start();
+        tcpService.restart();
+        tcpService.close();
+    }
+
+    private TcpService createTcpService(){
+        RSAUtil rsaUtil = new RSAUtil();
+        ProxyCodes codes = new DefaultProxyCommandCodes();
+        LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
+        Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
+        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(
+                Collections.singletonList(URI.create("ws://127.0.0.1:8083"))));
+        handler.setName("test");
+        handler.setFactoryMap(proxyFactoryMap);
+        return new LocalServiceBuilder()
+                .setPort(1088)
+                .setCodes(codes)
+                .setHandler(handler)
+                .setRsaUtil(rsaUtil)
+                .setProtocol(Protocol.SOCKS5)
+                .builder();
+    }
 }
