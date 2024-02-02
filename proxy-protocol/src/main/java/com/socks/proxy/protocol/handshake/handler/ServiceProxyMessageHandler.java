@@ -4,10 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.DefaultTargetServer;
+import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.message.*;
 import com.socks.proxy.util.AESUtil;
@@ -26,10 +28,15 @@ import java.util.Optional;
  **/
 @Getter
 @Slf4j
-public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMessageHandler{
+public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
 
-    public AbstractServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+    private final ProxyFactory factory;
+
+
+    public ServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager,
+                                      ProxyFactory factory){
         super(rsaUtil, codes, manager);
+        this.factory = factory;
     }
 
 
@@ -48,7 +55,9 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
                 break;
             case SEND_DST_ADDR:
                 SenTargetAddressMessage addrMessage = msg.toJavaObject(SenTargetAddressMessage.class);
-                ProxyConnect proxyConnect = targetConnect(addrMessage.getHost(), addrMessage.getPort());
+                ProxyConnect proxyConnect = targetConnect(connect,
+                        new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(), Protocol.UNKNOWN));
+
                 proxyContext.setConnect(proxyConnect);
                 proxyContext.getProxyInfo().setServer(
                         new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(), Protocol.UNKNOWN));
@@ -74,7 +83,6 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         local.write(codes.encodeStr(JSON.toJSONString(new PublicKeyMessage(rsaUtil.getPublicKey()))));
         manager.putLocalConnect(local, new ProxyContext());
-        //        manager.putProxyConnect(local);
     }
 
 
@@ -92,12 +100,13 @@ public abstract class AbstractServiceProxyMessageHandler extends AbstractProxyMe
     }
 
 
-    /**
-     * 服务端创建与目标服务连接
-     *
-     * @param host 目标服务地址
-     * @param port 目标服务端口
-     * @return 目标服务连接
-     */
-    protected abstract ProxyConnect targetConnect(String host, int port);
+    @Override
+    public ProxyConnect targetConnect(ProxyConnect local, TargetServer target){
+        try {
+            return factory.create(target, this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

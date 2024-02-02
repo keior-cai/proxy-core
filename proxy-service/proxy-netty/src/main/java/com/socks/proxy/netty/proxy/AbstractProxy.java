@@ -2,7 +2,8 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
-    private final AbstractLocalProxyMessageHandler handler;
+    private final ProxyMessageHandler handler;
 
 
     @Override
@@ -33,7 +34,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
         TargetServer target = resolveRemoteServer(msg);
         ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
         try {
-            handler.serviceConnect(new DirectConnectChannel(ctx.channel()), target);
+            handler.targetConnect(new DirectConnectChannel(ctx.channel()), target);
             pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
             writeSuccess(ctx, msg, target);
         } catch (Exception e) {
@@ -45,7 +46,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     @AllArgsConstructor
     private static class ReadLocalInboundHandler extends SimpleChannelInboundHandler<ByteBuf>{
 
-        private final AbstractLocalProxyMessageHandler connect;
+        private final ProxyMessageHandler connect;
 
 
         @Override

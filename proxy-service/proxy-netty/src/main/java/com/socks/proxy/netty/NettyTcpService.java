@@ -103,6 +103,13 @@ public class NettyTcpService implements TcpService{
     }
 
 
+    @Override
+    public void restart(){
+        close();
+        start();
+    }
+
+
     public void initializer(){
         int cpuNum = Runtime.getRuntime().availableProcessors();
         childGroup = new NioEventLoopGroup(cpuNum * 2, new NamedThreadFactory("reactive-child-", false));

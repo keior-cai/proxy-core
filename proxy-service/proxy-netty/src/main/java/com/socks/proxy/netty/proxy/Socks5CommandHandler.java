@@ -1,7 +1,7 @@
 package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.handshake.handler.AbstractLocalProxyMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @ChannelHandler.Sharable
 public class Socks5CommandHandler extends AbstractProxy<Socks5CommandRequest>{
 
-    public Socks5CommandHandler(AbstractLocalProxyMessageHandler handler){
+    public Socks5CommandHandler(ProxyMessageHandler handler){
         super(handler);
     }
 

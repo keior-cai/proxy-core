@@ -1,0 +1,91 @@
+package com.socks.proxy.netty.connect;
+
+import com.socks.proxy.handshake.connect.DirectConnectChannel;
+import com.socks.proxy.handshake.handler.ForwardBinaryData;
+import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
+import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.factory.ProxyFactory;
+import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.ByteBufFormat;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.util.concurrent.ExecutionException;
+
+/**
+ * @author: chuangjie
+ * @date: 2024/2/2
+ **/
+@Slf4j
+public class DricetConnectFactory implements ProxyFactory{
+
+    private final Bootstrap bootstrap = new Bootstrap();
+
+
+    public DricetConnectFactory(){
+        int processors = Runtime.getRuntime().availableProcessors();
+        EventLoopGroup group = new NioEventLoopGroup(processors * 2);
+        bootstrap.group(group).channel(NioSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+    }
+
+
+    @Override
+    public ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException{
+        ChannelFuture connect = bootstrap.connect(targetServer.host(), targetServer.port());
+        connect.channel().pipeline().addLast(new ForwardBinaryData(handler));
+        try {
+            connect.sync().get();
+            ProxyConnect channel = new DirectConnectChannel(connect.channel());
+            return new ConnectProxyConnect(){
+
+                @Override
+                public String channelId(){
+                    return channel.channelId();
+                }
+
+
+                @Override
+                public void write(byte[] binary){
+                    channel.write(binary);
+                }
+
+
+                @Override
+                public void write(String message){
+                    channel.write(message);
+                }
+
+
+                @Override
+                public void close(){
+                    channel.close();
+                }
+
+
+                @Override
+                public SocketAddress remoteAddress(){
+                    return channel.remoteAddress();
+                }
+
+
+                @Override
+                public void connect(){
+                    // ignore
+                }
+            };
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

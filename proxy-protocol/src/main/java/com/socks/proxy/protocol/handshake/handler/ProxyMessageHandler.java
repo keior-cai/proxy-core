@@ -1,5 +1,6 @@
 package com.socks.proxy.protocol.handshake.handler;
 
+import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
  *      {@link ProxyMessageHandler#handlerShakeEvent(ProxyConnect, Map)}
  *  2、本地客户端和服务端握手成功之后，本地客户端在将真正的请求数据发送给远程服务端;
  *      这里发送的数据会对发送的数据进行自定义加密
- *      详细参考{@link AbstractLocalProxyMessageHandler}
+ *      详细参考{@link LocalProxyMessageHandler}
  *  3、
  *  本地服务会先跟本地服务进行连接；
  *  代理消息协议处理器定义
@@ -71,4 +72,12 @@ public interface ProxyMessageHandler{
      * 处理客户端断开连接
      */
     void handleLocalClose(ProxyConnect local, Exception e);
+
+
+    /**
+     * 服务端创建与目标服务连接
+     *
+     * @return 目标服务连接
+     */
+    ProxyConnect targetConnect(ProxyConnect local, TargetServer target);
 }

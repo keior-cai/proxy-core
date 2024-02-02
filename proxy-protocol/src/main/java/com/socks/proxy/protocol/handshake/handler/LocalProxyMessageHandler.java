@@ -6,17 +6,21 @@ import com.socks.proxy.cipher.AbstractCipher;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
+import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.message.PublicKeyMessage;
 import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -28,9 +32,21 @@ import java.util.concurrent.CountDownLatch;
  * @date: 2024/1/25
  **/
 @Slf4j
-public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMessageHandler{
+@Setter
+public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
 
-    public AbstractLocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+    /**
+     * 代理工厂集合
+     */
+    private Map<String, ProxyFactory> factoryMap;
+
+    /**
+     * proxy node name
+     */
+    private String name;
+
+
+    public LocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
         super(rsaUtil, codes, manager);
     }
 
@@ -101,6 +117,24 @@ public abstract class AbstractLocalProxyMessageHandler extends AbstractProxyMess
     /**
      * 本地创建与服务端连接
      */
-    public abstract void serviceConnect(ProxyConnect local, TargetServer targetServer);
+    @Override
+    public ProxyConnect targetConnect(ProxyConnect local, TargetServer target){
+        ProxyContext proxyContext = manager.getContext(local);
+        ProxyInfo proxyInfo = proxyContext.getProxyInfo();
+        proxyInfo.setServer(target);
+        try {
+            ProxyFactory factory = factoryMap.get(name);
+            ConnectProxyConnect targetConnect = factory.create(target, this);
+            proxyContext.setConnect(targetConnect);
+            ProxyContext targetContext = new ProxyContext();
+            targetContext.setProxyInfo(proxyInfo);
+            targetContext.setConnect(local);
+            targetConnect.connect();
+            manager.putTargetConnect(targetConnect, targetContext);
+            return targetConnect;
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
 
 }

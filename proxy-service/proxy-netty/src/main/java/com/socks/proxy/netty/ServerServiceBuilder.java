@@ -1,13 +1,14 @@
 package com.socks.proxy.netty;
 
 import com.socks.proxy.handshake.WebsocketHandler;
-import com.socks.proxy.handshake.handler.NettyWebsocketProxyMessageHandler;
+import com.socks.proxy.netty.connect.DricetConnectFactory;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.NoCodeProxyCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.MapConnectContextManager;
+import com.socks.proxy.protocol.handshake.handler.ServiceProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
 import lombok.Getter;
@@ -54,7 +55,8 @@ public class ServerServiceBuilder implements ServiceBuilder{
         }
         if(handler == null){
             this.handler = new WebsocketHandler(
-                    ()->new NettyWebsocketProxyMessageHandler(rsaUtil, codes, connectContextManager));
+                    ()->new ServiceProxyMessageHandler(rsaUtil, codes, connectContextManager,
+                            new DricetConnectFactory()));
         }
         if(codes == null && useCodes){
             codes = new DefaultProxyCommandCodes();
