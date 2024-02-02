@@ -4,6 +4,7 @@ import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.socks.proxy.handshake.connect.WebsocketConnect;
+import com.socks.proxy.handshake.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
@@ -12,6 +13,8 @@ import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import lombok.AllArgsConstructor;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 
 /**
  * @author: chuangjie
@@ -21,6 +24,11 @@ import java.io.IOException;
 public class WebsocketProxyConnectFactory implements ProxyFactory{
 
     private final WebsocketFactory factory;
+
+
+    public static WebsocketProxyConnectFactory createDefault(List<URI> uris){
+        return new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(uris));
+    }
 
 
     @Override

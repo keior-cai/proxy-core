@@ -1,5 +1,6 @@
 package com.socks.proxy.netty.proxy;
 
+import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -21,6 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5InitialRequest>{
 
     private AbstractProxy<?> proxyHandle;
+
+
+    public Socks5Proxy(ProxyMessageHandler handler){
+        this(new Socks5CommandHandler(handler));
+    }
 
 
     @Override

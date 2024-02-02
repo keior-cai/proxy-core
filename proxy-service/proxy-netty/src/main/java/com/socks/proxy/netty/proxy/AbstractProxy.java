@@ -39,6 +39,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
             writeSuccess(ctx, msg, target);
         } catch (Exception e) {
             writeFail(ctx, msg, target);
+            handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
         }
     }
 

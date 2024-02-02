@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -70,12 +69,13 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
 
 
     public static LocalProxyCode ofSocks5(ProxyMessageHandler handler){
-        return new LocalProxyCode(new Socks5HandshakeProtocolHandler(), new Socks5CommandHandler(handler), handler);
+        return new LocalProxyCode(new Socks5HandshakeProtocolHandler(), new Socks5Proxy(handler), handler);
     }
 
 
     public static LocalProxyCode ofComplex(ProxyMessageHandler handler){
-        List<SimpleChannelInboundHandler<?>> complexHandleList = Arrays.asList(new HttpTunnelProxy(handler), new Socks5CommandHandler(handler));
+        List<SimpleChannelInboundHandler<?>> complexHandleList = Arrays.asList(new HttpTunnelProxy(handler),
+                new Socks5CommandHandler(handler));
         return new LocalProxyCode(new ComplexHandshakeProtocolHandler(), new ComplexProxy(complexHandleList), handler);
     }
 }
