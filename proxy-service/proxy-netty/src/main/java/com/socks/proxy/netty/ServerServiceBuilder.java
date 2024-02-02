@@ -39,6 +39,9 @@ public class ServerServiceBuilder implements ServiceBuilder{
      */
     private boolean useCodes = true;
 
+    /**
+     * 连接管理器
+     */
     private ConnectContextManager connectContextManager;
 
 
