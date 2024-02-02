@@ -29,8 +29,13 @@ public class LocalHttpProxyServiceTest{
         RSAUtil rsaUtil = new RSAUtil();
         ProxyCodes codes = new DefaultProxyCommandCodes();
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
-        TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
-                .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
+        TcpService tcpService = new LocalServiceBuilder()
+                .setPort(1088)
+                .setCodes(codes)
+                .setHandler(handler)
+                .setRsaUtil(rsaUtil)
+                .setProtocol(Protocol.SOCKS5)
+                .builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);

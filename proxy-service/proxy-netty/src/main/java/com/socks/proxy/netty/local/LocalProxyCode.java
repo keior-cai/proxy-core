@@ -9,6 +9,7 @@ import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.handshake.ComplexHandshakeProtocolHandler;
 import com.socks.proxy.protocol.handshake.HandshakeProtocolHandler;
 import com.socks.proxy.protocol.handshake.HttpHandshakeProtocolHandler;
+import com.socks.proxy.protocol.handshake.Socks5HandshakeProtocolHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -69,7 +70,7 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
 
 
     public static LocalProxyCode ofSocks5(ProxyMessageHandler handler){
-        return new LocalProxyCode(new HttpHandshakeProtocolHandler(), new Socks5CommandHandler(handler), handler);
+        return new LocalProxyCode(new Socks5HandshakeProtocolHandler(), new Socks5CommandHandler(handler), handler);
     }
 
 
