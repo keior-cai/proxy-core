@@ -16,24 +16,19 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public class DefaultWebsocketFactory implements WebsocketFactory{
 
-    private final List<URI> address;
-
-    private final AtomicLong COUNTER = new AtomicLong();
+    private final URI address;
 
     private final WebSocketFactory factory = new WebSocketFactory();
 
 
-    public DefaultWebsocketFactory(List<URI> address){
+    public DefaultWebsocketFactory(URI address){
         this.address = address;
     }
 
 
     @Override
     public WebSocket getClient() throws IOException{
-        int len = address.size();
-        int index = (int) (COUNTER.incrementAndGet() % len);
-        URI target = address.get(index);
-        log.debug("create proxy server = {}", target);
-        return factory.createSocket(target);
+        log.debug("create proxy server = {}", address);
+        return factory.createSocket(address);
     }
 }

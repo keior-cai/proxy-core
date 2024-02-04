@@ -1,10 +1,10 @@
 package com.socks.proxy.netty.local;
 
 import com.socks.proxy.netty.enums.HandshakeProtocol;
+import com.socks.proxy.util.SocketUtils;
 import lombok.Data;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +19,7 @@ public class ProxyProperties{
     /**
      * 服务地址
      */
-    private List<URI> addr;
+    private URI addr;
 
     /**
      * 握手传输协议
@@ -35,4 +35,12 @@ public class ProxyProperties{
      * 配置项名称
      */
     private String name;
+
+
+    /**
+     * ping 延迟
+     */
+    public long pingDelay(){
+        return SocketUtils.ping(addr.getHost(), addr.getPort());
+    }
 }

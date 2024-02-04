@@ -26,7 +26,7 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
     private final WebsocketFactory factory;
 
 
-    public static WebsocketProxyConnectFactory createDefault(List<URI> uris){
+    public static WebsocketProxyConnectFactory createDefault(URI uris){
         return new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(uris));
     }
 

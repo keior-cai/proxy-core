@@ -36,8 +36,7 @@ public class LocalHttpProxyServiceTest{
         ProxyCodes codes = new DefaultProxyCommandCodes();
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
-        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(
-                Collections.singletonList(URI.create("ws://127.0.0.1:8083"))));
+        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         handler.setName("test");
         handler.setFactoryMap(proxyFactoryMap);
         TcpService tcpService = new LocalServiceBuilder()
@@ -70,8 +69,7 @@ public class LocalHttpProxyServiceTest{
         ProxyCodes codes = new DefaultProxyCommandCodes();
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
-        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(
-                Collections.singletonList(URI.create("ws://127.0.0.1:8083"))));
+        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         handler.setName("test");
         handler.setFactoryMap(proxyFactoryMap);
         return new LocalServiceBuilder()
