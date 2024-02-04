@@ -88,32 +88,4 @@ public class LocalServiceBuilder implements ServiceBuilder{
             this.rsaUtil = new RSAUtil();
         }
     }
-
-    //
-    //    public TcpService builderProperties(LocalProperties properties){
-    //        if(Objects.nonNull(properties.getPrivateKey()) && Objects.nonNull(properties.getPublicKey())){
-    //            rsaUtil = new RSAUtil(properties.getPrivateKey(), rsaUtil.getPublicKey());
-    //        }
-    //        this.port = properties.getPort();
-    //        this.protocol = properties.getProtocol();
-    //        List<ProxyProperties> proxies = properties.getProxies();
-    //        Map<String, ProxyFactory> factoryMap = new ConcurrentHashMap<>();
-    //        for(ProxyProperties proxy : proxies) {
-    //            ProxyFactory factory;
-    //            switch(proxy.getType()) {
-    //                case WEBSOCKET:
-    //                    factory = new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(proxy.getAddr()));
-    //                    break;
-    //                default:
-    //                    throw new IllegalArgumentException("unknown proxy type");
-    //            }
-    //            factoryMap.putIfAbsent(proxy.getName(), factory);
-    //        }
-    //        init();
-    //        LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
-    //        localProxyMessageHandler.setFactoryMap(factoryMap);
-    //        localProxyMessageHandler.setName(properties.getName());
-    //        this.handler = localProxyMessageHandler;
-    //        return builder();
-    //    }
 }

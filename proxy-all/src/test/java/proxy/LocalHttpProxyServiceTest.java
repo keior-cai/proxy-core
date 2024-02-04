@@ -44,14 +44,14 @@ public class LocalHttpProxyServiceTest{
                 .setCodes(codes)
                 .setHandler(handler)
                 .setRsaUtil(rsaUtil)
-                .setProtocol(Protocol.SOCKS5)
+                .setProtocol(Protocol.COMPLEX)
                 .builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
-        factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1088)));
+        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1088)));
         RestTemplate template = new RestTemplate(factory);
-        String forObject = template.getForObject("http://www.baidu.com", String.class);
+        String forObject = template.getForObject("https://www.baidu.com", String.class);
         log.info("http body = {}", forObject);
         tcpService.close();
     }
