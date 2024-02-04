@@ -1,6 +1,5 @@
 package com.socks.proxy.netty.local;
 
-import com.socks.proxy.netty.enums.ProxyModel;
 import com.socks.proxy.protocol.enums.Protocol;
 import lombok.Data;
 
@@ -19,7 +18,6 @@ public class LocalProperties{
      * 代理配置
      */
     private List<ProxyProperties> proxies;
-
 
     /**
      * 代理端口

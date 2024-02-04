@@ -40,7 +40,7 @@ public class DricetConnectFactory implements ProxyFactory{
 
 
     @Override
-    public ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException{
+    public ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler){
         ChannelFuture connect = bootstrap.connect(targetServer.host(), targetServer.port());
         connect.channel().pipeline().addLast(new ForwardBinaryData(handler));
         try {
