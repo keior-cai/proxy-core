@@ -61,11 +61,7 @@ public class NamedThreadFactory implements ThreadFactory{
      */
     public NamedThreadFactory(String prefix, ThreadGroup threadGroup, boolean isDaemon,
                               UncaughtExceptionHandler handler){
-        this.prefix = prefix == null || prefix.length() == 0 ? "proxy-" : prefix;
-        if(null == threadGroup){
-            final SecurityManager s = System.getSecurityManager();
-            threadGroup = (null != s) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        }
+        this.prefix = prefix == null || prefix.isEmpty() ? "proxy-" : prefix;
         this.group = threadGroup;
         this.isDaemon = isDaemon;
         this.handler = handler;
