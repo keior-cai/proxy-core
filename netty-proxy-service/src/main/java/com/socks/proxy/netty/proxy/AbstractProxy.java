@@ -45,18 +45,15 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
         ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
         try {
             ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
-            handler.targetConnect(localConnect, target);
+            ProxyConnect proxyConnect = handler.targetConnect(localConnect, target);
             pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
-            writeSuccess(ctx, msg, target);
+            writeSuccess(ctx, msg, target,handler);
         } catch (Exception e) {
             writeFail(ctx, msg, target);
             handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
         }
     }
 
-
-    protected void writeSuccessAfter(ChannelHandlerContext ctx, I msg, TargetServer target, ProxyConnect proxyConnect){
-    }
 
 
     @AllArgsConstructor
@@ -84,7 +81,8 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     /**
      * 通知请求服务，代理连接准备就绪
      */
-    protected abstract void writeSuccess(ChannelHandlerContext context, I msg, TargetServer target);
+    protected abstract void writeSuccess(ChannelHandlerContext context, I msg, TargetServer target,
+                                         ProxyMessageHandler handler);
 
 
     /**

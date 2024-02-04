@@ -25,7 +25,8 @@ public class Socks5CommandHandler extends AbstractProxy<Socks5CommandRequest>{
 
 
     @Override
-    protected void writeSuccess(ChannelHandlerContext context, Socks5CommandRequest msg, TargetServer target){
+    protected void writeSuccess(ChannelHandlerContext context, Socks5CommandRequest msg, TargetServer target,
+                                ProxyMessageHandler proxyConnect){
         context.writeAndFlush(new DefaultSocks5CommandResponse(Socks5CommandStatus.SUCCESS, msg.dstAddrType()));
 
     }
