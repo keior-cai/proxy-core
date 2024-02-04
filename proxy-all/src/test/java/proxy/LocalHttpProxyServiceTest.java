@@ -58,7 +58,8 @@ public class LocalHttpProxyServiceTest{
         ProxyCodes codes = new DefaultProxyCommandCodes();
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
-        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
+//        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
+        proxyFactoryMap.put("test", new DricetConnectFactory());
         handler.setName("test");
         handler.setFactoryMap(proxyFactoryMap);
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
@@ -86,7 +87,7 @@ public class LocalHttpProxyServiceTest{
                 URI.create("ws://chuangjie.icu:8041"));
         RuleLocalConnectServerFactory connectServerFactory = new RuleLocalConnectServerFactory(
                 new DricetConnectFactory());
-        connectServerFactory.addDomain("baidu.com", ws);
+        connectServerFactory.addDomain("baidu.com", new DricetConnectFactory());
         connectServerFactory.addDomain("google.com", xjp);
         proxyFactoryMap.put("新加坡", connectServerFactory);
         handler.setName("新加坡");
@@ -101,6 +102,8 @@ public class LocalHttpProxyServiceTest{
         RestTemplate template = new RestTemplate(factory);
         String forObject = template.getForObject("https://www.baidu.com", String.class);
         log.info("http body = {}", forObject);
+        String google = template.getForObject("https://www.google.com", String.class);
+        log.info("google body = {}", google);
         tcpService.close();
     }
 

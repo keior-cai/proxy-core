@@ -140,6 +140,10 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
             targetContext.setProxyInfo(proxyInfo);
             targetContext.setConnect(local);
             targetConnect.connect();
+            if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
+                // 直接连接不需要等待，直接发送数据
+                proxyContext.getProxyInfo().getCount().countDown();
+            }
             manager.putTargetConnect(targetConnect, targetContext);
             return targetConnect;
         } catch (IOException e) {
