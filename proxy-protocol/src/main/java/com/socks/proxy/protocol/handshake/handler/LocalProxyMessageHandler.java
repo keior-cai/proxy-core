@@ -115,7 +115,7 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
         ProxyContext proxyContext = manager.getContext(target);
-        if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
+        if(Objects.equals(target.type(), ConnectType.PROXY)){
             Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
         }else {
             Optional.of(proxyContext).ifPresent(context->context.write(binary));

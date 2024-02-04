@@ -60,10 +60,12 @@ public class LocalHttpProxyServiceTest{
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         WebsocketProxyConnectFactory ws = WebsocketProxyConnectFactory.createDefault(
                 URI.create("ws://127.0.0.1:8083"));
+        WebsocketProxyConnectFactory xjp = WebsocketProxyConnectFactory.createDefault(
+                URI.create("ws://chuangjie.icu:8041"));
         RuleLocalConnectServerFactory connectServerFactory = new RuleLocalConnectServerFactory(
                 new DricetConnectFactory());
-        connectServerFactory.addDomain("www.baidu.com", new DricetConnectFactory());
-        connectServerFactory.addDomain("google.com", ws);
+        connectServerFactory.addDomain("baidu.com", new DricetConnectFactory());
+        connectServerFactory.addDomain("google.com", xjp);
         proxyFactoryMap.put("新加坡", connectServerFactory);
         handler.setName("新加坡");
         handler.setFactoryMap(proxyFactoryMap);
@@ -72,10 +74,12 @@ public class LocalHttpProxyServiceTest{
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
-        factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1088)));
+        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1088)));
         RestTemplate template = new RestTemplate(factory);
-        String forObject = template.getForObject("https://www.baidu.com", String.class);
-        log.info("http body = {}", forObject);
+        String baidu = template.getForObject("http://www.baidu.com", String.class);
+        log.info("baidu http body = {}", baidu);
+        String google = template.getForObject("http://www.google.com", String.class);
+        log.info("google http body = {}", google);
         tcpService.close();
     }
 

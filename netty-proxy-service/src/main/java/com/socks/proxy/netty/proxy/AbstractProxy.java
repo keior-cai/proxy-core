@@ -8,6 +8,9 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.logging.ByteBufFormat;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,8 +41,8 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         log.debug("receive {} handshake", this.getClass().getSimpleName());
         TargetServer target = resolveRemoteServer(msg);
-        ChannelPipeline pipeline = ctx.pipeline();
-        //                .addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+        ChannelPipeline pipeline = ctx.pipeline()
+                        .addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
         try {
             handler.targetConnect(new DirectConnectChannel(ctx.channel()), target);
             pipeline.addLast(new ReadLocalInboundHandler(handler))

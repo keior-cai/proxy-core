@@ -5,6 +5,9 @@ import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.enums.Protocol;
 import io.netty.handler.codec.http.HttpRequest;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * @author: chuangjie
  * @date: 2023/6/29
@@ -21,9 +24,18 @@ public class HttpTargetServer implements TargetServer{
 
     private TargetServer resolveTargetAddress(HttpRequest httpMsg){
         String uri = httpMsg.uri();
-        String host = uri.contains(":") ? uri.substring(0, uri.lastIndexOf(":")) : uri;
-        int port = uri.contains(":") ? Integer.parseInt(uri.substring(uri.lastIndexOf(":") + 1)) : 80;
-        return new DefaultTargetServer(host, port, Protocol.HTTP);
+        if(uri.startsWith("http://") || uri.startsWith("https://")){
+            try {
+                URL url = new URL(uri);
+                return new DefaultTargetServer(url.getHost(), url.getPort() == -1 ? 80 : url.getPort(), Protocol.HTTP);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException(httpMsg.uri() + " is getDstAddress fail");
+            }
+        } else {
+            String host = uri.contains(":") ? uri.substring(0, uri.lastIndexOf(":")) : uri;
+            int port = uri.contains(":") ? Integer.parseInt(uri.substring(uri.lastIndexOf(":") + 1)) : 80;
+            return new DefaultTargetServer(host, port, Protocol.HTTP);
+        }
     }
 
 
