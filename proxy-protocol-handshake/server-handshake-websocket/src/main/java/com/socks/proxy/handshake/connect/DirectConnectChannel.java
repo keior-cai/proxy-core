@@ -1,6 +1,7 @@
 package com.socks.proxy.handshake.connect;
 
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import lombok.AllArgsConstructor;
@@ -48,6 +49,12 @@ public class DirectConnectChannel implements ProxyConnect{
     @Override
     public SocketAddress remoteAddress(){
         return context.remoteAddress();
+    }
+
+
+    @Override
+    public ConnectType type(){
+        return ConnectType.DIRECT;
     }
 
 

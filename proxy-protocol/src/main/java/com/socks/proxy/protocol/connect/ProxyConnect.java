@@ -1,5 +1,7 @@
 package com.socks.proxy.protocol.connect;
 
+import com.socks.proxy.protocol.enums.ConnectType;
+
 import java.net.SocketAddress;
 
 /**
@@ -39,5 +41,11 @@ public interface ProxyConnect{
      * 连接地址
      */
     SocketAddress remoteAddress();
+
+
+    /**
+     * 连接类型
+     */
+    ConnectType type();
 
 }

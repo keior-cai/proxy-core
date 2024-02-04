@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,6 +35,9 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
     @Override
     public ConnectProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
         List<ProxyFactory> proxyFactories = domainRule(remoteServer.host());
+        if(Objects.isNull(proxyFactories) || proxyFactories.isEmpty()){
+            return defaultProxyFactory.create(remoteServer, handler);
+        }
         for(ProxyFactory factory : proxyFactories) {
             try {
                 return factory.create(remoteServer, handler);

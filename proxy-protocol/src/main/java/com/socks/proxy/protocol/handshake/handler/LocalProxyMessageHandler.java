@@ -8,6 +8,7 @@ import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 import com.socks.proxy.protocol.enums.ServerProxyCommand;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
@@ -98,8 +100,12 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         try {
             ProxyContext proxyContext = manager.getContext(local);
-            proxyContext.getProxyInfo().getCount().await();
-            Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
+            if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
+                proxyContext.getProxyInfo().getCount().await();
+                Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
+            }else {
+                Optional.of(proxyContext).ifPresent(context->context.write(binary));
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -109,7 +115,11 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
         ProxyContext proxyContext = manager.getContext(target);
-        Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
+        if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
+            Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
+        }else {
+            Optional.of(proxyContext).ifPresent(context->context.write(binary));
+        }
 
     }
 
@@ -131,6 +141,11 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
             targetContext.setConnect(local);
             targetConnect.connect();
             manager.putTargetConnect(targetConnect, targetContext);
+            if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
+                // 直接连接不需要等待，直接发送数据
+                proxyInfo.getCount().countDown();
+            }
+            // 能不能发现是不是直连
             return targetConnect;
         } catch (IOException e) {
             throw new Error(e);

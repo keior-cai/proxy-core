@@ -1,6 +1,7 @@
 package com.socks.proxy.handshake.connect;
 
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
@@ -51,6 +52,12 @@ public class WebsocketProxyChannel implements ProxyConnect{
     @Override
     public SocketAddress remoteAddress(){
         return context.remoteAddress();
+    }
+
+
+    @Override
+    public ConnectType type(){
+        return ConnectType.PROXY;
     }
 
 

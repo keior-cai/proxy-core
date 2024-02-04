@@ -5,6 +5,7 @@ import com.socks.proxy.handshake.handler.ForwardBinaryData;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.bootstrap.Bootstrap;
@@ -17,7 +18,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.ExecutionException;
 
@@ -81,6 +81,12 @@ public class DricetConnectFactory implements ProxyFactory{
                 @Override
                 public void connect(){
                     // ignore
+                }
+
+
+                @Override
+                public ConnectType type(){
+                    return ConnectType.DIRECT;
                 }
             };
 

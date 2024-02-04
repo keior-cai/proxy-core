@@ -4,6 +4,7 @@ import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketState;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 
 import java.net.SocketAddress;
 import java.util.Objects;
@@ -61,6 +62,12 @@ public class WebsocketConnect implements ConnectProxyConnect{
         } catch (WebSocketException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    @Override
+    public ConnectType type(){
+        return ConnectType.PROXY;
     }
 
 }
