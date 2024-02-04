@@ -2,16 +2,12 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.logging.ByteBufFormat;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,17 +18,28 @@ import lombok.extern.slf4j.Slf4j;
  * @date: 2023/5/26
  **/
 @Slf4j
-@AllArgsConstructor
 public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     private final ProxyMessageHandler handler;
+
+
+    public AbstractProxy(ProxyMessageHandler handler){
+        this(handler, true);
+    }
+
+
+    public AbstractProxy(ProxyMessageHandler handler, boolean autoRelease){
+        super(autoRelease);
+        this.handler = handler;
+    }
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         log.debug("receive {} handshake", this.getClass().getSimpleName());
         TargetServer target = resolveRemoteServer(msg);
-        ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+        ChannelPipeline pipeline = ctx.pipeline();
+        //                .addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
         try {
             handler.targetConnect(new DirectConnectChannel(ctx.channel()), target);
             pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);

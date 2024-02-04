@@ -14,16 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.proxy</groupId>
-            <artifactId>proxy-netty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.proxy</groupId>
-            <artifactId>proxy-protocol-websocket</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.proxy</groupId>
-            <artifactId>server-handshake-websocket</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>netty-proxy-service</artifactId>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>

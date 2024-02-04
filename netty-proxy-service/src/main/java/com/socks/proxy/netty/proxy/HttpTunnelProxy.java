@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HttpTunnelProxy extends AbstractProxy<HttpRequest>{
 
     public HttpTunnelProxy(ProxyMessageHandler handler){
-        super(handler);
+        super(handler, false);
     }
 
 

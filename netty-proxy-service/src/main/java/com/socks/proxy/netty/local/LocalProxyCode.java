@@ -3,7 +3,6 @@ package com.socks.proxy.netty.local;
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.netty.proxy.ComplexProxy;
 import com.socks.proxy.netty.proxy.HttpTunnelProxy;
-import com.socks.proxy.netty.proxy.Socks5CommandHandler;
 import com.socks.proxy.netty.proxy.Socks5Proxy;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.handshake.ComplexHandshakeProtocolHandler;
@@ -21,7 +20,6 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@Slf4j
 @AllArgsConstructor
 @ChannelHandler.Sharable
 public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
@@ -75,7 +72,7 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
 
     public static LocalProxyCode ofComplex(ProxyMessageHandler handler){
         List<SimpleChannelInboundHandler<?>> complexHandleList = Arrays.asList(new HttpTunnelProxy(handler),
-                new Socks5CommandHandler(handler));
+                new Socks5Proxy(handler));
         return new LocalProxyCode(new ComplexHandshakeProtocolHandler(), new ComplexProxy(complexHandleList), handler);
     }
 }

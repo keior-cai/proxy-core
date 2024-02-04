@@ -18,8 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,22 +37,18 @@ public class LocalHttpProxyServiceTest{
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         handler.setName("test");
         handler.setFactoryMap(proxyFactoryMap);
-        TcpService tcpService = new LocalServiceBuilder()
-                .setPort(1088)
-                .setCodes(codes)
-                .setHandler(handler)
-                .setRsaUtil(rsaUtil)
-                .setProtocol(Protocol.COMPLEX)
-                .builder();
+        TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
+                .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
-        factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1088)));
+        factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", 1088)));
         RestTemplate template = new RestTemplate(factory);
         String forObject = template.getForObject("https://www.baidu.com", String.class);
         log.info("http body = {}", forObject);
         tcpService.close();
     }
+
 
     @Test
     public void testRestart(){
@@ -64,6 +58,7 @@ public class LocalHttpProxyServiceTest{
         tcpService.close();
     }
 
+
     private TcpService createTcpService(){
         RSAUtil rsaUtil = new RSAUtil();
         ProxyCodes codes = new DefaultProxyCommandCodes();
@@ -72,12 +67,7 @@ public class LocalHttpProxyServiceTest{
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         handler.setName("test");
         handler.setFactoryMap(proxyFactoryMap);
-        return new LocalServiceBuilder()
-                .setPort(1088)
-                .setCodes(codes)
-                .setHandler(handler)
-                .setRsaUtil(rsaUtil)
-                .setProtocol(Protocol.SOCKS5)
-                .builder();
+        return new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler).setRsaUtil(rsaUtil)
+                .setProtocol(Protocol.SOCKS5).builder();
     }
 }
