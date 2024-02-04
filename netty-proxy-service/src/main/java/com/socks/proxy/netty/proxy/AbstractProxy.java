@@ -2,6 +2,7 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -41,17 +42,20 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         log.debug("receive {} handshake", this.getClass().getSimpleName());
         TargetServer target = resolveRemoteServer(msg);
-        ChannelPipeline pipeline = ctx.pipeline()
-                        .addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+        ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
         try {
-            handler.targetConnect(new DirectConnectChannel(ctx.channel()), target);
-            pipeline.addLast(new ReadLocalInboundHandler(handler))
-                    .remove(this);
+            ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
+            handler.targetConnect(localConnect, target);
+            pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
             writeSuccess(ctx, msg, target);
         } catch (Exception e) {
             writeFail(ctx, msg, target);
             handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
         }
+    }
+
+
+    protected void writeSuccessAfter(ChannelHandlerContext ctx, I msg, TargetServer target, ProxyConnect proxyConnect){
     }
 
 

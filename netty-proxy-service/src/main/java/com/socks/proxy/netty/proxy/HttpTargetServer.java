@@ -3,7 +3,7 @@ package com.socks.proxy.netty.proxy;
 import com.socks.proxy.protocol.DefaultTargetServer;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.enums.Protocol;
-import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,12 +17,12 @@ public class HttpTargetServer implements TargetServer{
     private final TargetServer proxy;
 
 
-    public HttpTargetServer(HttpRequest request){
+    public HttpTargetServer(FullHttpRequest request){
         proxy = resolveTargetAddress(request);
     }
 
 
-    private TargetServer resolveTargetAddress(HttpRequest httpMsg){
+    private TargetServer resolveTargetAddress(FullHttpRequest httpMsg){
         String uri = httpMsg.uri();
         if(uri.startsWith("http://") || uri.startsWith("https://")){
             try {
@@ -34,7 +34,7 @@ public class HttpTargetServer implements TargetServer{
         } else {
             String host = uri.contains(":") ? uri.substring(0, uri.lastIndexOf(":")) : uri;
             int port = uri.contains(":") ? Integer.parseInt(uri.substring(uri.lastIndexOf(":") + 1)) : 80;
-            return new DefaultTargetServer(host, port, Protocol.HTTP);
+            return new DefaultTargetServer(host, port, Protocol.HTTPS);
         }
     }
 
