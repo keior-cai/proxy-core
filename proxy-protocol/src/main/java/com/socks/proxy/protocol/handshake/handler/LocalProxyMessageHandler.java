@@ -100,10 +100,10 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         try {
             ProxyContext proxyContext = manager.getContext(local);
+            proxyContext.getProxyInfo().getCount().await();
             if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
-                proxyContext.getProxyInfo().getCount().await();
                 Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
-            } else {
+            }else {
                 Optional.of(proxyContext).ifPresent(context->context.write(binary));
             }
         } catch (InterruptedException e) {
@@ -117,7 +117,7 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
         ProxyContext proxyContext = manager.getContext(target);
         if(Objects.equals(target.type(), ConnectType.PROXY)){
             Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
-        } else {
+        }else {
             Optional.of(proxyContext).ifPresent(context->context.write(binary));
         }
 
@@ -140,10 +140,6 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
             targetContext.setProxyInfo(proxyInfo);
             targetContext.setConnect(local);
             targetConnect.connect();
-            if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
-                // 直接连接不需要等待，直接发送数据
-                proxyContext.getProxyInfo().getCount().countDown();
-            }
             manager.putTargetConnect(targetConnect, targetContext);
             return targetConnect;
         } catch (IOException e) {

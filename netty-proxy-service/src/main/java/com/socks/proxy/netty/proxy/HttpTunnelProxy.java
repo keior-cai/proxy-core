@@ -40,6 +40,8 @@ public class HttpTunnelProxy extends AbstractProxy<FullHttpRequest>{
 
         if(Objects.equals(target.sourceProtocol(), Protocol.HTTP)){
             handler.handleLocalBinaryMessage(new DirectConnectChannel(context.channel()), ByteBufUtil.getBytes(convertHttpRequestToByteBuf(msg)));
+            context.pipeline().remove(HttpServerCodec.class);
+            context.pipeline().remove(HttpObjectAggregator.class);
         }else{
             HttpResponse response = new DefaultFullHttpResponse(msg.protocolVersion(), HttpResponseStatus.OK,
                     Unpooled.buffer());
@@ -65,7 +67,8 @@ public class HttpTunnelProxy extends AbstractProxy<FullHttpRequest>{
                 httpRequest.protocolVersion().text() + "\r\n" +
                 headersToString(httpRequest.headers()) + "\r\n";
         ByteBuf byteBuf = Unpooled.copiedBuffer(requestAsString, io.netty.util.CharsetUtil.UTF_8);
-        byteBuf.writeBytes(httpRequest.content().asByteBuf());
+        byte[] body = ByteBufUtil.getBytes(httpRequest.content().asByteBuf());
+        byteBuf.writeBytes(body);
         return byteBuf;
     }
 

@@ -68,7 +68,7 @@ public class LocalHttpProxyServiceTest{
         factory.setConnectTimeout(10000);
         factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1088)));
         RestTemplate template = new RestTemplate(factory);
-        String forObject = template.getForObject("https://www.baidu.com", String.class);
+        String forObject = template.getForObject("http://www.baidu.com", String.class);
         log.info("http body = {}", forObject);
         tcpService.close();
     }
