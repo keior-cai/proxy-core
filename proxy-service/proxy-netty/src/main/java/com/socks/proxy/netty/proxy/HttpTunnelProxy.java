@@ -1,7 +1,6 @@
 package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.protocol.TargetServer;
-import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
@@ -34,9 +33,9 @@ public class HttpTunnelProxy extends AbstractProxy<HttpRequest>{
     protected void writeSuccess(ChannelHandlerContext context, HttpRequest msg, TargetServer target){
         HttpResponse response = new DefaultFullHttpResponse(msg.protocolVersion(),
                 HttpResponseStatus.valueOf(200, "Connection established"), Unpooled.buffer());
+        context.writeAndFlush(response);
         context.pipeline().remove(HttpServerCodec.class);
         context.pipeline().remove(HttpObjectAggregator.class);
-        context.writeAndFlush(response);
     }
 
 

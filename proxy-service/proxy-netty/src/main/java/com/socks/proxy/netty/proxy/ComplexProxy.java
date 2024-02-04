@@ -30,7 +30,7 @@ public class ComplexProxy extends SimpleChannelInboundHandler<Object>{
         for(SimpleChannelInboundHandler<?> handler : listeners) {
             pipeline.addLast(handler);
         }
-        ctx.fireChannelRead(msg);
         pipeline.remove(this);
+        ctx.fireChannelRead(msg);
     }
 }
