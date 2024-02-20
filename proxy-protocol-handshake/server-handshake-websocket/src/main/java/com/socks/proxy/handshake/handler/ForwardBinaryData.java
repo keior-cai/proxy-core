@@ -37,6 +37,6 @@ public class ForwardBinaryData extends SimpleChannelInboundHandler<ByteBuf>{
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
         handler.handleTargetClose(new DirectConnectChannel(ctx.channel()),
-                new Exception("连接发生异常:" + cause.getMessage()));
+                new Exception("远程连接发生异常:" + cause.getMessage()));
     }
 }

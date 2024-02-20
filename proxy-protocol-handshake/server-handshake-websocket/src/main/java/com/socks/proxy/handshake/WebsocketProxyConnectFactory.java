@@ -3,6 +3,7 @@ package com.socks.proxy.handshake;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
+import com.neovisionaries.ws.client.WebSocketFrame;
 import com.socks.proxy.handshake.connect.WebsocketConnect;
 import com.socks.proxy.handshake.websocket.DefaultWebsocketFactory;
 import com.socks.proxy.handshake.websocket.WebsocketFactory;
@@ -66,6 +67,12 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
         @Override
         public void onError(WebSocket websocket, WebSocketException cause){
             handler.handleTargetClose(new WebsocketConnect(websocket), new Exception(cause.getMessage()));
+        }
+
+
+        @Override
+        public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
+            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception("websocket 断开连接"));
         }
 
 

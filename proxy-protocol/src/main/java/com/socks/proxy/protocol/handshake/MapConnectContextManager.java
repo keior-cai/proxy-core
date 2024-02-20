@@ -19,6 +19,19 @@ public class MapConnectContextManager implements ConnectContextManager{
 
     private final Map<String, ProxyContext> contextMap = new ConcurrentHashMap<>();
 
+    public MapConnectContextManager(){
+        new Thread(()->{
+            while(!Thread.currentThread().isInterrupted()){
+                log.info("map = {} ", contextMap);
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
+
 
     @Override
     public void putLocalConnect(ProxyConnect connect, ProxyContext proxyContext){
@@ -44,7 +57,7 @@ public class MapConnectContextManager implements ConnectContextManager{
 
 
     @Override
-    public void removeAll(ProxyConnect connect){
+    public synchronized void removeAll(ProxyConnect connect){
         Optional<String> optional = Optional.ofNullable(connect).map(ProxyConnect::channelId);
         if(optional.isPresent()){
             connect.close();
