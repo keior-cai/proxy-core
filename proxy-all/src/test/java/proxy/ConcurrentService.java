@@ -34,7 +34,7 @@ public class ConcurrentService{
 
 
     @Test
-    public void http(){
+    public void http() throws Exception{
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
         factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1088)));
