@@ -22,9 +22,6 @@ public class MapConnectContextManager implements ConnectContextManager{
 
     private final Map<String, ProxyContext> contextMap = new ConcurrentHashMap<>();
 
-    private final Set<String> connectIds = new ConcurrentHashSet<>();
-
-
     @Override
     public void putLocalConnect(ProxyConnect connect, ProxyContext proxyContext){
         contextMap.put(connect.channelId(), proxyContext);
@@ -54,14 +51,12 @@ public class MapConnectContextManager implements ConnectContextManager{
         if(optional.isPresent()){
             connect.close();
             ProxyContext remove = contextMap.remove(optional.get());
-            connectIds.remove(connect.channelId());
             if(Objects.nonNull(remove)){
                 Optional.ofNullable(remove.getProxyInfo().getCount()).filter(item->item.getCount() > 0)
                         .ifPresent(CountDownLatch::countDown);
                 Optional.ofNullable(remove.getConnect()).ifPresent(ProxyConnect::close);
                 Optional.ofNullable(remove.getConnect()).ifPresent(otherConnect->{
                     contextMap.remove(otherConnect.channelId());
-                    connectIds.remove(otherConnect.channelId());
                 });
             }
         } else {
@@ -73,17 +68,5 @@ public class MapConnectContextManager implements ConnectContextManager{
     @Override
     public ProxyContext getContext(ProxyConnect connect){
         return contextMap.get(connect.channelId());
-    }
-
-
-    @Override
-    public void putProxyConnect(ProxyConnect connect){
-        connectIds.add(connect.channelId());
-    }
-
-
-    @Override
-    public Set<ProxyConnect> getTargetAllProxy(){
-        return connectIds.stream().map(contextMap::get).map(ProxyContext::getConnect).collect(Collectors.toSet());
     }
 }

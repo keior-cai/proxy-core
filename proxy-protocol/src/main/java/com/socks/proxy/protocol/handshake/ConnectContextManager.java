@@ -39,15 +39,4 @@ public interface ConnectContextManager{
      */
     ProxyContext getContext(ProxyConnect connect);
 
-
-    /**
-     * 创建一个代理连接
-     */
-    void putProxyConnect(ProxyConnect connect);
-
-
-    /**
-     * 查询连接管理器全部连接
-     */
-    Set<ProxyConnect> getTargetAllProxy();
 }
