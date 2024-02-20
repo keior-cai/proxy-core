@@ -4,7 +4,13 @@ import cn.hutool.core.lang.func.Func1;
 import cn.hutool.core.lang.func.LambdaUtil;
 
 import java.lang.invoke.SerializedLambda;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * @Description: field name utils
@@ -39,5 +45,38 @@ public final class FieldNameUtils{
         }
 
         return name;
+    }
+
+
+    public static void main(String[] args) throws Throwable{
+        Selector open = Selector.open();
+        new Thread(()->{
+            try {
+                while(!Thread.currentThread().isInterrupted()) {
+                    SocketChannel channel = SocketChannel.open();
+                    channel.configureBlocking(false);
+                    channel.register(open, SelectionKey.OP_CONNECT);
+                    channel.connect(new InetSocketAddress("www.baidu.com", 80));
+                    open.wakeup();
+                    Thread.sleep(3000L);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
+        while(!Thread.currentThread().isInterrupted()) {
+            int select = open.select();
+            Set<SelectionKey> selectionKeys = open.selectedKeys();
+            for(SelectionKey key : selectionKeys) {
+                SocketChannel channel = (SocketChannel) key.channel();
+                if(key.isConnectable()){
+                    channel.register(open, SelectionKey.OP_WRITE);
+                } else if(key.isWritable()){
+                    channel.write(ByteBuffer.wrap(new byte[] { 01, 02 }));
+                    channel.register(open, SelectionKey.OP_READ);
+                }
+            }
+        }
     }
 }
