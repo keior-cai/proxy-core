@@ -1,6 +1,5 @@
 package com.socks.proxy.protocol.handshake;
 
-import cn.hutool.core.collection.ConcurrentHashSet;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 /**
  * @author: chuangjie
@@ -21,6 +18,7 @@ import java.util.stream.Collectors;
 public class MapConnectContextManager implements ConnectContextManager{
 
     private final Map<String, ProxyContext> contextMap = new ConcurrentHashMap<>();
+
 
     @Override
     public void putLocalConnect(ProxyConnect connect, ProxyContext proxyContext){

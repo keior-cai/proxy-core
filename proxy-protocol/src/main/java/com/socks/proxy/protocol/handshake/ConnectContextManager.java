@@ -3,8 +3,6 @@ package com.socks.proxy.protocol.handshake;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 
-import java.util.Set;
-
 /**
  * 连接上下文管理器
  */
