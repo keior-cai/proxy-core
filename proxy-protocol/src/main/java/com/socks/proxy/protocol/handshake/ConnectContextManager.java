@@ -23,12 +23,6 @@ public interface ConnectContextManager{
 
 
     /**
-     * 从连接管理器移除一个连接上下文
-     */
-    void remove(ProxyConnect connect);
-
-
-    /**
      * 从连接管理器移除全部关联上下文
      */
     void removeAll(ProxyConnect connect);

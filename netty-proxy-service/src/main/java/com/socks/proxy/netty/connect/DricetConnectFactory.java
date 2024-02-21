@@ -19,6 +19,7 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.SocketAddress;
+import java.net.URI;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -93,5 +94,17 @@ public class DricetConnectFactory implements ProxyFactory{
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    @Override
+    public long ping(){
+        return 0;
+    }
+
+
+    @Override
+    public URI uri(){
+        return null;
     }
 }

@@ -6,6 +6,7 @@ import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,18 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
             }
         }
         return defaultProxyFactory.create(remoteServer, handler);
+    }
+
+
+    @Override
+    public long ping(){
+        return 0;
+    }
+
+
+    @Override
+    public URI uri(){
+        return null;
     }
 
 

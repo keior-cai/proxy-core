@@ -1,11 +1,19 @@
 package com.socks.proxy.netty;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.socks.proxy.netty.http.HttpHandle;
+import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.netty.local.LocalProxyCode;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ICipher;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.factory.ProxyFactory;
+import com.socks.proxy.protocol.handshake.ConnectContextManager;
+import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
+import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
@@ -13,6 +21,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author: chuangjie
@@ -28,6 +41,16 @@ public class LocalServiceBuilder implements ServiceBuilder{
      * local 服务端口
      */
     private int port = 1081;
+
+    /**
+     * http 管理端口
+     */
+    private int httpManagePort = 8000;
+
+    /**
+     * proxy name
+     */
+    private String name;
 
     /**
      * local 启动代理协议, 默认使用COMPLEX
@@ -60,6 +83,16 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private ChannelHandler protocolHandle;
 
+    /**
+     * 代理工厂
+     */
+    private Map<String, ProxyFactory> proxyFactoryMap;
+
+    /**
+     * 管理器
+     */
+    private ConnectContextManager manager;
+
 
     @Override
     public TcpService builder(){
@@ -76,7 +109,70 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 this.protocolHandle = LocalProxyCode.ofComplex(handler);
                 break;
         }
-        return new NettyTcpService(port, protocolHandle);
+        NettyTcpService nettyTcpService = new NettyTcpService(port, protocolHandle);
+
+        Map<String, HttpHandle> map = new HashMap<>();
+        map.put("/stop", (request, response)->{
+            nettyTcpService.close();
+            response.content().writeBytes("OK".getBytes());
+        });
+        map.put("/start", (request, response)->{
+            init();
+            nettyTcpService.start();
+            response.content().writeBytes("OK".getBytes());
+        });
+        map.put("/restart", (request, response)->{
+            init();
+            nettyTcpService.restart();
+            response.content().writeBytes("OK".getBytes());
+        });
+        map.put("/ping", (request, response)->{
+            List<Map<String, Object>> collect = proxyFactoryMap.values().stream()
+                    .map(value->{
+                        Map<String, Object> p = new HashMap<>();
+                        p.put("host", value.uri().toString());
+                        p.put("ping", value.ping());
+                        return p;
+                    })
+                    .collect(Collectors.toList());
+            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
+
+        });
+        map.put("/connects", (request, response)->{
+            List<JSONObject> collect = manager.getTargetAllProxy().stream().map(item->{
+                ProxyContext context = manager.getContext(item);
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("src", item.remoteAddress());
+                jsonObject.put("dst", context.getProxyInfo().getServer().toString());
+                return jsonObject;
+            }).collect(Collectors.toList());
+            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
+        });
+        NettyTcpService httpService = new NettyTcpService(httpManagePort, new HttpService(map));
+
+        return new TcpService(){
+            @Override
+            public void start(){
+                nettyTcpService.start();
+                httpService.start();
+
+            }
+
+
+            @Override
+            public void close(){
+                nettyTcpService.close();
+                httpService.close();
+            }
+
+
+            @Override
+            public void restart(){
+                nettyTcpService.restart();
+                httpService.restart();
+            }
+        };
+
     }
 
 
@@ -87,5 +183,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
         if(rsaUtil == null){
             this.rsaUtil = new RSAUtil();
         }
+        LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
+        localProxyMessageHandler.setFactoryMap(proxyFactoryMap);
+        localProxyMessageHandler.setName(name);
+        handler = localProxyMessageHandler;
     }
 }

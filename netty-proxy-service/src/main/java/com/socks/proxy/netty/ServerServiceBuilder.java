@@ -15,8 +15,6 @@ import com.socks.proxy.protocol.handshake.MapConnectContextManager;
 import com.socks.proxy.protocol.handshake.handler.ServiceProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -53,7 +51,7 @@ public class ServerServiceBuilder implements ServiceBuilder{
     /**
      * 开启http管理服务
      */
-    private boolean useHttpService;
+    private boolean useHttpService = true;
 
     /**
      * 连接管理器
@@ -64,7 +62,6 @@ public class ServerServiceBuilder implements ServiceBuilder{
     @Override
     public TcpService builder(){
         init();
-
         NettyTcpService nettyTcpService = new NettyTcpService(port, handler);
         Map<String, HttpHandle> handleMap = new HashMap<>();
         handleMap.put("/connects", (request, response)->{
@@ -73,19 +70,24 @@ public class ServerServiceBuilder implements ServiceBuilder{
                     .collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
         });
-        NettyTcpService httpService = new NettyTcpService(httpProt, new HttpService(handleMap));
+        NettyTcpService httpService;
+        if(useHttpService){
+            httpService = new NettyTcpService(httpProt, new HttpService(handleMap));
+        }else {
+            httpService = null;
+        }
         return new TcpService(){
             @Override
             public void start(){
                 nettyTcpService.start();
-                httpService.start();
+                Optional.ofNullable(httpService).ifPresent(TcpService::start);
             }
 
 
             @Override
             public void close(){
                 nettyTcpService.close();
-                httpService.close();
+                Optional.ofNullable(httpService).ifPresent(TcpService::close);
             }
 
 

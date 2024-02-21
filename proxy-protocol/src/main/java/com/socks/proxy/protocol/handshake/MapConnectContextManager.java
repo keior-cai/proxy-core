@@ -41,16 +41,7 @@ public class MapConnectContextManager implements ConnectContextManager{
 
 
     @Override
-    public void remove(ProxyConnect connect){
-        if(Objects.nonNull(connect)){
-            ProxyContext remove = contextMap.remove(connect.channelId());
-            Optional.ofNullable(remove.getConnect()).ifPresent(ProxyConnect::close);
-        }
-    }
-
-
-    @Override
-    public void removeAll(ProxyConnect connect){
+    public synchronized void removeAll(ProxyConnect connect){
         Optional<String> optional = Optional.ofNullable(connect).map(ProxyConnect::channelId);
         if(optional.isPresent()){
             connect.close();

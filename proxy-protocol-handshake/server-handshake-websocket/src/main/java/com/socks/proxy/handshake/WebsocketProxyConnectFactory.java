@@ -11,11 +11,11 @@ import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
+import com.socks.proxy.util.SocketUtils;
 import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 /**
  * @author: chuangjie
@@ -26,9 +26,11 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
 
     private final WebsocketFactory factory;
 
+    private final URI uris;
+
 
     public static WebsocketProxyConnectFactory createDefault(URI uris){
-        return new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(uris));
+        return new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(uris), uris);
     }
 
 
@@ -37,6 +39,18 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
         WebSocket client = factory.getClient();
         client.addListener(new BlockWebsocketProtocol(handler));
         return new WebsocketConnect(client);
+    }
+
+
+    @Override
+    public long ping(){
+        return SocketUtils.ping(uris.getHost(), uris.getPort(), 3000);
+    }
+
+
+    @Override
+    public URI uri(){
+        return uris;
     }
 
 
