@@ -1,8 +1,7 @@
 package com.socks.proxy.netty.local;
 
-import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.netty.LocalServiceBuilder;
-import com.socks.proxy.netty.connect.DricetConnectFactory;
+import com.socks.proxy.netty.connect.DirectConnectFactory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.NoCodeProxyCodes;
@@ -19,7 +18,7 @@ public class SimpleLocalTcpServer implements TcpService{
 
     private final TcpService tcpService;
 
-    private final DricetConnectFactory factory = new DricetConnectFactory();
+    private final DirectConnectFactory factory = new DirectConnectFactory();
 
     public SimpleLocalTcpServer(int port){
         tcpService = new LocalServiceBuilder()

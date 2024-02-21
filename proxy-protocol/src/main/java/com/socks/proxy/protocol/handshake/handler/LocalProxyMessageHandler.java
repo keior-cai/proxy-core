@@ -40,12 +40,7 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     /**
      * 代理工厂集合
      */
-    private Map<String, ProxyFactory> factoryMap;
-
-    /**
-     * proxy node name
-     */
-    private String name;
+    private ProxyFactory factory;
 
 
     public LocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
@@ -133,7 +128,6 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
         ProxyInfo proxyInfo = proxyContext.getProxyInfo();
         proxyInfo.setServer(target);
         try {
-            ProxyFactory factory = factoryMap.get(name);
             ConnectProxyConnect targetConnect = factory.create(target, this);
             proxyContext.setConnect(targetConnect);
             ProxyContext targetContext = new ProxyContext();

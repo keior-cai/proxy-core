@@ -55,4 +55,9 @@ public class HttpTargetServer implements TargetServer{
     public Protocol sourceProtocol(){
         return proxy.sourceProtocol();
     }
+
+    public String toString(){
+        return sourceProtocol()+"://"+host()+":"+port();
+    }
+
 }

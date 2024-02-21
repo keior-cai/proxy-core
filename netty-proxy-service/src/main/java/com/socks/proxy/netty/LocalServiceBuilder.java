@@ -1,16 +1,21 @@
 package com.socks.proxy.netty;
 
+import cn.hutool.core.map.MapUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.socks.proxy.netty.connect.DirectConnectFactory;
+import com.socks.proxy.netty.enums.ProxyModel;
 import com.socks.proxy.netty.http.HttpHandle;
 import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.netty.local.LocalProxyCode;
+import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ICipher;
 import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.factory.ProxyFactory;
+import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.MapConnectContextManager;
 import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
@@ -59,6 +64,11 @@ public class LocalServiceBuilder implements ServiceBuilder{
     private Protocol protocol = Protocol.COMPLEX;
 
     /**
+     * 代理模式
+     */
+    private ProxyModel proxyModel = ProxyModel.RULE;
+
+    /**
      * 非对称加密工具
      */
     private RSAUtil rsaUtil;
@@ -94,6 +104,11 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private ConnectContextManager manager;
 
+    /**
+     * 代理模式
+     */
+    private Map<String, List<String>> ruleMap;
+
 
     @Override
     public TcpService builder(){
@@ -128,23 +143,26 @@ public class LocalServiceBuilder implements ServiceBuilder{
             response.content().writeBytes("OK".getBytes());
         });
         map.put("/ping", (request, response)->{
-            List<Map<String, Object>> collect = proxyFactoryMap.values().stream()
-                    .map(value->{
-                        Map<String, Object> p = new HashMap<>();
-                        p.put("host", value.uri().toString());
-                        p.put("ping", value.ping());
-                        return p;
-                    })
-                    .collect(Collectors.toList());
+            List<Map<String, Object>> collect = proxyFactoryMap.entrySet().stream().map(value->{
+                ProxyFactory factory = value.getValue();
+                Map<String, Object> p = new HashMap<>();
+                p.put("host", factory.uri().toString());
+                p.put("ping", factory.ping());
+                p.put("name", value.getKey());
+                return p;
+            }).collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
 
         });
         map.put("/connects", (request, response)->{
             List<JSONObject> collect = manager.getTargetAllProxy().stream().map(item->{
                 ProxyContext context = manager.getContext(item);
+                TargetServer server = context.getProxyInfo().getServer();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("src", item.remoteAddress());
-                jsonObject.put("dst", context.getProxyInfo().getServer().toString());
+                jsonObject.put("type", context.getConnect().type());
+                jsonObject.put("dst", MapUtil.builder("proxy", server.sourceProtocol().toString())
+                        .put("address", server.host() + ":" + server.port()).map());
                 return jsonObject;
             }).collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
@@ -187,9 +205,35 @@ public class LocalServiceBuilder implements ServiceBuilder{
         if(manager == null){
             manager = new MapConnectContextManager();
         }
+        ProxyFactory factory = proxyFactoryMap.get(name);
         LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
-        localProxyMessageHandler.setFactoryMap(proxyFactoryMap);
-        localProxyMessageHandler.setName(name);
+        switch(proxyModel) {
+            case RULE:
+                RuleLocalConnectServerFactory proxyFactory = new RuleLocalConnectServerFactory(
+                        new DirectConnectFactory());
+                if(ruleMap != null){
+                    ruleMap.forEach((k, v)->v.forEach(model->{
+                        if(model.equalsIgnoreCase("DIRECT")){
+                            proxyFactory.addDomain(k, new DirectConnectFactory());
+                        } else if(model.equalsIgnoreCase("PROXY")){
+                            proxyFactory.addDomain(k, factory);
+                        } else {
+                            ProxyFactory domain = proxyFactoryMap.get(model);
+                            if(domain == null){
+                                throw new IllegalArgumentException();
+                            }
+                            proxyFactory.addDomain(k, domain);
+                        }
+                    }));
+                }
+                localProxyMessageHandler.setFactory(proxyFactory);
+                break;
+            case DIRECT:
+                localProxyMessageHandler.setFactory(new DirectConnectFactory());
+            default:
+            case GLOBAL:
+                localProxyMessageHandler.setFactory(factory);
+        }
         handler = localProxyMessageHandler;
     }
 }

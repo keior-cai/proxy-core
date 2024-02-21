@@ -2,7 +2,7 @@ package proxy;
 
 import com.socks.proxy.handshake.WebsocketProxyConnectFactory;
 import com.socks.proxy.netty.LocalServiceBuilder;
-import com.socks.proxy.netty.connect.DricetConnectFactory;
+import com.socks.proxy.netty.connect.DirectConnectFactory;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
@@ -37,9 +37,8 @@ public class LocalHttpProxyServiceTest{
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
-        handler.setName("test");
-        handler.setFactoryMap(proxyFactoryMap);
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
+                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -59,10 +58,9 @@ public class LocalHttpProxyServiceTest{
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
 //        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
-        proxyFactoryMap.put("test", new DricetConnectFactory());
-        handler.setName("test");
-        handler.setFactoryMap(proxyFactoryMap);
+        proxyFactoryMap.put("test", new DirectConnectFactory());
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
+                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -86,14 +84,13 @@ public class LocalHttpProxyServiceTest{
         WebsocketProxyConnectFactory xjp = WebsocketProxyConnectFactory.createDefault(
                 URI.create("ws://chuangjie.icu:8041"));
         RuleLocalConnectServerFactory connectServerFactory = new RuleLocalConnectServerFactory(
-                new DricetConnectFactory());
-        connectServerFactory.addDomain("baidu.com", new DricetConnectFactory());
+                new DirectConnectFactory());
+        connectServerFactory.addDomain("baidu.com", new DirectConnectFactory());
         connectServerFactory.addDomain("google.com", xjp);
         proxyFactoryMap.put("新加坡", connectServerFactory);
-        handler.setName("新加坡");
-        handler.setFactoryMap(proxyFactoryMap);
 
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
+                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -123,9 +120,8 @@ public class LocalHttpProxyServiceTest{
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
-        handler.setName("test");
-        handler.setFactoryMap(proxyFactoryMap);
         return new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler).setRsaUtil(rsaUtil)
+                .setProxyFactoryMap(proxyFactoryMap)
                 .setProtocol(Protocol.SOCKS5).builder();
     }
 }

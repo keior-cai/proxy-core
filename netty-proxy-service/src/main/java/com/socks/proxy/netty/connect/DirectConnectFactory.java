@@ -27,12 +27,12 @@ import java.util.concurrent.ExecutionException;
  * @date: 2024/2/2
  **/
 @Slf4j
-public class DricetConnectFactory implements ProxyFactory{
+public class DirectConnectFactory implements ProxyFactory{
 
     private final Bootstrap bootstrap = new Bootstrap();
 
 
-    public DricetConnectFactory(){
+    public DirectConnectFactory(){
         int processors = Runtime.getRuntime().availableProcessors();
         EventLoopGroup group = new NioEventLoopGroup(processors * 2);
         bootstrap.group(group).channel(NioSocketChannel.class)

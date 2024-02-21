@@ -2,7 +2,7 @@ package com.socks.proxy.netty;
 
 import com.alibaba.fastjson2.JSON;
 import com.socks.proxy.handshake.WebsocketHandler;
-import com.socks.proxy.netty.connect.DricetConnectFactory;
+import com.socks.proxy.netty.connect.DirectConnectFactory;
 import com.socks.proxy.netty.http.HttpHandle;
 import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.protocol.TcpService;
@@ -106,7 +106,7 @@ public class ServerServiceBuilder implements ServiceBuilder{
         if(handler == null){
             this.handler = new WebsocketHandler(
                     ()->new ServiceProxyMessageHandler(rsaUtil, codes, connectContextManager,
-                            new DricetConnectFactory()));
+                            new DirectConnectFactory()));
         }
         if(codes == null && useCodes){
             codes = new DefaultProxyCommandCodes();
