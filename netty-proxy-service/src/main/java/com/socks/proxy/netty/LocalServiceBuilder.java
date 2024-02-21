@@ -12,6 +12,7 @@ import com.socks.proxy.protocol.codes.ProxyCodes;
 import com.socks.proxy.protocol.enums.Protocol;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
+import com.socks.proxy.protocol.handshake.MapConnectContextManager;
 import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
@@ -182,6 +183,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
         }
         if(rsaUtil == null){
             this.rsaUtil = new RSAUtil();
+        }
+        if(manager == null){
+            manager = new MapConnectContextManager();
         }
         LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
         localProxyMessageHandler.setFactoryMap(proxyFactoryMap);
