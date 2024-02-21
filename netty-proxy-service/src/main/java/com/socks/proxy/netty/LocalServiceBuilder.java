@@ -8,6 +8,10 @@ import com.socks.proxy.netty.enums.ProxyModel;
 import com.socks.proxy.netty.http.HttpHandle;
 import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.netty.local.LocalProxyCode;
+import com.socks.proxy.netty.system.LinuxSetProxy;
+import com.socks.proxy.netty.system.MacSetUpProxy;
+import com.socks.proxy.netty.system.SetProxy;
+import com.socks.proxy.netty.system.WindowsSetProxy;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
@@ -27,6 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
  * @author: chuangjie
  * @date: 2023/6/4
  **/
+@Slf4j
 @Getter
 @Setter
 @ToString
@@ -169,17 +175,34 @@ public class LocalServiceBuilder implements ServiceBuilder{
         });
         NettyTcpService httpService = new NettyTcpService(httpManagePort, new HttpService(map));
 
+        String os = System.getProperty("os.name").toLowerCase();
+        SetProxy setProxy;
+        switch(os) {
+            case "mac":
+                setProxy = new MacSetUpProxy();
+            break;
+            case "linux":
+                setProxy = new LinuxSetProxy();
+                break;
+            default:
+            case "win":
+                setProxy = new WindowsSetProxy();
+                break;
+
+        }
+
         return new TcpService(){
             @Override
             public void start(){
                 nettyTcpService.start();
                 httpService.start();
-
+                setProxy.turnOnProxy(port);
             }
 
 
             @Override
             public void close(){
+                setProxy.turnOffProxy();
                 nettyTcpService.close();
                 httpService.close();
             }
