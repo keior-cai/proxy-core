@@ -27,6 +27,8 @@ import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -168,28 +170,43 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 jsonObject.put("src", item.remoteAddress());
                 jsonObject.put("type", context.getConnect().type());
                 jsonObject.put("dst", MapUtil.builder("proxy", server.sourceProtocol().toString())
-                        .put("address", server.host() + ":" + server.port()).map());
+                        .put("address", server.host() + ":" + server.port())
+                        .put("proxyService", context.getConnect().remoteAddress().toString())
+                        .map());
                 return jsonObject;
             }).collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
+        });
+        // 切换节点
+        map.put("/changeNode", (request, response)->{
+            int i = request.uri().indexOf("?");
+            if(i <0){
+                response.content().writeBytes("OK".getBytes());
+                return;
+            }
+            String[] split = request.uri().substring(i).split("=");
+            Map<String, String> param = new HashMap<>();
+            for(int j = 0;  j < split.length; j+=2){
+                param.put(split[j], split[j+1]);
+            }
+            name = param.get("node");
+            init();
+            nettyTcpService.restart();
+            response.content().writeBytes("OK".getBytes());
         });
         NettyTcpService httpService = new NettyTcpService(httpManagePort, new HttpService(map));
 
         String os = System.getProperty("os.name").toLowerCase();
         SetProxy setProxy;
-        switch(os) {
-            case "mac":
-                setProxy = new MacSetUpProxy();
-            break;
-            case "linux":
-                setProxy = new LinuxSetProxy();
-                break;
-            default:
-            case "win":
-                setProxy = new WindowsSetProxy();
-                break;
+        if(os.contains("mac")){
+            setProxy = new MacSetUpProxy();
 
+        } else if(os.contains("linux")){
+            setProxy = new LinuxSetProxy();
+        } else{
+            setProxy = new WindowsSetProxy();
         }
+
 
         return new TcpService(){
             @Override
@@ -233,17 +250,17 @@ public class LocalServiceBuilder implements ServiceBuilder{
         switch(proxyModel) {
             case RULE:
                 RuleLocalConnectServerFactory proxyFactory = new RuleLocalConnectServerFactory(
-                        new DirectConnectFactory());
+                        DirectConnectFactory.INSTANCE);
                 if(ruleMap != null){
                     ruleMap.forEach((k, v)->v.forEach(model->{
                         if(model.equalsIgnoreCase("DIRECT")){
-                            proxyFactory.addDomain(k, new DirectConnectFactory());
+                            proxyFactory.addDomain(k, DirectConnectFactory.INSTANCE);
                         } else if(model.equalsIgnoreCase("PROXY")){
                             proxyFactory.addDomain(k, factory);
                         } else {
                             ProxyFactory domain = proxyFactoryMap.get(model);
                             if(domain == null){
-                                throw new IllegalArgumentException();
+                                throw new IllegalArgumentException(model);
                             }
                             proxyFactory.addDomain(k, domain);
                         }
@@ -252,7 +269,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 localProxyMessageHandler.setFactory(proxyFactory);
                 break;
             case DIRECT:
-                localProxyMessageHandler.setFactory(new DirectConnectFactory());
+                localProxyMessageHandler.setFactory(DirectConnectFactory.INSTANCE);
             default:
             case GLOBAL:
                 localProxyMessageHandler.setFactory(factory);

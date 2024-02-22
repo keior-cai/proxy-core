@@ -18,7 +18,7 @@ public class SimpleLocalTcpServer implements TcpService{
 
     private final TcpService tcpService;
 
-    private final DirectConnectFactory factory = new DirectConnectFactory();
+    private final DirectConnectFactory factory = DirectConnectFactory.INSTANCE;
 
     public SimpleLocalTcpServer(int port){
         tcpService = new LocalServiceBuilder()

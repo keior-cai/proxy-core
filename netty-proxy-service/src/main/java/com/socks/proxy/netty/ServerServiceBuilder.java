@@ -73,7 +73,7 @@ public class ServerServiceBuilder implements ServiceBuilder{
         NettyTcpService httpService;
         if(useHttpService){
             httpService = new NettyTcpService(httpProt, new HttpService(handleMap));
-        }else {
+        } else {
             httpService = null;
         }
         return new TcpService(){
@@ -106,7 +106,7 @@ public class ServerServiceBuilder implements ServiceBuilder{
         if(handler == null){
             this.handler = new WebsocketHandler(
                     ()->new ServiceProxyMessageHandler(rsaUtil, codes, connectContextManager,
-                            new DirectConnectFactory()));
+                            DirectConnectFactory.INSTANCE));
         }
         if(codes == null && useCodes){
             codes = new DefaultProxyCommandCodes();

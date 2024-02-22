@@ -45,6 +45,11 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
         LocalProxyCommand command = LocalProxyCommand.of(commandValue);
         log.debug("receive local commandValue = {} command = {}", commandValue, command);
         ProxyContext proxyContext = manager.getContext(connect);
+        if(proxyContext == null){
+            // 这里说明本地客户端已经断开连接，直接退出就行了
+            connect.close();
+            return;
+        }
         switch(command) {
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
@@ -89,14 +94,24 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
     @Override
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         ProxyContext proxyContext = manager.getContext(local);
-        Optional.ofNullable(proxyContext).ifPresent(context->context.decodeWrite(binary));
+        if(proxyContext == null){
+            // 这里说明目标服务已经断开连接，本地客户端需要退出
+            local.close();
+            return;
+        }
+        proxyContext.decodeWrite(binary);
     }
 
 
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
         ProxyContext proxyContext = manager.getContext(target);
-        Optional.ofNullable(proxyContext).ifPresent(context->context.encodeWrite(binary));
+        if(proxyContext == null){
+            // 这里说明本地服务已经断开连接，本地客户端需要退出
+            target.close();
+            return;
+        }
+        proxyContext.encodeWrite(binary);
     }
 
 

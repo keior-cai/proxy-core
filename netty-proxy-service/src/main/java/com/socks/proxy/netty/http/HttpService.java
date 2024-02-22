@@ -31,6 +31,12 @@ public class HttpService extends ChannelInitializer<Channel>{
                     @Override
                     protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpRequest request){
                         String uri = request.uri();
+                        if(uri != null){
+                            int i = uri.indexOf("?");
+                            if(i > 0){
+                                uri  = uri.substring(0, i);
+                            }
+                        }
                         HttpHandle httpHandle = handleMap.get(uri);
                         DefaultFullHttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(),
                                 HttpResponseStatus.NOT_FOUND);

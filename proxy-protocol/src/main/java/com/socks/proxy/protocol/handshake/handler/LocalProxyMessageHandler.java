@@ -87,6 +87,9 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
         proxyContext.getProxyInfo().setCount(new CountDownLatch(1));
+        if(log.isDebugEnabled()){
+            log.debug("shake event = {}", local.channelId());
+        }
         manager.putLocalConnect(local, proxyContext);
     }
 
@@ -95,6 +98,11 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
         try {
             ProxyContext proxyContext = manager.getContext(local);
+            if(proxyContext == null){
+                // 这里说明远程连接已经关闭了，需要重新连接;直接断开本地连接
+                local.close();
+                return;
+            }
             proxyContext.getProxyInfo().getCount().await();
             if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
                 Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
@@ -110,6 +118,11 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     @Override
     public void handleTargetBinaryMessage(ProxyConnect target, byte[] binary){
         ProxyContext proxyContext = manager.getContext(target);
+        if(proxyContext == null){
+            // 这说明本地客户端已经断开连接了，不需要发送数据;关闭代理连接
+            target.close();
+            return;
+        }
         if(Objects.equals(target.type(), ConnectType.PROXY)){
             Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
         }else {

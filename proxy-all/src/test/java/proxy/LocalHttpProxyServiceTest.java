@@ -58,7 +58,7 @@ public class LocalHttpProxyServiceTest{
         LocalProxyMessageHandler handler = new LocalProxyMessageHandler(rsaUtil, codes, new MapConnectContextManager());
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
 //        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
-        proxyFactoryMap.put("test", new DirectConnectFactory());
+        proxyFactoryMap.put("test", DirectConnectFactory.INSTANCE);
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
                 .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
@@ -84,8 +84,8 @@ public class LocalHttpProxyServiceTest{
         WebsocketProxyConnectFactory xjp = WebsocketProxyConnectFactory.createDefault(
                 URI.create("ws://chuangjie.icu:8041"));
         RuleLocalConnectServerFactory connectServerFactory = new RuleLocalConnectServerFactory(
-                new DirectConnectFactory());
-        connectServerFactory.addDomain("baidu.com", new DirectConnectFactory());
+                DirectConnectFactory.INSTANCE);
+        connectServerFactory.addDomain("baidu.com", DirectConnectFactory.INSTANCE);
         connectServerFactory.addDomain("google.com", xjp);
         proxyFactoryMap.put("新加坡", connectServerFactory);
 
