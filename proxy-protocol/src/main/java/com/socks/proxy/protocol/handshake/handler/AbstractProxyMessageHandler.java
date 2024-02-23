@@ -54,18 +54,18 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
 
 
     @Override
-    public void handleTargetClose(ProxyConnect target, Exception e){
+    public void handleTargetClose(ProxyConnect target, String reason){
         if(log.isDebugEnabled()){
-            log.debug("remove target connect = {}， reason = {}", target.channelId(), e.getMessage(), e);
+            log.debug("remove target connect = {}， reason = {}", target.channelId(), reason);
         }
         manager.removeAll(target);
     }
 
 
     @Override
-    public void handleLocalClose(ProxyConnect local, Exception e){
+    public void handleLocalClose(ProxyConnect local, String reason){
         if(log.isDebugEnabled()){
-            log.debug("remove local connect = {}， reason = {}", local.channelId(), e.getMessage(), e);
+            log.debug("remove local connect = {}， reason = {}", local.channelId(), reason);
         }
         manager.removeAll(local);
     }

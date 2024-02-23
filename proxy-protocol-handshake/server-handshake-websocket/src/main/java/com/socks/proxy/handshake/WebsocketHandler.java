@@ -69,7 +69,7 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
                 .addLast(new ChannelInboundHandlerAdapter(){
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
-                        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), new Exception(cause));
+                        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "服务端发送关闭连接命令");
                     }
                 });
     }
@@ -95,7 +95,7 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx){
-            handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), new Exception("客户端断开连接"));
+            handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "客户端断开连接");
         }
     }
 }

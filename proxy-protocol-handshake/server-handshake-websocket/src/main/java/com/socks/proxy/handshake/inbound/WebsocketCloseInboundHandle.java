@@ -23,7 +23,7 @@ public class WebsocketCloseInboundHandle extends SimpleChannelInboundHandler<Clo
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, CloseWebSocketFrame msg){
-        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), new Exception(msg.reasonText()) );
+        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), msg.reasonText() );
     }
 
 }

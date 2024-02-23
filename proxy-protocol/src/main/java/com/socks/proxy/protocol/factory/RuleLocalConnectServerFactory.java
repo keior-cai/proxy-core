@@ -3,6 +3,7 @@ package com.socks.proxy.protocol.factory;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -20,16 +21,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date: 2023/7/9
  **/
 @Slf4j
+@Setter
 public class RuleLocalConnectServerFactory implements ProxyFactory{
 
-    private final ProxyFactory                    defaultProxyFactory;
+    private ProxyFactory defaultProxyFactory;
+
+    private       ProxyFactory                    directProxyFactory;
+
     private final Map<String, List<ProxyFactory>> domainMap = new ConcurrentHashMap<>();
 
     private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
 
 
     public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory){
+        this(defaultProxyFactory, defaultProxyFactory);
+    }
+
+    public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory, ProxyFactory directProxyFactory){
         this.defaultProxyFactory = defaultProxyFactory;
+        this.directProxyFactory = directProxyFactory;
     }
 
 
@@ -37,16 +47,14 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
     public ConnectProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
         List<ProxyFactory> proxyFactories = domainRule(remoteServer.host());
         if(Objects.isNull(proxyFactories) || proxyFactories.isEmpty()){
+            return directProxyFactory.create(remoteServer, handler);
+        }
+        try {
             return defaultProxyFactory.create(remoteServer, handler);
+        } catch (Exception e) {
+            log.error("", e);
+            return directProxyFactory.create(remoteServer, handler);
         }
-        for(ProxyFactory factory : proxyFactories) {
-            try {
-                return factory.create(remoteServer, handler);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-        }
-        return defaultProxyFactory.create(remoteServer, handler);
     }
 
 

@@ -7,11 +7,7 @@ import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.logging.ByteBufFormat;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,13 +27,12 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     private final ExecutorService executorService;
 
 
-
     public AbstractProxy(ProxyMessageHandler handler, ExecutorService executorService){
-        this(handler, executorService,true);
+        this(handler, executorService, true);
     }
 
 
-    public AbstractProxy(ProxyMessageHandler handler,ExecutorService executorService, boolean autoRelease){
+    public AbstractProxy(ProxyMessageHandler handler, ExecutorService executorService, boolean autoRelease){
         super(autoRelease);
         this.handler = handler;
         this.executorService = executorService;
@@ -46,22 +41,20 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
+        TargetServer target = resolveRemoteServer(msg);
+        ctx.pipeline().addLast(new ReadLocalInboundHandler(handler, executorService)).remove(this);
         executorService.execute(()->{
-            TargetServer target = resolveRemoteServer(msg);
-            ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
             try {
                 ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
                 handler.targetConnect(localConnect, target);
-                pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
-                writeSuccess(ctx, msg, target,handler);
+                writeSuccess(ctx, msg, target, handler);
             } catch (Exception e) {
                 writeFail(ctx, msg, target);
-                handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
+                handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
             }
         });
 
     }
-
 
 
     @AllArgsConstructor
@@ -69,16 +62,20 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
         private final ProxyMessageHandler connect;
 
+        private final ExecutorService executorService;
+
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
-            connect.handleLocalBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
+            byte[] bytes = ByteBufUtil.getBytes(msg);
+            executorService.execute(
+                    ()->connect.handleLocalBinaryMessage(new DirectConnectChannel(ctx.channel()), bytes));
         }
 
 
         @Override
-        public void channelInactive(ChannelHandlerContext ctx) {
-            connect.handleLocalClose(new DirectConnectChannel(ctx.channel()), new Exception("本地客户端断开连接"));
+        public void channelInactive(ChannelHandlerContext ctx){
+            connect.handleLocalClose(new DirectConnectChannel(ctx.channel()), "本地客户端断开连接");
         }
     }
 

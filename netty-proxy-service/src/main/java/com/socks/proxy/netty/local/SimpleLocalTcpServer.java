@@ -50,13 +50,13 @@ public class SimpleLocalTcpServer implements TcpService{
 
 
                     @Override
-                    public void handleTargetClose(ProxyConnect target, Exception e){
+                    public void handleTargetClose(ProxyConnect target, String reason){
 
                     }
 
 
                     @Override
-                    public void handleLocalClose(ProxyConnect local, Exception e){
+                    public void handleLocalClose(ProxyConnect local, String reason){
 
                     }
 

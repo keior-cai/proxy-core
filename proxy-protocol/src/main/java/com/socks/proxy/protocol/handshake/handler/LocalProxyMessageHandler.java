@@ -17,6 +17,7 @@ import com.socks.proxy.protocol.handshake.message.SenTargetAddressMessage;
 import com.socks.proxy.protocol.handshake.message.SendUserMessage;
 import com.socks.proxy.util.AESUtil;
 import com.socks.proxy.util.RSAUtil;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -34,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
  * @date: 2024/1/25
  **/
 @Slf4j
+@Getter
 @Setter
 public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
 
@@ -139,12 +141,12 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
             targetContext.setProxyInfo(proxyInfo);
             targetContext.setConnect(local);
             targetConnect.connect();
-            if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
-                // 直接连接不需要等待，直接发送数据
-                proxyContext.getProxyInfo().getCount().countDown();
-            }
             manager.putTargetConnect(targetConnect, targetContext);
-            proxyContext.getProxyInfo().getCount().await();
+            if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
+                proxyContext.getProxyInfo().setCount(null);
+            }else {
+                proxyContext.getProxyInfo().getCount().await();
+            }
             return targetConnect;
         } catch (IOException | InterruptedException e) {
             throw new Error(e);

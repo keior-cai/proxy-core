@@ -11,7 +11,6 @@ public interface ProxyFactory{
 
     ConnectProxyConnect create(TargetServer targetServer, ProxyMessageHandler handler) throws IOException;
 
-
     /**
      * ping 延迟
      */

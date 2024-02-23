@@ -74,25 +74,25 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
 
         @Override
         public void handleCallbackError(WebSocket websocket, Throwable cause){
-            handler.handleLocalClose(new WebsocketConnect(websocket), new Exception(cause));
+            handler.handleLocalClose(new WebsocketConnect(websocket), cause.getMessage());
         }
 
 
         @Override
         public void onError(WebSocket websocket, WebSocketException cause){
-            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception(cause.getMessage()));
+            handler.handleTargetClose(new WebsocketConnect(websocket), cause.getMessage());
         }
 
 
         @Override
         public void onCloseFrame(WebSocket websocket, WebSocketFrame frame){
-            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception("websocket 断开连接"));
+            handler.handleTargetClose(new WebsocketConnect(websocket), "websocket 断开连接");
         }
 
 
         @Override
         public void onUnexpectedError(WebSocket websocket, WebSocketException cause){
-            handler.handleTargetClose(new WebsocketConnect(websocket), new Exception(cause.getMessage()));
+            handler.handleTargetClose(new WebsocketConnect(websocket), cause.getMessage());
         }
     }
 }

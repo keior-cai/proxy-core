@@ -1,18 +1,12 @@
 package com.socks.proxy.netty;
 
-import cn.hutool.core.map.MapUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.netty.connect.DirectConnectFactory;
 import com.socks.proxy.netty.enums.ProxyModel;
-import com.socks.proxy.netty.http.HttpHandle;
-import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.netty.local.LocalProxyCode;
 import com.socks.proxy.netty.system.LinuxSetProxy;
 import com.socks.proxy.netty.system.MacSetUpProxy;
 import com.socks.proxy.netty.system.SetProxy;
 import com.socks.proxy.netty.system.WindowsSetProxy;
-import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ICipher;
@@ -23,7 +17,6 @@ import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import com.socks.proxy.protocol.handshake.MapConnectContextManager;
 import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
-import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
@@ -33,14 +26,12 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author: chuangjie
@@ -141,67 +132,6 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 break;
         }
         NettyTcpService nettyTcpService = new NettyTcpService(port, protocolHandle);
-
-        Map<String, HttpHandle> map = new HashMap<>();
-        map.put("/stop", (request, response)->{
-            nettyTcpService.close();
-            response.content().writeBytes("OK".getBytes());
-        });
-        map.put("/start", (request, response)->{
-            init();
-            nettyTcpService.start();
-            response.content().writeBytes("OK".getBytes());
-        });
-        map.put("/restart", (request, response)->{
-            init();
-            nettyTcpService.restart();
-            response.content().writeBytes("OK".getBytes());
-        });
-        map.put("/ping", (request, response)->{
-            List<Map<String, Object>> collect = proxyFactoryMap.entrySet().stream().map(value->{
-                ProxyFactory factory = value.getValue();
-                Map<String, Object> p = new HashMap<>();
-                p.put("host", factory.uri().toString());
-                p.put("ping", factory.ping());
-                p.put("name", value.getKey());
-                return p;
-            }).collect(Collectors.toList());
-            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
-
-        });
-        map.put("/connects", (request, response)->{
-            List<JSONObject> collect = manager.getTargetAllProxy().stream().map(item->{
-                ProxyContext context = manager.getContext(item);
-                TargetServer server = context.getProxyInfo().getServer();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("src", item.remoteAddress());
-                jsonObject.put("type", context.getConnect().type());
-                jsonObject.put("dst", MapUtil.builder("proxy", server.sourceProtocol().toString())
-                        .put("address", server.host() + ":" + server.port())
-                        .put("proxyService", context.getConnect().remoteAddress().toString()).map());
-                return jsonObject;
-            }).collect(Collectors.toList());
-            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
-        });
-        // 切换节点
-        map.put("/changeNode", (request, response)->{
-            int i = request.uri().indexOf("?");
-            if(i < 0){
-                response.content().writeBytes("OK".getBytes());
-                return;
-            }
-            String[] split = request.uri().substring(i).split("=");
-            Map<String, String> param = new HashMap<>();
-            for(int j = 0; j < split.length; j += 2) {
-                param.put(split[j], split[j + 1]);
-            }
-            name = param.get("node");
-            init();
-            nettyTcpService.restart();
-            response.content().writeBytes("OK".getBytes());
-        });
-        NettyTcpService httpService = new NettyTcpService(httpManagePort, new HttpService(map));
-
         String os = System.getProperty("os.name").toLowerCase();
         SetProxy setProxy;
         if(os.contains("mac")){
@@ -212,12 +142,10 @@ public class LocalServiceBuilder implements ServiceBuilder{
         } else {
             setProxy = new WindowsSetProxy();
         }
-
         return new TcpService(){
             @Override
             public void start(){
                 nettyTcpService.start();
-                httpService.start();
                 setProxy.turnOnProxy(port);
             }
 
@@ -226,14 +154,12 @@ public class LocalServiceBuilder implements ServiceBuilder{
             public void close(){
                 setProxy.turnOffProxy();
                 nettyTcpService.close();
-                httpService.close();
             }
 
 
             @Override
             public void restart(){
                 nettyTcpService.restart();
-                httpService.restart();
             }
         };
 
@@ -258,7 +184,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
         LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
         switch(proxyModel) {
             case RULE:
-                RuleLocalConnectServerFactory proxyFactory = new RuleLocalConnectServerFactory(
+                RuleLocalConnectServerFactory proxyFactory = new RuleLocalConnectServerFactory(factory,
                         DirectConnectFactory.INSTANCE);
                 if(ruleMap != null){
                     ruleMap.forEach((k, v)->v.forEach(model->{

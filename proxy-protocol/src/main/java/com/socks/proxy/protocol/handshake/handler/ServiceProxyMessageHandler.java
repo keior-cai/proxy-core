@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 服务协议处理消息
@@ -74,7 +73,7 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckTargetAddressMessage())));
                 break;
             case CLOSE:
-                handleLocalClose(connect, new Exception("服务端发送关闭连接命令"));
+                handleLocalClose(connect, "服务端发送关闭连接命令");
                 break;
             default:
             case UNKNOWN:

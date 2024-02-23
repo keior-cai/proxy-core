@@ -65,13 +65,13 @@ public interface ProxyMessageHandler{
     /**
      * 目标服务断开连接
      */
-    void handleTargetClose(ProxyConnect target, Exception e);
+    void handleTargetClose(ProxyConnect target, String reason);
 
 
     /**
      * 处理客户端断开连接
      */
-    void handleLocalClose(ProxyConnect local, Exception e);
+    void handleLocalClose(ProxyConnect local, String reason);
 
 
     /**
