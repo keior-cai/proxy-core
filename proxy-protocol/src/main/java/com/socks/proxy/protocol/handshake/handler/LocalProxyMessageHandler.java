@@ -96,21 +96,16 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
 
     @Override
     public void handleLocalBinaryMessage(ProxyConnect local, byte[] binary){
-        try {
-            ProxyContext proxyContext = manager.getContext(local);
-            if(proxyContext == null){
-                // 这里说明远程连接已经关闭了，需要重新连接;直接断开本地连接
-                local.close();
-                return;
-            }
-            proxyContext.getProxyInfo().getCount().await();
-            if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
-                Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
-            }else {
-                Optional.of(proxyContext).ifPresent(context->context.write(binary));
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        ProxyContext proxyContext = manager.getContext(local);
+        if(proxyContext == null){
+            // 这里说明远程连接已经关闭了，需要重新连接;直接断开本地连接
+            local.close();
+            return;
+        }
+        if(Objects.equals(proxyContext.getConnect().type(), ConnectType.PROXY)){
+            Optional.of(proxyContext).ifPresent(context->context.encodeWrite(binary));
+        } else {
+            Optional.of(proxyContext).ifPresent(context->context.write(binary));
         }
     }
 
@@ -125,7 +120,7 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
         }
         if(Objects.equals(target.type(), ConnectType.PROXY)){
             Optional.of(proxyContext).ifPresent(context->context.decodeWrite(binary));
-        }else {
+        } else {
             Optional.of(proxyContext).ifPresent(context->context.write(binary));
         }
 
@@ -152,8 +147,9 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
                 proxyContext.getProxyInfo().getCount().countDown();
             }
             manager.putTargetConnect(targetConnect, targetContext);
+            proxyContext.getProxyInfo().getCount().await();
             return targetConnect;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new Error(e);
         }
     }
