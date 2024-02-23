@@ -44,6 +44,8 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
      */
     private ProxyFactory factory;
 
+    private Map<String, ProxyFactory> proxyFactoryMap;
+
 
     public LocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
         super(rsaUtil, codes, manager);

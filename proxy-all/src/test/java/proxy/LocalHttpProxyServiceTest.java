@@ -38,7 +38,6 @@ public class LocalHttpProxyServiceTest{
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
-                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -60,7 +59,6 @@ public class LocalHttpProxyServiceTest{
 //        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         proxyFactoryMap.put("test", DirectConnectFactory.INSTANCE);
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
-                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -90,7 +88,6 @@ public class LocalHttpProxyServiceTest{
         proxyFactoryMap.put("新加坡", connectServerFactory);
 
         TcpService tcpService = new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler)
-                .setProxyFactoryMap(proxyFactoryMap)
                 .setRsaUtil(rsaUtil).setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -121,7 +118,6 @@ public class LocalHttpProxyServiceTest{
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://127.0.0.1:8083")));
         return new LocalServiceBuilder().setPort(1088).setCodes(codes).setHandler(handler).setRsaUtil(rsaUtil)
-                .setProxyFactoryMap(proxyFactoryMap)
                 .setProtocol(Protocol.SOCKS5).builder();
     }
 }

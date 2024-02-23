@@ -40,11 +40,6 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
      */
     private ConnectContextManager manager;
 
-    /**
-     * 代理工厂
-     */
-    private Map<String, ProxyFactory> proxyFactoryMap;
-
     private LocalProxyMessageHandler localProxyMessageHandler;
 
 
@@ -64,6 +59,7 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
             response.content().writeBytes("OK".getBytes());
         });
         map.put("/ping", (request, response)->{
+            Map<String, ProxyFactory> proxyFactoryMap = localProxyMessageHandler.getProxyFactoryMap();
             List<Map<String, Object>> collect = proxyFactoryMap.entrySet().stream().map(value->{
                 ProxyFactory factory = value.getValue();
                 Map<String, Object> p = new HashMap<>();
@@ -96,12 +92,12 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
                 response.content().writeBytes("OK".getBytes());
                 return;
             }
-            String[] split = request.uri().substring(i).split("=");
+            String[] split = request.uri().substring(i+1).split("=");
             Map<String, String> param = new HashMap<>();
             for(int j = 0; j < split.length; j += 2) {
                 param.put(split[j], split[j + 1]);
             }
-            ProxyFactory factory = proxyFactoryMap.get(param.get("node"));
+            ProxyFactory factory = localProxyMessageHandler.getProxyFactoryMap().get(param.get("node"));
             ProxyFactory handleProxy = localProxyMessageHandler.getFactory();
             if(handleProxy instanceof RuleLocalConnectServerFactory){
                 RuleLocalConnectServerFactory rule = (RuleLocalConnectServerFactory) handleProxy;
@@ -109,7 +105,7 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
             } else if(!(handleProxy instanceof DirectConnectFactory)){
                 localProxyMessageHandler.setFactory(factory);
             }
-            response.content().writeBytes("OK".getBytes());
+            response.content().writeBytes(param.get("node").getBytes());
         });
         return new NettyTcpService(port, new HttpService(map));
     }

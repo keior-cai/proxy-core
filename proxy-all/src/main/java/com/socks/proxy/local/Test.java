@@ -23,8 +23,9 @@ public class Test{
         RSAUtil rsaUtil = new RSAUtil();
         Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
         proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://chuangjie.icu:8041")));
-        TcpService tcpService = new LocalServiceBuilder().setPort(1088).setProxyFactoryMap(proxyFactoryMap)
-                .setManager(new MapConnectContextManager()).setName("test").setRsaUtil(rsaUtil)
+        TcpService tcpService = new LocalServiceBuilder().setPort(1088)
+                .setManager(new MapConnectContextManager())
+                .setName("test").setRsaUtil(rsaUtil)
                 .setProtocol(Protocol.COMPLEX).builder();
         tcpService.start();
     }

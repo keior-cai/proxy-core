@@ -2,10 +2,7 @@ package com.socks.proxy.netty;
 
 import com.socks.proxy.protocol.TcpService;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +58,7 @@ public class NettyTcpService implements TcpService{
                     // ignore
                     future.channel().close();
                 } finally {
-                    close();
+                    stop();
                 }
             }, "tcp-server-main");
             thread.setDaemon(false);
@@ -95,7 +92,6 @@ public class NettyTcpService implements TcpService{
 
     @Override
     public void close(){
-        stop();
         if(thread == null || thread.isInterrupted()){
             return;
         }
