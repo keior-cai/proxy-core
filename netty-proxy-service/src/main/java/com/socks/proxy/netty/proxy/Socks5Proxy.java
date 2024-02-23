@@ -13,6 +13,8 @@ import io.netty.handler.codec.socksx.v5.Socks5InitialRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * socks5 代理处理器
  */
@@ -24,8 +26,8 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
     private AbstractProxy<?> proxyHandle;
 
 
-    public Socks5Proxy(ProxyMessageHandler handler){
-        this(new Socks5CommandHandler(handler));
+    public Socks5Proxy(ProxyMessageHandler handler, ExecutorService executorService){
+        this(new Socks5CommandHandler(handler, executorService));
     }
 
 

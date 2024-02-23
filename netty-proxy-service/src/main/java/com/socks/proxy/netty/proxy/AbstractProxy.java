@@ -15,6 +15,8 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * 代理处理器
  *
@@ -26,32 +28,38 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
     private final ProxyMessageHandler handler;
 
+    private final ExecutorService executorService;
 
-    public AbstractProxy(ProxyMessageHandler handler){
-        this(handler, true);
+
+
+    public AbstractProxy(ProxyMessageHandler handler, ExecutorService executorService){
+        this(handler, executorService,true);
     }
 
 
-    public AbstractProxy(ProxyMessageHandler handler, boolean autoRelease){
+    public AbstractProxy(ProxyMessageHandler handler,ExecutorService executorService, boolean autoRelease){
         super(autoRelease);
         this.handler = handler;
+        this.executorService = executorService;
     }
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
-        log.debug("receive {} handshake", this.getClass().getSimpleName());
-        TargetServer target = resolveRemoteServer(msg);
-        ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
-        try {
-            ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
-            handler.targetConnect(localConnect, target);
-            pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
-            writeSuccess(ctx, msg, target,handler);
-        } catch (Exception e) {
-            writeFail(ctx, msg, target);
-            handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
-        }
+        executorService.execute(()->{
+            TargetServer target = resolveRemoteServer(msg);
+            ChannelPipeline pipeline = ctx.pipeline().addFirst(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP));
+            try {
+                ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
+                handler.targetConnect(localConnect, target);
+                pipeline.addLast(new ReadLocalInboundHandler(handler)).remove(this);
+                writeSuccess(ctx, msg, target,handler);
+            } catch (Exception e) {
+                writeFail(ctx, msg, target);
+                handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e);
+            }
+        });
+
     }
 
 

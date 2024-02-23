@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 
 /**
  * resolve http proxy implement
@@ -23,8 +24,8 @@ import java.util.Objects;
 @ChannelHandler.Sharable
 public class HttpTunnelProxy extends AbstractProxy<FullHttpRequest>{
 
-    public HttpTunnelProxy(ProxyMessageHandler handler){
-        super(handler, false);
+    public HttpTunnelProxy(ProxyMessageHandler handler, ExecutorService executorService){
+        super(handler, executorService,false);
     }
 
 

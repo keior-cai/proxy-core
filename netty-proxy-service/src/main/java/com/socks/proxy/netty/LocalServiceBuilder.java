@@ -27,8 +27,6 @@ import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import io.netty.channel.ChannelHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -38,6 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -117,6 +119,11 @@ public class LocalServiceBuilder implements ServiceBuilder{
      */
     private Map<String, List<String>> ruleMap;
 
+    /**
+     * 连接数据交换线程池
+     */
+    private ExecutorService executorService;
+
 
     @Override
     public TcpService builder(){
@@ -124,13 +131,13 @@ public class LocalServiceBuilder implements ServiceBuilder{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                this.protocolHandle = LocalProxyCode.ofHttp(handler);
+                this.protocolHandle = LocalProxyCode.ofHttp(handler, executorService);
                 break;
             case SOCKS5:
-                this.protocolHandle = LocalProxyCode.ofSocks5(handler);
+                this.protocolHandle = LocalProxyCode.ofSocks5(handler, executorService);
                 break;
             case COMPLEX:
-                this.protocolHandle = LocalProxyCode.ofComplex(handler);
+                this.protocolHandle = LocalProxyCode.ofComplex(handler, executorService);
                 break;
         }
         NettyTcpService nettyTcpService = new NettyTcpService(port, protocolHandle);
@@ -171,8 +178,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
                 jsonObject.put("type", context.getConnect().type());
                 jsonObject.put("dst", MapUtil.builder("proxy", server.sourceProtocol().toString())
                         .put("address", server.host() + ":" + server.port())
-                        .put("proxyService", context.getConnect().remoteAddress().toString())
-                        .map());
+                        .put("proxyService", context.getConnect().remoteAddress().toString()).map());
                 return jsonObject;
             }).collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
@@ -180,14 +186,14 @@ public class LocalServiceBuilder implements ServiceBuilder{
         // 切换节点
         map.put("/changeNode", (request, response)->{
             int i = request.uri().indexOf("?");
-            if(i <0){
+            if(i < 0){
                 response.content().writeBytes("OK".getBytes());
                 return;
             }
             String[] split = request.uri().substring(i).split("=");
             Map<String, String> param = new HashMap<>();
-            for(int j = 0;  j < split.length; j+=2){
-                param.put(split[j], split[j+1]);
+            for(int j = 0; j < split.length; j += 2) {
+                param.put(split[j], split[j + 1]);
             }
             name = param.get("node");
             init();
@@ -203,10 +209,9 @@ public class LocalServiceBuilder implements ServiceBuilder{
 
         } else if(os.contains("linux")){
             setProxy = new LinuxSetProxy();
-        } else{
+        } else {
             setProxy = new WindowsSetProxy();
         }
-
 
         return new TcpService(){
             @Override
@@ -244,6 +249,10 @@ public class LocalServiceBuilder implements ServiceBuilder{
         }
         if(manager == null){
             manager = new MapConnectContextManager();
+        }
+        if(executorService == null){
+            executorService = new ThreadPoolExecutor(100, 200, 3000L, TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(1024), new NamedThreadFactory("Thread-socks-", true));
         }
         ProxyFactory factory = proxyFactoryMap.get(name);
         LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(rsaUtil, codes, manager);
