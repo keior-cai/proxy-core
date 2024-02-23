@@ -9,6 +9,7 @@ import com.socks.proxy.netty.http.HttpService;
 import com.socks.proxy.protocol.TargetServer;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.enums.ConnectType;
 import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
@@ -21,6 +22,7 @@ import lombok.experimental.Accessors;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -106,8 +108,10 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
             } else if(!(handleProxy instanceof DirectConnectFactory)){
                 localProxyMessageHandler.setFactory(factory);
             }
-            // 需要断开全部连接
-            manager.getTargetAllProxy().forEach(ProxyConnect::close);
+            // 需要断开全部代理连接，直接连接不需要断开
+            manager.getTargetAllProxy()
+                    .stream().filter(item->Objects.equals(item.type(), ConnectType.PROXY))
+                    .forEach(ProxyConnect::close);
             response.content().writeBytes(param.get("node").getBytes());
         });
         return new NettyTcpService(port, new HttpService(map));
