@@ -42,7 +42,7 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         TargetServer target = resolveRemoteServer(msg);
-        ctx.pipeline().addLast(new ReadLocalInboundHandler(handler, executorService)).remove(this);
+        ctx.pipeline().addLast(new ReadLocalInboundHandler(handler)).remove(this);
         executorService.execute(()->{
             try {
                 ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
@@ -57,19 +57,18 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     }
 
 
+    /**
+     * 这里暂时先样，这里需要改为写缓冲区，来提高本地服务的性能
+     */
     @AllArgsConstructor
     private static class ReadLocalInboundHandler extends SimpleChannelInboundHandler<ByteBuf>{
 
         private final ProxyMessageHandler connect;
 
-        private final ExecutorService executorService;
-
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg){
-            byte[] bytes = ByteBufUtil.getBytes(msg);
-            executorService.execute(
-                    ()->connect.handleLocalBinaryMessage(new DirectConnectChannel(ctx.channel()), bytes));
+            connect.handleLocalBinaryMessage(new DirectConnectChannel(ctx.channel()), ByteBufUtil.getBytes(msg));
         }
 
 
