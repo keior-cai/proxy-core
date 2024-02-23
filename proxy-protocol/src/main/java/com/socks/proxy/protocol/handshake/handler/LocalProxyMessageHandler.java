@@ -87,9 +87,6 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         ProxyContext proxyContext = new ProxyContext();
         proxyContext.getProxyInfo().setCount(new CountDownLatch(1));
-        if(log.isDebugEnabled()){
-            log.debug("shake event = {}", local.channelId());
-        }
         manager.putLocalConnect(local, proxyContext);
     }
 
