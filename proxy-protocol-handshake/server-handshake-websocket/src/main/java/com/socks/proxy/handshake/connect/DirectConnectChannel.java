@@ -42,7 +42,12 @@ public class DirectConnectChannel implements ProxyConnect{
 
     @Override
     public void close(){
-        context.close();
+        try {
+            context.close()
+                    .sync();
+        } catch (InterruptedException e) {
+            //ignore
+        }
     }
 
 
