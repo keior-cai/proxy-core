@@ -1,17 +1,17 @@
 package com.socks.proxy.local;
 
 import com.socks.proxy.handshake.WebsocketProxyConnectFactory;
+import com.socks.proxy.netty.LocalHttpManagerBuilder;
 import com.socks.proxy.netty.LocalServiceBuilder;
 import com.socks.proxy.protocol.TcpService;
+import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.enums.Protocol;
-import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.MapConnectContextManager;
+import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author: chuangjie
@@ -21,12 +21,18 @@ import java.util.Map;
 public class Test{
     public static void main(String[] args){
         RSAUtil rsaUtil = new RSAUtil();
-        Map<String, ProxyFactory> proxyFactoryMap = new HashMap<>();
-        proxyFactoryMap.put("test", WebsocketProxyConnectFactory.createDefault(URI.create("ws://chuangjie.icu:8041")));
-        TcpService tcpService = new LocalServiceBuilder().setPort(1088)
-                .setManager(new MapConnectContextManager())
-                .setName("test").setRsaUtil(rsaUtil)
-                .setProtocol(Protocol.COMPLEX).builder();
+        MapConnectContextManager manager = new MapConnectContextManager();
+        LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(new RSAUtil(),
+                new DefaultProxyCommandCodes(), manager);
+        localProxyMessageHandler.setFactory(
+                WebsocketProxyConnectFactory.createDefault(URI.create("ws://chuangjie.icu:8042")));
+        TcpService tcpService = new LocalServiceBuilder().setPort(1089).setHttpManagePort(8000).setManager(manager)
+                .setHandler(localProxyMessageHandler).setName("test").setRsaUtil(rsaUtil).setProtocol(Protocol.SOCKS5)
+                .builder();
         tcpService.start();
+
+        TcpService http = new LocalHttpManagerBuilder().setPort(8000).setManager(manager)
+                .setLocalProxyMessageHandler(localProxyMessageHandler).builder();
+        http.start();
     }
 }

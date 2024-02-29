@@ -20,14 +20,18 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
+@Slf4j
 @AllArgsConstructor
 @ChannelHandler.Sharable
 public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
@@ -48,12 +52,14 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
         switch(protocol) {
             case HTTP:
             case HTTPS:
-                pipeline.addLast(new HttpServerCodec())
-                        .addLast(new HttpObjectAggregator(65536));
+                pipeline.addLast(new HttpServerCodec()).addLast(new HttpObjectAggregator(65536));
                 break;
             case SOCKS5:
                 pipeline.addLast(new SocksPortUnificationServerHandler());
                 break;
+            case UNKNOWN:
+                ctx.close();
+                return;
             case SOCKS4:
                 break;
         }
@@ -63,19 +69,34 @@ public class LocalProxyCode extends SimpleChannelInboundHandler<ByteBuf>{
     }
 
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception{
+        if(cause instanceof SocketException){
+            if(!Objects.equals("Connection reset", cause.getMessage())){
+                log.error("socket exception message = {}", cause.getMessage());
+            }
+        }else {
+            ctx.fireExceptionCaught(cause);
+        }
+
+    }
+
+
     public static LocalProxyCode ofHttp(ProxyMessageHandler handler, ExecutorService executorService){
-        return new LocalProxyCode(new HttpHandshakeProtocolHandler(), new HttpTunnelProxy(handler, executorService), handler);
+        return new LocalProxyCode(new HttpHandshakeProtocolHandler(), new HttpTunnelProxy(handler, executorService),
+                handler);
     }
 
 
     public static LocalProxyCode ofSocks5(ProxyMessageHandler handler, ExecutorService executorService){
-        return new LocalProxyCode(new Socks5HandshakeProtocolHandler(), new Socks5Proxy(handler,executorService), handler);
+        return new LocalProxyCode(new Socks5HandshakeProtocolHandler(), new Socks5Proxy(handler, executorService),
+                handler);
     }
 
 
     public static LocalProxyCode ofComplex(ProxyMessageHandler handler, ExecutorService executorService){
-        List<SimpleChannelInboundHandler<?>> complexHandleList = Arrays.asList(new HttpTunnelProxy(handler, executorService),
-                new Socks5Proxy(handler, executorService));
+        List<SimpleChannelInboundHandler<?>> complexHandleList = Arrays.asList(
+                new HttpTunnelProxy(handler, executorService), new Socks5Proxy(handler, executorService));
         return new LocalProxyCode(new ComplexHandshakeProtocolHandler(), new ComplexProxy(complexHandleList), handler);
     }
 }

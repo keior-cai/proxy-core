@@ -5,6 +5,9 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.ByteBufFormat;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.BindException;
@@ -112,15 +115,12 @@ public class NettyTcpService implements TcpService{
         childGroup = new NioEventLoopGroup(cpuNum * 2, new NamedThreadFactory("reactive-child-", false));
         masterGroup = new NioEventLoopGroup(cpuNum, new NamedThreadFactory("reactive-master-", false));
         this.bootstrap = new ServerBootstrap();
-        bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class).handler(initHandler())
+        bootstrap.group(masterGroup, childGroup).channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 2048)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.SO_TIMEOUT, 1000)
+                .handler(new LoggingHandler(LogLevel.DEBUG, ByteBufFormat.HEX_DUMP))
                 .childHandler(handler);
-    }
-
-
-    protected ChannelHandler initHandler(){
-        return new ChannelHandlerAdapter(){
-
-        };
     }
 
 }

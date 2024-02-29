@@ -44,8 +44,11 @@ public class WebsocketProxyChannel implements ProxyConnect{
 
     @Override
     public void close(){
-        // ???
-        context.writeAndFlush(new CloseWebSocketFrame());
+        try {
+            context.writeAndFlush(new CloseWebSocketFrame()).sync();
+        } catch (InterruptedException e) {
+            // ignore
+        }
     }
 
 

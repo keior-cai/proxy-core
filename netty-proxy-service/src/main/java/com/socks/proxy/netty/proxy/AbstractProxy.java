@@ -6,6 +6,7 @@ import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -50,7 +51,11 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
                 writeSuccess(ctx, msg, target, handler);
             } catch (Exception e) {
                 writeFail(ctx, msg, target);
-                handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
+                ctx.close().addListener((ChannelFutureListener) channelFuture->{
+                    if(channelFuture.isSuccess()){
+                        handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
+                    }
+                });
             }
         });
 
@@ -73,8 +78,13 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
 
 
         @Override
-        public void channelInactive(ChannelHandlerContext ctx){
-            connect.handleLocalClose(new DirectConnectChannel(ctx.channel()), "本地客户端断开连接");
+        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception{
+            ctx.close().addListener((ChannelFutureListener) channelFuture->{
+                if(channelFuture.isSuccess()){
+                    connect.handleLocalClose(new DirectConnectChannel(ctx.channel()), "本地客户端断开连接");
+                }
+            });
+            super.channelUnregistered(ctx);
         }
     }
 
