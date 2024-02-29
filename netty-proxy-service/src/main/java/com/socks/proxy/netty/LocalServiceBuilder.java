@@ -41,18 +41,7 @@ public class LocalServiceBuilder implements ServiceBuilder{
     /**
      * local 服务端口
      */
-    private int port = 1081;
-
-    /**
-     * http 管理端口
-     */
-    private int httpManagePort = 8000;
-
-    /**
-     * proxy name
-     */
-    private String name;
-
+    private int      port     = 1081;
     /**
      * local 启动代理协议, 默认使用COMPLEX
      */
