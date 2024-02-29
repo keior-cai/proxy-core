@@ -1,6 +1,7 @@
 package com.socks.proxy.protocol.handshake;
 
 import com.socks.proxy.protocol.enums.Protocol;
+import com.socks.proxy.protocol.exception.UnKnowProtocolException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.EOFException;
@@ -21,7 +22,7 @@ public abstract class AbstractSocksHandshakeProtocolHandler implements Handshake
         int read = is.read();
         if(read != version()){
             log.error("version = {}", read);
-            return Protocol.UNKNOWN;
+            throw new UnKnowProtocolException();
         }
         int method = is.read();
         if(method == -1){
@@ -35,7 +36,7 @@ public abstract class AbstractSocksHandshakeProtocolHandler implements Handshake
         }
         boolean validate = validate((byte) (method & 0xff), content);
         if(!validate){
-            return Protocol.UNKNOWN;
+            throw new UnKnowProtocolException();
         }
         return protocol();
     }
