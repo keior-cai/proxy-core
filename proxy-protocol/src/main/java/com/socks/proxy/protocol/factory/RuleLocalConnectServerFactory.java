@@ -26,20 +26,21 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
 
     private ProxyFactory defaultProxyFactory;
 
-    private       ProxyFactory                    directProxyFactory;
+    private ProxyFactory directProxyFactory;
 
     private final Map<String, List<ProxyFactory>> domainMap = new ConcurrentHashMap<>();
-
-    private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
+//
+//    private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
 
 
     public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory){
         this(defaultProxyFactory, defaultProxyFactory);
     }
 
-    public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory, ProxyFactory directProxyFactory){
+
+    public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory, ProxyFactory proxyFactory){
         this.defaultProxyFactory = defaultProxyFactory;
-        this.directProxyFactory = directProxyFactory;
+        this.directProxyFactory = proxyFactory;
     }
 
 
@@ -76,13 +77,21 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
     }
 
 
-    private List<ProxyFactory> domainRule(String host){
-        if(host.matches(ipRegex)){
-            return domainMap.get(host);
-        } else {
-            return domainMap.get(host.substring(host.indexOf(".") + 1));
+    public List<ProxyFactory> domainRule(String host){
+        List<ProxyFactory> proxyFactories = domainMap.get(host);
+        if(Objects.nonNull(proxyFactories) && !proxyFactories.isEmpty()){
+            return proxyFactories;
         }
-
+        String substring;
+        int i;
+        do {
+            i = host.indexOf(".");
+            substring = host.substring(i + 1);
+            proxyFactories = domainMap.get(substring);
+            if(proxyFactories != null && !proxyFactories.isEmpty() && substring.contains(".")){
+                return proxyFactories;
+            }
+        } while(i != -1);
+        return null;
     }
-
 }

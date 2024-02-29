@@ -11,8 +11,6 @@ import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.util.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
-
 /**
  * @author: chuangjie
  * @date: 2023/6/4
@@ -23,16 +21,22 @@ public class Test{
         RSAUtil rsaUtil = new RSAUtil();
         MapConnectContextManager manager = new MapConnectContextManager();
         LocalProxyMessageHandler localProxyMessageHandler = new LocalProxyMessageHandler(new RSAUtil(),
-                new DefaultProxyCommandCodes(), manager);
-        localProxyMessageHandler.setFactory(
-                WebsocketProxyConnectFactory.createDefault(URI.create("ws://chuangjie.icu:8042")));
-        TcpService tcpService = new LocalServiceBuilder().setPort(1089).setHttpManagePort(8000).setManager(manager)
-                .setHandler(localProxyMessageHandler).setName("test").setRsaUtil(rsaUtil).setProtocol(Protocol.SOCKS5)
+                new DefaultProxyCommandCodes(), manager,
+                WebsocketProxyConnectFactory.createDefault("ws://chuangjie.icu:8042"));
+
+        TcpService tcpService = new LocalServiceBuilder()
+                .setPort(1089)
+                .setManager(manager)
+                .setHandler(localProxyMessageHandler)
+                .setRsaUtil(rsaUtil)
+                .setProtocol(Protocol.SOCKS5)
                 .builder();
         tcpService.start();
 
-        TcpService http = new LocalHttpManagerBuilder().setPort(8000).setManager(manager)
-                .setLocalProxyMessageHandler(localProxyMessageHandler).builder();
+        TcpService http = new LocalHttpManagerBuilder()
+                .setPort(8000).setManager(manager)
+                .setLocalProxyMessageHandler(localProxyMessageHandler)
+                .builder();
         http.start();
     }
 }

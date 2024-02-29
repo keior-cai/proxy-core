@@ -44,11 +44,10 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
      */
     private ProxyFactory factory;
 
-    private Map<String, ProxyFactory> proxyFactoryMap;
 
-
-    public LocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager){
+    public LocalProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager,ProxyFactory factory ){
         super(rsaUtil, codes, manager);
+        this.factory = factory;
     }
 
 
@@ -146,7 +145,7 @@ public class LocalProxyMessageHandler extends AbstractProxyMessageHandler{
             manager.putTargetConnect(targetConnect, targetContext);
             if(Objects.equals(targetConnect.type(), ConnectType.DIRECT)){
                 proxyContext.getProxyInfo().setCount(null);
-            }else {
+            } else {
                 proxyContext.getProxyInfo().getCount().await();
             }
             return targetConnect;

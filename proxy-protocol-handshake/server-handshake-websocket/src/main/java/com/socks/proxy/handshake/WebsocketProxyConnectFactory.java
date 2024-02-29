@@ -29,6 +29,11 @@ public class WebsocketProxyConnectFactory implements ProxyFactory{
     private final URI uris;
 
 
+    public static WebsocketProxyConnectFactory createDefault(String uris){
+        return createDefault(URI.create(uris));
+    }
+
+
     public static WebsocketProxyConnectFactory createDefault(URI uris){
         return new WebsocketProxyConnectFactory(new DefaultWebsocketFactory(uris), uris);
     }

@@ -45,6 +45,8 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
 
     private LocalProxyMessageHandler localProxyMessageHandler;
 
+    private Map<String, ProxyFactory> proxyFactoryMap;
+
 
     @Override
     public TcpService builder(){
@@ -62,7 +64,6 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
             response.content().writeBytes("OK".getBytes());
         });
         map.put("/ping", (request, response)->{
-            Map<String, ProxyFactory> proxyFactoryMap = localProxyMessageHandler.getProxyFactoryMap();
             List<Map<String, Object>> collect = proxyFactoryMap.entrySet().stream().map(value->{
                 ProxyFactory factory = value.getValue();
                 Map<String, Object> p = new HashMap<>();
@@ -100,7 +101,7 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
             for(int j = 0; j < split.length; j += 2) {
                 param.put(split[j], split[j + 1]);
             }
-            ProxyFactory factory = localProxyMessageHandler.getProxyFactoryMap().get(param.get("node"));
+            ProxyFactory factory = proxyFactoryMap.get(param.get("node"));
             ProxyFactory handleProxy = localProxyMessageHandler.getFactory();
             if(handleProxy instanceof RuleLocalConnectServerFactory){
                 RuleLocalConnectServerFactory rule = (RuleLocalConnectServerFactory) handleProxy;
