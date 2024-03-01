@@ -29,14 +29,8 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
     private ProxyFactory directProxyFactory;
 
     private final Map<String, List<ProxyFactory>> domainMap = new ConcurrentHashMap<>();
-//
-//    private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
-
-
-    public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory){
-        this(defaultProxyFactory, defaultProxyFactory);
-    }
-
+    //
+    //    private static final String ipRegex = "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}";
 
     public RuleLocalConnectServerFactory(ProxyFactory defaultProxyFactory, ProxyFactory proxyFactory){
         this.defaultProxyFactory = defaultProxyFactory;
@@ -48,14 +42,9 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
     public ConnectProxyConnect create(TargetServer remoteServer, ProxyMessageHandler handler) throws IOException{
         List<ProxyFactory> proxyFactories = domainRule(remoteServer.host());
         if(Objects.isNull(proxyFactories) || proxyFactories.isEmpty()){
-            return directProxyFactory.create(remoteServer, handler);
-        }
-        try {
             return defaultProxyFactory.create(remoteServer, handler);
-        } catch (Exception e) {
-            log.error("", e);
-            return directProxyFactory.create(remoteServer, handler);
         }
+        return directProxyFactory.create(remoteServer, handler);
     }
 
 
@@ -82,10 +71,10 @@ public class RuleLocalConnectServerFactory implements ProxyFactory{
         if(Objects.nonNull(proxyFactories) && !proxyFactories.isEmpty()){
             return proxyFactories;
         }
-        String substring;
+        String substring = host;
         int i;
         do {
-            i = host.indexOf(".");
+            i = substring.indexOf(".");
             substring = host.substring(i + 1);
             proxyFactories = domainMap.get(substring);
             if(proxyFactories != null && !proxyFactories.isEmpty() && substring.contains(".")){

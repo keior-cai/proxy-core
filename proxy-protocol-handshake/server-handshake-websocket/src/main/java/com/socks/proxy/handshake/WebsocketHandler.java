@@ -67,6 +67,12 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
                 .addLast(new WebSocketBinaryInboundHandle(handler))
                 .addLast(new WebsocketCloseInboundHandle(handler))
                 .addLast(new ChannelInboundHandlerAdapter(){
+
+                    @Override
+                    public void channelInactive(ChannelHandlerContext ctx){
+                        handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "客户端断开连接");
+                    }
+
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause){
                         handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "服务端发送关闭连接命令");
@@ -90,12 +96,6 @@ public class WebsocketHandler extends ChannelInitializer<Channel>{
             HttpHeaders headers = evt.requestHeaders();
             headers.entries().forEach(item->headerValue.put(item.getKey(), item.getValue()));
             handler.handlerShakeEvent(new WebsocketProxyChannel(ctx.channel()), headerValue);
-        }
-
-
-        @Override
-        public void channelInactive(ChannelHandlerContext ctx){
-            handler.handleLocalClose(new WebsocketProxyChannel(ctx.channel()), "客户端断开连接");
         }
     }
 }

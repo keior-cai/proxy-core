@@ -5,7 +5,6 @@ import com.socks.proxy.protocol.enums.ConnectType;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.AllArgsConstructor;
 
@@ -45,7 +44,7 @@ public class WebsocketProxyChannel implements ProxyConnect{
     @Override
     public void close(){
         try {
-            context.writeAndFlush(new CloseWebSocketFrame()).sync();
+            context.close().sync();
         } catch (InterruptedException e) {
             // ignore
         }
