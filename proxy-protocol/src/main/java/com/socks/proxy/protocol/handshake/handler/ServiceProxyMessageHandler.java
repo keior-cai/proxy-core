@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.JSONObject;
 import com.socks.proxy.cipher.CipherProvider;
 import com.socks.proxy.protocol.DefaultTargetServer;
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.codes.DefaultProxyCommandCodes;
 import com.socks.proxy.protocol.codes.ProxyCodes;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.connect.ProxyConnect;
 import com.socks.proxy.protocol.enums.LocalProxyCommand;
 import com.socks.proxy.protocol.enums.Protocol;
@@ -32,6 +34,16 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
     private final ProxyFactory factory;
 
 
+    public ServiceProxyMessageHandler(ConnectContextManager manager, ProxyFactory factory){
+        this(new RSAUtil(), manager, factory);
+    }
+
+
+    public ServiceProxyMessageHandler(RSAUtil rsaUtil, ConnectContextManager manager, ProxyFactory factory){
+        this(rsaUtil, new DefaultProxyCommandCodes(), manager, factory);
+    }
+
+
     public ServiceProxyMessageHandler(RSAUtil rsaUtil, ProxyCodes codes, ConnectContextManager manager,
                                       ProxyFactory factory){
         super(rsaUtil, codes, manager);
@@ -40,7 +52,7 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
 
 
     @Override
-    protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg){
+    protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg) throws Exception{
         LocalProxyCommand command = LocalProxyCommand.of(commandValue);
         log.debug("receive local commandValue = {} command = {}", commandValue, command);
         ProxyContext proxyContext = manager.getContext(connect);
@@ -53,23 +65,19 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
             case SEND_USER_INFO:
                 SendUserMessage sendUserMessage = msg.toJavaObject(SendUserMessage.class);
                 String decrypt = rsaUtil.decrypt(AESUtil.decryptByDefaultKey(sendUserMessage.getRandom()));
-                proxyContext.getProxyInfo().setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
-                proxyContext.getProxyInfo().setRandom(decrypt);
+                proxyContext.setCipher(CipherProvider.getByName(sendUserMessage.getMethod(), decrypt));
+                proxyContext.setRandom(decrypt);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckUserMessage())));
                 break;
             case SEND_DST_ADDR:
                 SenTargetAddressMessage addrMessage = msg.toJavaObject(SenTargetAddressMessage.class);
-                ProxyConnect proxyConnect = targetConnect(connect,
-                        new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(), Protocol.UNKNOWN));
-
-                proxyContext.setConnect(proxyConnect);
-                proxyContext.getProxyInfo().setServer(
-                        new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(), Protocol.UNKNOWN));
-                ProxyContext localContext = new ProxyContext();
-                localContext.setProxyInfo(proxyContext.getProxyInfo());
-                localContext.setConnect(connect);
+                TargetServer server = new DefaultTargetServer(addrMessage.getHost(), addrMessage.getPort(),
+                        Protocol.UNKNOWN);
+                proxyContext.setServer(server);
+                ConnectProxyConnect dst = factory.create(server, this);
+                proxyContext.setDst(dst);
                 // 正方向维护
-                manager.putTargetConnect(proxyConnect, localContext);
+                manager.putTargetConnect(connect, dst);
                 connect.write(codes.encodeStr(JSON.toJSONString(new AckTargetAddressMessage())));
                 break;
             case CLOSE:
@@ -86,7 +94,7 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
     @Override
     public void handlerShakeEvent(ProxyConnect local, Map<String, Object> context){
         local.write(codes.encodeStr(JSON.toJSONString(new PublicKeyMessage(rsaUtil.getPublicKey()))));
-        manager.putLocalConnect(local, new ProxyContext());
+        manager.putLocalConnect(local);
     }
 
 
@@ -98,7 +106,7 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
             local.close();
             return;
         }
-        proxyContext.decodeWrite(binary);
+        proxyContext.dstDecodeWrite(binary);
     }
 
 
@@ -110,17 +118,23 @@ public class ServiceProxyMessageHandler extends AbstractProxyMessageHandler{
             target.close();
             return;
         }
-        proxyContext.encodeWrite(binary);
+        proxyContext.localEncodeWrite(binary);
     }
 
 
     @Override
-    public ProxyConnect targetConnect(ProxyConnect local, TargetServer target){
-        try {
-            return factory.create(target, this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void handleDstConnect(ProxyConnect local, ProxyConnect dst, TargetServer target){
+
     }
+
+    //
+    //    @Override
+    //    public ProxyConnect targetConnect(ProxyConnect local, TargetServer target){
+    //        try {
+    //            return factory.create(target, this);
+    //        } catch (Exception e) {
+    //            throw new RuntimeException(e);
+    //        }
+    //    }
 
 }

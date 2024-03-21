@@ -29,6 +29,6 @@ public class DefaultWebsocketFactory implements WebsocketFactory{
     @Override
     public WebSocket getClient() throws IOException{
         log.debug("create proxy server = {}", address);
-        return factory.createSocket(address);
+        return factory.createSocket(address, 1000);
     }
 }

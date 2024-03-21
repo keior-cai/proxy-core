@@ -46,11 +46,15 @@ public abstract class AbstractProxyMessageHandler implements ProxyMessageHandler
             log.debug("receive message = {}", msg);
         }
         int commandValue = msg.getIntValue(FieldNameUtils.getFieldName(ProxyMessage::getCommand));
-        handelProxyMessage(local, commandValue, msg);
+        try {
+            handelProxyMessage(local, commandValue, msg);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
     }
 
 
-    abstract protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg);
+    abstract protected void handelProxyMessage(ProxyConnect connect, int commandValue, JSONObject msg) throws Exception;
 
 
     @Override

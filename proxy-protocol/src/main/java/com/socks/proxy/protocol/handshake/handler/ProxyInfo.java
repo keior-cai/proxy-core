@@ -13,17 +13,4 @@ import java.util.concurrent.CountDownLatch;
 @Data
 public class ProxyInfo{
 
-    /**
-     * 流式数据加密工具
-     */
-    private AbstractCipher cipher;
-
-    /**
-     * 加密随机数
-     */
-    private String random;
-
-    private CountDownLatch count;
-
-    private TargetServer server;
 }

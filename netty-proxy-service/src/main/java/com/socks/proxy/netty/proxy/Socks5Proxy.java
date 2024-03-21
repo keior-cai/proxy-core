@@ -1,5 +1,6 @@
 package com.socks.proxy.netty.proxy;
 
+import com.socks.proxy.protocol.factory.ProxyFactory;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,13 +22,13 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 @AllArgsConstructor
 @ChannelHandler.Sharable
-public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5InitialRequest>{
+public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5InitialRequest> implements ProtocolChannelHandler{
 
     private AbstractProxy<?> proxyHandle;
 
 
-    public Socks5Proxy(ProxyMessageHandler handler, ExecutorService executorService){
-        this(new Socks5CommandHandler(handler, executorService));
+    public Socks5Proxy(ProxyMessageHandler handler){
+        this(new Socks5CommandHandler(handler));
     }
 
 
@@ -42,4 +43,9 @@ public final class Socks5Proxy extends SimpleChannelInboundHandler<Socks5Initial
         ctx.writeAndFlush(new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH));
     }
 
+
+    @Override
+    public void setFactory(ProxyFactory factory){
+        proxyHandle.setFactory(factory);
+    }
 }

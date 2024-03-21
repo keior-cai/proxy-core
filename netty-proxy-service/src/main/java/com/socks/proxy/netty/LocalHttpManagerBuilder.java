@@ -1,19 +1,17 @@
 package com.socks.proxy.netty;
 
-import cn.hutool.core.map.MapUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.socks.proxy.netty.connect.DirectConnectFactory;
 import com.socks.proxy.netty.http.HttpHandle;
 import com.socks.proxy.netty.http.HttpService;
-import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.netty.system.LinuxSetProxy;
+import com.socks.proxy.netty.system.MacSetUpProxy;
+import com.socks.proxy.netty.system.SetProxy;
+import com.socks.proxy.netty.system.WindowsSetProxy;
 import com.socks.proxy.protocol.TcpService;
-import com.socks.proxy.protocol.connect.ProxyConnect;
-import com.socks.proxy.protocol.enums.ConnectType;
+import com.socks.proxy.protocol.exception.LifecycleException;
 import com.socks.proxy.protocol.factory.ProxyFactory;
-import com.socks.proxy.protocol.factory.RuleLocalConnectServerFactory;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
-import com.socks.proxy.protocol.handshake.handler.LocalProxyMessageHandler;
 import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,7 +20,7 @@ import lombok.experimental.Accessors;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -38,26 +36,43 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
 
     private TcpService tcpService;
 
+    private int tcpPort;
+
     /**
      * 管理器
      */
     private ConnectContextManager manager;
-
-    private LocalProxyMessageHandler localProxyMessageHandler;
 
     private Map<String, ProxyFactory> proxyFactoryMap;
 
 
     @Override
     public TcpService builder(){
+        String os = System.getProperty("os.name").toLowerCase();
+        SetProxy setProxy;
+        if(os.contains("mac")){
+            setProxy = new MacSetUpProxy();
+        } else if(os.contains("linux")){
+            setProxy = new LinuxSetProxy();
+        } else {
+            setProxy = new WindowsSetProxy();
+        }
         Map<String, HttpHandle> map = new HashMap<>();
         map.put("/stop", (request, response)->{
-            tcpService.close();
-            response.content().writeBytes("OK".getBytes());
+            try {
+                tcpService.stop();
+                response.content().writeBytes("OK".getBytes());
+            } catch (LifecycleException e) {
+                throw new RuntimeException(e);
+            }
         });
         map.put("/start", (request, response)->{
-            tcpService.start();
-            response.content().writeBytes("OK".getBytes());
+            try {
+                tcpService.start();
+                response.content().writeBytes("OK".getBytes());
+            } catch (LifecycleException e) {
+                throw new RuntimeException(e);
+            }
         });
         map.put("/restart", (request, response)->{
             tcpService.restart();
@@ -73,21 +88,6 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
                 return p;
             }).collect(Collectors.toList());
             response.content().writeBytes(JSON.toJSONString(collect).getBytes());
-
-        });
-        map.put("/connects", (request, response)->{
-            List<JSONObject> collect = manager.getTargetAllProxy().stream().map(item->{
-                ProxyContext context = manager.getContext(item);
-                TargetServer server = context.getProxyInfo().getServer();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("src", item.remoteAddress());
-                jsonObject.put("type", context.getConnect().type());
-                jsonObject.put("dst", MapUtil.builder("proxy", server.sourceProtocol().toString())
-                        .put("address", server.host() + ":" + server.port())
-                        .put("proxyService", context.getConnect().remoteAddress().toString()).map());
-                return jsonObject;
-            }).collect(Collectors.toList());
-            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
         });
         // 切换节点
         map.put("/changeNode", (request, response)->{
@@ -96,25 +96,44 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
                 response.content().writeBytes("OK".getBytes());
                 return;
             }
-            String[] split = request.uri().substring(i+1).split("=");
+            String[] split = request.uri().substring(i + 1).split("=");
             Map<String, String> param = new HashMap<>();
             for(int j = 0; j < split.length; j += 2) {
                 param.put(split[j], split[j + 1]);
             }
-            ProxyFactory factory = proxyFactoryMap.get(param.get("node"));
-            ProxyFactory handleProxy = localProxyMessageHandler.getFactory();
-            if(handleProxy instanceof RuleLocalConnectServerFactory){
-                RuleLocalConnectServerFactory rule = (RuleLocalConnectServerFactory) handleProxy;
-                rule.setDefaultProxyFactory(factory);
-            } else if(!(handleProxy instanceof DirectConnectFactory)){
-                localProxyMessageHandler.setFactory(factory);
-            }
-            // 需要断开全部代理连接，直接连接不需要断开
-            manager.getTargetAllProxy()
-                    .stream().filter(item->Objects.equals(item.type(), ConnectType.PROXY))
-                    .forEach(ProxyConnect::close);
-            response.content().writeBytes(param.get("node").getBytes());
         });
+        // connect
+        map.put("/connects", (request, response)->{
+            Set<ProxyContext> connects = manager.getTargetAllProxy();
+            List<JSONObject> collect = connects.stream().map(item->{
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("local", item.getLocal().remoteAddress());
+                jsonObject.put("dst", String.format("%s:%s", item.getServer().host(), item.getServer().port()));
+                jsonObject.put("protocol", item.getServer().sourceProtocol());
+                return jsonObject;
+            }).collect(Collectors.toList());
+            response.content().writeBytes(JSON.toJSONString(collect).getBytes());
+        });
+
+        map.put("/system/startProxy", (request, response)->{
+            setProxy.turnOnProxy(tcpPort);
+        });
+
+        map.put("/system/stopProxy", (request, response)->{
+            setProxy.turnOffProxy();
+        });
+
         return new NettyTcpService(port, new HttpService(map));
     }
+    //
+    //    String       os = System.getProperty("os.name").toLowerCase();
+    //    SetProxy setProxy;
+    //        if(os.contains("mac")){
+    //        setProxy = new MacSetUpProxy();
+    //
+    //    } else if(os.contains("linux")){
+    //        setProxy = new LinuxSetProxy();
+    //    } else {
+    //        setProxy = new WindowsSetProxy();
+    //    }
 }

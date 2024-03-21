@@ -32,6 +32,9 @@ public interface ProxyMessageHandler{
     void handlerShakeEvent(ProxyConnect local, Map<String, Object> context);
 
 
+    default void handlerShakeEvent(ProxyConnect local){}
+
+
     /**
      * <pre>
      *     处理客户端发送文本请求数据
@@ -76,8 +79,6 @@ public interface ProxyMessageHandler{
 
     /**
      * 服务端创建与目标服务连接
-     *
-     * @return 目标服务连接
      */
-    ProxyConnect targetConnect(ProxyConnect local, TargetServer target);
+    void handleDstConnect(ProxyConnect local, ProxyConnect dst, TargetServer target);
 }

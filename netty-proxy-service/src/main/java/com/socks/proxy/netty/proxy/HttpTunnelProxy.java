@@ -24,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 @ChannelHandler.Sharable
 public class HttpTunnelProxy extends AbstractProxy<FullHttpRequest>{
 
-    public HttpTunnelProxy(ProxyMessageHandler handler, ExecutorService executorService){
-        super(handler, executorService,false);
+    public HttpTunnelProxy(ProxyMessageHandler handler){
+        super(handler,false);
     }
 
 

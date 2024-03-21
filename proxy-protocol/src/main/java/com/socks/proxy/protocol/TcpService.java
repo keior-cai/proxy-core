@@ -1,17 +1,8 @@
 package com.socks.proxy.protocol;
 
-public interface TcpService{
-    /**
-     * 启动TCP服务
-     */
-    void start();
+import com.socks.proxy.protocol.lifecycle.Lifecycle;
 
-
-    /**
-     * 关闭tcp服务
-     */
-    void close();
-
+public interface TcpService extends Lifecycle{
 
     /**
      * 重启服务

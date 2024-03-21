@@ -12,14 +12,15 @@ public interface ConnectContextManager{
 
     /**
      * 向管理器添加一个连接上下文
+     *
      */
-    void putLocalConnect(ProxyConnect connect, ProxyContext proxyContext);
+    ProxyContext putLocalConnect(ProxyConnect connect);
 
 
     /**
      * 创建一个远程连接
      */
-    void putTargetConnect(ProxyConnect connect, ProxyContext proxyContext);
+    void putTargetConnect(ProxyConnect connect, ProxyConnect dst);
 
 
     /**
@@ -43,5 +44,5 @@ public interface ConnectContextManager{
     /**
      * 查询连接管理器全部连接
      */
-    Set<ProxyConnect> getTargetAllProxy();
+    Set<ProxyContext> getTargetAllProxy();
 }

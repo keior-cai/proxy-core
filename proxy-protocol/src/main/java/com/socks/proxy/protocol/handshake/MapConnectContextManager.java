@@ -26,39 +26,33 @@ public class MapConnectContextManager implements ConnectContextManager{
 
 
     @Override
-    public void putLocalConnect(ProxyConnect connect, ProxyContext proxyContext){
+    public ProxyContext putLocalConnect(ProxyConnect connect){
+        ProxyContext proxyContext = new ProxyContext();
+        proxyContext.setCount(new CountDownLatch(1));
+        proxyContext.setLocal(connect);
         contextMap.put(connect.channelId(), proxyContext);
+        return proxyContext;
     }
 
 
     @Override
-    public void putTargetConnect(ProxyConnect connect, ProxyContext proxyContext){
-        ProxyConnect contextConnect = proxyContext.getConnect();
-        log.info("L:= {} | R:={}", contextConnect.remoteAddress(), connect.remoteAddress());
-        contextMap.put(connect.channelId(), proxyContext);
+    public void putTargetConnect(ProxyConnect connect, ProxyConnect dst){
+        ProxyContext context = contextMap.get(connect.channelId());
+        context.setDst(dst);
+        log.info("L:= {} | R:={}", connect.remoteAddress(), connect.remoteAddress());
+        contextMap.put(dst.channelId(), context);
         connectIds.add(connect.channelId());
     }
 
 
     @Override
     public synchronized void removeAll(ProxyConnect connect){
-        Optional<String> optional = Optional.ofNullable(connect).map(ProxyConnect::channelId);
-        if(optional.isPresent()){
-            connect.close();
-            ProxyContext remove = contextMap.remove(optional.get());
-            connectIds.remove(connect.channelId());
-            if(Objects.nonNull(remove)){
-                Optional.ofNullable(remove.getProxyInfo().getCount()).filter(item->item.getCount() > 0)
-                        .ifPresent(CountDownLatch::countDown);
-                Optional.ofNullable(remove.getConnect()).ifPresent(ProxyConnect::close);
-                Optional.ofNullable(remove.getConnect()).ifPresent(otherConnect->{
-                    contextMap.remove(otherConnect.channelId());
-                    connectIds.remove(otherConnect.channelId());
-                });
-            }
-        } else {
-            log.debug("remove connect Id is empty.");
+        ProxyContext context = contextMap.remove(connect.channelId());
+        if(Objects.nonNull(context.getCount())){
+            context.getCount().countDown();
         }
+        Optional.ofNullable(context.getDst()).ifPresent(ProxyConnect::close);
+        Optional.ofNullable(context.getLocal()).ifPresent(ProxyConnect::close);
     }
 
 
@@ -75,7 +69,7 @@ public class MapConnectContextManager implements ConnectContextManager{
 
 
     @Override
-    public Set<ProxyConnect> getTargetAllProxy(){
-        return connectIds.stream().map(contextMap::get).map(ProxyContext::getConnect).collect(Collectors.toSet());
+    public Set<ProxyContext> getTargetAllProxy(){
+        return connectIds.stream().map(contextMap::get).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 }

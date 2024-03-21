@@ -2,7 +2,10 @@ package com.socks.proxy.netty.proxy;
 
 import com.socks.proxy.handshake.connect.DirectConnectChannel;
 import com.socks.proxy.protocol.TargetServer;
+import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.connect.ProxyConnect;
+import com.socks.proxy.protocol.factory.ProxyFactory;
+import com.socks.proxy.protocol.handshake.handler.ProxyContext;
 import com.socks.proxy.protocol.handshake.handler.ProxyMessageHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -10,9 +13,10 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * 代理处理器
@@ -21,22 +25,21 @@ import java.util.concurrent.ExecutorService;
  * @date: 2023/5/26
  **/
 @Slf4j
-public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
+public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I> implements ProtocolChannelHandler{
 
     private final ProxyMessageHandler handler;
 
-    private final ExecutorService executorService;
+    @Setter
+    protected ProxyFactory factory;
 
-
-    public AbstractProxy(ProxyMessageHandler handler, ExecutorService executorService){
-        this(handler, executorService, true);
+    public AbstractProxy(ProxyMessageHandler handler){
+        this(handler, true);
     }
 
 
-    public AbstractProxy(ProxyMessageHandler handler, ExecutorService executorService, boolean autoRelease){
+    public AbstractProxy(ProxyMessageHandler handler, boolean autoRelease){
         super(autoRelease);
         this.handler = handler;
-        this.executorService = executorService;
     }
 
 
@@ -44,21 +47,21 @@ public abstract class AbstractProxy<I> extends SimpleChannelInboundHandler<I>{
     protected void channelRead0(ChannelHandlerContext ctx, I msg){
         TargetServer target = resolveRemoteServer(msg);
         ctx.pipeline().addLast(new ReadLocalInboundHandler(handler)).remove(this);
-        executorService.execute(()->{
-            try {
-                ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
-                handler.targetConnect(localConnect, target);
-                writeSuccess(ctx, msg, target, handler);
-            } catch (Exception e) {
-                writeFail(ctx, msg, target);
-                ctx.close().addListener((ChannelFutureListener) channelFuture->{
-                    if(channelFuture.isSuccess()){
-                        handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
-                    }
-                });
-            }
-        });
-
+        try {
+            ProxyConnect localConnect = new DirectConnectChannel(ctx.channel());
+            ConnectProxyConnect connectProxyConnect = factory.create(target, handler);
+            handler.handleDstConnect(localConnect, connectProxyConnect,target);
+            connectProxyConnect.connect();
+            handler.handlerShakeEvent(localConnect);
+            writeSuccess(ctx, msg, target, handler);
+        } catch (Exception e) {
+            writeFail(ctx, msg, target);
+            ctx.close().addListener((ChannelFutureListener) channelFuture->{
+                if(channelFuture.isSuccess()){
+                    handler.handleLocalClose(new DirectConnectChannel(ctx.channel()), e.getMessage());
+                }
+            });
+        }
     }
 
 

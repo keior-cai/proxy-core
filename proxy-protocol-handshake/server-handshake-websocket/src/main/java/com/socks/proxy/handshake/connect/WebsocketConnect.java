@@ -6,7 +6,6 @@ import com.neovisionaries.ws.client.WebSocketState;
 import com.socks.proxy.protocol.connect.ConnectProxyConnect;
 import com.socks.proxy.protocol.enums.ConnectType;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Objects;
 
@@ -44,11 +43,7 @@ public class WebsocketConnect implements ConnectProxyConnect{
 
     @Override
     public void close(){
-        try {
-            client.sendClose().getSocket().close();
-        } catch (IOException e) {
-            // ignore
-        }
+        client.sendClose();
     }
 
 

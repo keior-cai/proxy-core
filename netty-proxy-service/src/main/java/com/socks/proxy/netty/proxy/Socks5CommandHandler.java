@@ -9,14 +9,12 @@ import io.netty.handler.codec.socksx.v5.Socks5CommandRequest;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ExecutorService;
-
 @Slf4j
 @ChannelHandler.Sharable
 public class Socks5CommandHandler extends AbstractProxy<Socks5CommandRequest>{
 
-    public Socks5CommandHandler(ProxyMessageHandler handler, ExecutorService executorService){
-        super(handler, executorService);
+    public Socks5CommandHandler(ProxyMessageHandler handler){
+        super(handler);
     }
 
 
