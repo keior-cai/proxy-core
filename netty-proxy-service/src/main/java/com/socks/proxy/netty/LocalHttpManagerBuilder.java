@@ -125,15 +125,4 @@ public class LocalHttpManagerBuilder implements ServiceBuilder{
 
         return new NettyTcpService(port, new HttpService(map));
     }
-    //
-    //    String       os = System.getProperty("os.name").toLowerCase();
-    //    SetProxy setProxy;
-    //        if(os.contains("mac")){
-    //        setProxy = new MacSetUpProxy();
-    //
-    //    } else if(os.contains("linux")){
-    //        setProxy = new LinuxSetProxy();
-    //    } else {
-    //        setProxy = new WindowsSetProxy();
-    //    }
 }
