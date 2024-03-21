@@ -1,10 +1,6 @@
 package com.socks.proxy.netty;
 
 import com.socks.proxy.netty.proxy.ProtocolChannelHandler;
-import com.socks.proxy.netty.system.LinuxSetProxy;
-import com.socks.proxy.netty.system.MacSetUpProxy;
-import com.socks.proxy.netty.system.SetProxy;
-import com.socks.proxy.netty.system.WindowsSetProxy;
 import com.socks.proxy.protocol.TcpService;
 import com.socks.proxy.protocol.handshake.ConnectContextManager;
 import lombok.Getter;
