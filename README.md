@@ -1,5 +1,7 @@
 socket-proxy
 
+该项目仅供学习使用，禁止用于非法用途，一切后果概不负责。
+
 
 [system-proxy] -> [proxy-local] -> [proxy-server] -> [target-server]
 
